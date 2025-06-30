@@ -65,11 +65,11 @@ _NODISCARD constexpr _Ty byteswap(const _Ty _Val) noexcept {
     if constexpr (sizeof(_Ty) == 1) {
         return _Val;
     } else if constexpr (sizeof(_Ty) == 2) {
-        return static_cast<_Ty>(_Byteswap_ushort(static_cast<unsigned short>(_Val)));
+        return static_cast<_Ty>(_STD _Byteswap_ushort(static_cast<unsigned short>(_Val)));
     } else if constexpr (sizeof(_Ty) == 4) {
-        return static_cast<_Ty>(_Byteswap_ulong(static_cast<unsigned long>(_Val)));
+        return static_cast<_Ty>(_STD _Byteswap_ulong(static_cast<unsigned long>(_Val)));
     } else if constexpr (sizeof(_Ty) == 8) {
-        return static_cast<_Ty>(_Byteswap_uint64(static_cast<unsigned long long>(_Val)));
+        return static_cast<_Ty>(_STD _Byteswap_uint64(static_cast<unsigned long long>(_Val)));
     } else {
         _STL_INTERNAL_STATIC_ASSERT(false); // unexpected size
     }
@@ -86,7 +86,7 @@ _EXPORT_STD template <_Standard_unsigned_integral _Ty>
 _NODISCARD constexpr bool has_single_bit(const _Ty _Val) noexcept {
 #if _POPCNT_INTRINSICS_ALWAYS_AVAILABLE
     if (!_STD is_constant_evaluated()) {
-        return _Unchecked_popcount(_Val) == 1;
+        return _STD _Unchecked_popcount(_Val) == 1;
     }
 #endif // ^^^ _POPCNT_INTRINSICS_ALWAYS_AVAILABLE ^^^
 
@@ -115,7 +115,7 @@ _NODISCARD constexpr _Ty bit_ceil(const _Ty _Val) noexcept /* strengthened */ {
             // "Remarks: A function call expression that violates the precondition in the Preconditions: element
             // is not a core constant expression (7.7)."
             if (_Num == _Unsigned_integer_digits<_Ty>) {
-                _Precondition_violation_in_bit_ceil();
+                _STD _Precondition_violation_in_bit_ceil();
             }
         }
     }
@@ -201,7 +201,7 @@ _NODISCARD constexpr int countl_zero(const _Ty _Val) noexcept {
 #if _HAS_COUNTL_ZERO_INTRINSICS
 #if (defined(_M_IX86) && !defined(_M_HYBRID_X86_ARM64)) || (defined(_M_X64) && !defined(_M_ARM64EC))
     if (!_STD is_constant_evaluated()) {
-        return _Checked_x86_x64_countl_zero(_Val);
+        return _STD _Checked_x86_x64_countl_zero(_Val);
     }
 #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
     if (!_STD is_constant_evaluated()) {
@@ -210,7 +210,7 @@ _NODISCARD constexpr int countl_zero(const _Ty _Val) noexcept {
 #endif // defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
 #endif // _HAS_COUNTL_ZERO_INTRINSICS
 
-    return _Countl_zero_fallback(_Val);
+    return _STD _Countl_zero_fallback(_Val);
 }
 
 _EXPORT_STD template <_Standard_unsigned_integral _Ty>
@@ -220,17 +220,17 @@ _NODISCARD constexpr int countl_one(const _Ty _Val) noexcept {
 
 _EXPORT_STD template <_Standard_unsigned_integral _Ty>
 _NODISCARD constexpr int countr_zero(const _Ty _Val) noexcept {
-    return _Countr_zero(_Val);
+    return _STD _Countr_zero(_Val);
 }
 
 _EXPORT_STD template <_Standard_unsigned_integral _Ty>
 _NODISCARD constexpr int countr_one(const _Ty _Val) noexcept {
-    return _Countr_zero(static_cast<_Ty>(~_Val));
+    return _STD _Countr_zero(static_cast<_Ty>(~_Val));
 }
 
 _EXPORT_STD template <_Standard_unsigned_integral _Ty>
 _NODISCARD constexpr int popcount(const _Ty _Val) noexcept {
-    return _Popcount(_Val);
+    return _STD _Popcount(_Val);
 }
 
 _EXPORT_STD enum class endian { little = 0, big = 1, native = little };

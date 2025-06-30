@@ -233,7 +233,7 @@ public:
         _TRY_BEGIN
         _Facptr = const_cast<_Facet*>(_STD addressof(_STD use_facet<_Facet>(_Loc)));
         _CATCH_ALL
-        _Xruntime_error("locale::combine facet missing");
+        _STD _Xruntime_error("locale::combine facet missing");
         _CATCH_END
 
         _Locimp* _Newimp = _Locimp::_New_Locimp(*_Ptr);
@@ -310,7 +310,7 @@ private:
 
         if (_Bad) { // Don't throw within _BEGIN_LOCINFO if we can avoid it
             delete _Ptr->_Decref();
-            _Xruntime_error("bad locale name");
+            _STD _Xruntime_error("bad locale name");
         }
     }
 
@@ -324,7 +324,7 @@ public:
             return;
         }
 
-        _Xruntime_error("bad locale name");
+        _STD _Xruntime_error("bad locale name");
     }
 
     locale(const locale& _Loc, const char* _Locname, category _Cat) : _Ptr(_Locimp::_New_Locimp(*_Loc._Ptr)) {
@@ -336,7 +336,7 @@ public:
             return;
         }
 
-        _Xruntime_error("bad locale name");
+        _STD _Xruntime_error("bad locale name");
     }
 
     explicit locale(const string& _Str, category _Cat = all) : _Ptr(_Locimp::_New_Locimp()) {
@@ -444,7 +444,7 @@ const _Facet& __CRTDECL use_facet(const locale& _Loc) { // get facet reference f
             _Pf = _Psave; // lazy facet already allocated
         } else if (_Facet::_Getcat(&_Psave, &_Loc) == static_cast<size_t>(-1)) {
 #if _HAS_EXCEPTIONS
-            _Throw_bad_cast(); // lazy disallowed
+            _STD _Throw_bad_cast(); // lazy disallowed
 #else
             _STL_REPORT_ERROR("lazy facet disallowed");
 #endif
@@ -455,7 +455,7 @@ const _Facet& __CRTDECL use_facet(const locale& _Loc) { // get facet reference f
 #if defined(_M_CEE)
             _Facet_Register_m(_Pfmod);
 #else // ^^^ defined(_M_CEE) / !defined(_M_CEE) vvv
-            _Facet_Register(_Pfmod);
+            _STD _Facet_Register(_Pfmod);
 #endif // ^^^ !defined(_M_CEE) ^^^
 
             _Pfmod->_Incref();
@@ -481,7 +481,7 @@ inline char __CRTDECL _Maklocbyte(wchar_t _Char, const _Locinfo::_Cvtvec& _Cvt) 
     // convert wchar_t to char using _Cvtvec
     char _Byte       = '\0';
     mbstate_t _Mbst1 = {};
-    _Wcrtomb(&_Byte, _Char, &_Mbst1, &_Cvt);
+    ::_Wcrtomb(&_Byte, _Char, &_Mbst1, &_Cvt);
     return _Byte;
 }
 
@@ -491,7 +491,7 @@ inline char __CRTDECL _Maklocbyte(unsigned short _Char, const _Locinfo::_Cvtvec&
     // convert unsigned short to char using _Cvtvec
     char _Byte       = '\0';
     mbstate_t _Mbst1 = {};
-    _Wcrtomb(&_Byte, static_cast<wchar_t>(_Char), &_Mbst1, &_Cvt);
+    ::_Wcrtomb(&_Byte, static_cast<wchar_t>(_Char), &_Mbst1, &_Cvt);
     return _Byte;
 }
 #endif // defined(_NATIVE_WCHAR_T_DEFINED) && !_ENFORCE_FACET_SPECIALIZATIONS
@@ -507,7 +507,7 @@ inline wchar_t __CRTDECL _Maklocchr(char _Byte, wchar_t*, const _Locinfo::_Cvtve
     // convert char to wchar_t using _Cvtvec
     wchar_t _Wc      = L'\0';
     mbstate_t _Mbst1 = {};
-    _Mbrtowc(&_Wc, &_Byte, 1, &_Mbst1, &_Cvt);
+    ::_Mbrtowc(&_Wc, &_Byte, 1, &_Mbst1, &_Cvt);
     return _Wc;
 }
 
@@ -517,7 +517,7 @@ inline unsigned short __CRTDECL _Maklocchr(char _Byte, unsigned short*, const _L
     // convert char to unsigned short using _Cvtvec
     unsigned short _Wc = 0;
     mbstate_t _Mbst1   = {};
-    _Mbrtowc(reinterpret_cast<wchar_t*>(&_Wc), &_Byte, 1, &_Mbst1, &_Cvt);
+    ::_Mbrtowc(reinterpret_cast<wchar_t*>(&_Wc), &_Byte, 1, &_Mbst1, &_Cvt);
     return _Wc;
 }
 #endif // defined(_NATIVE_WCHAR_T_DEFINED) && !_ENFORCE_FACET_SPECIALIZATIONS
@@ -530,7 +530,7 @@ _Elem* __CRTDECL _Maklocstr(const char* _Ptr, _Elem*, const _Locinfo::_Cvtvec&) 
     _Elem* _Ptrdest = static_cast<_Elem*>(_calloc_dbg(_Count, sizeof(_Elem), _CRT_BLOCK, __FILE__, __LINE__));
 
     if (!_Ptrdest) {
-        _Xbad_alloc();
+        _STD _Xbad_alloc();
     }
 
     for (_Elem* _Ptrnext = _Ptrdest; 0 < _Count; --_Count, ++_Ptrnext, ++_Ptr) {
@@ -553,7 +553,7 @@ inline wchar_t* __CRTDECL _Maklocstr(const char* _Ptr, wchar_t*, const _Locinfo:
 
     _Count1 = _CSTD strlen(_Ptr) + 1;
     for (_Count = _Count1, _Wchars = 0, _Ptr1 = _Ptr; 0 < _Count; _Count -= _Bytes, _Ptr1 += _Bytes, ++_Wchars) {
-        if ((_Bytes = _Mbrtowc(&_Wc, _Ptr1, _Count, &_Mbst1, &_Cvt)) <= 0) {
+        if ((_Bytes = ::_Mbrtowc(&_Wc, _Ptr1, _Count, &_Mbst1, &_Cvt)) <= 0) {
             break;
         }
     }
@@ -563,14 +563,14 @@ inline wchar_t* __CRTDECL _Maklocstr(const char* _Ptr, wchar_t*, const _Locinfo:
     wchar_t* _Ptrdest = static_cast<wchar_t*>(_calloc_dbg(_Wchars, sizeof(wchar_t), _CRT_BLOCK, __FILE__, __LINE__));
 
     if (!_Ptrdest) {
-        _Xbad_alloc();
+        _STD _Xbad_alloc();
     }
 
     wchar_t* _Ptrnext = _Ptrdest;
     mbstate_t _Mbst2  = {};
 
     for (; 0 < _Wchars; _Count -= _Bytes, _Ptr += _Bytes, --_Wchars, ++_Ptrnext) {
-        if ((_Bytes = _Mbrtowc(_Ptrnext, _Ptr, _Count1, &_Mbst2, &_Cvt)) <= 0) {
+        if ((_Bytes = ::_Mbrtowc(_Ptrnext, _Ptr, _Count1, &_Mbst2, &_Cvt)) <= 0) {
             break;
         }
     }
@@ -594,7 +594,7 @@ inline unsigned short* __CRTDECL _Maklocstr(const char* _Ptr, unsigned short*, c
 
     _Count1 = _CSTD strlen(_Ptr) + 1;
     for (_Count = _Count1, _Wchars = 0, _Ptr1 = _Ptr; 0 < _Count; _Count -= _Bytes, _Ptr1 += _Bytes, ++_Wchars) {
-        if ((_Bytes = _Mbrtowc(reinterpret_cast<wchar_t*>(&_Wc), _Ptr1, _Count, &_Mbst1, &_Cvt)) <= 0) {
+        if ((_Bytes = ::_Mbrtowc(reinterpret_cast<wchar_t*>(&_Wc), _Ptr1, _Count, &_Mbst1, &_Cvt)) <= 0) {
             break;
         }
     }
@@ -604,13 +604,13 @@ inline unsigned short* __CRTDECL _Maklocstr(const char* _Ptr, unsigned short*, c
     wchar_t* _Ptrdest = static_cast<wchar_t*>(_calloc_dbg(_Wchars, sizeof(wchar_t), _CRT_BLOCK, __FILE__, __LINE__));
 
     if (!_Ptrdest) {
-        _Xbad_alloc();
+        _STD _Xbad_alloc();
     }
 
     wchar_t* _Ptrnext = _Ptrdest;
     mbstate_t _Mbst2  = {};
     for (; 0 < _Wchars; _Count -= _Bytes, _Ptr += _Bytes, --_Wchars, ++_Ptrnext) {
-        if ((_Bytes = _Mbrtowc(_Ptrnext, _Ptr, _Count1, &_Mbst2, &_Cvt)) <= 0) {
+        if ((_Bytes = ::_Mbrtowc(_Ptrnext, _Ptr, _Count1, &_Mbst2, &_Cvt)) <= 0) {
             break;
         }
     }
@@ -825,7 +825,7 @@ _NODISCARD int _Codecvt_do_length(
     using _Elem = typename _CvtTy::intern_type;
     _STL_RESTORE_DEPRECATED_WARNING
 
-    _Adl_verify_range(_First1, _Last1);
+    _STD _Adl_verify_range(_First1, _Last1);
     const auto _Old_first1 = _First1;
 
     while (_Count > 0 && _First1 != _Last1) { // convert another wide character
@@ -1126,7 +1126,7 @@ protected:
 
     virtual int __CLR_OR_THIS_CALL do_length(
         mbstate_t& _State, const char* _First1, const char* _Last1, size_t _Count) const {
-        return _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
+        return _STD _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
     }
 
     bool __CLR_OR_THIS_CALL do_always_noconv() const noexcept override {
@@ -1367,7 +1367,7 @@ protected:
 
     virtual int __CLR_OR_THIS_CALL do_length(
         mbstate_t& _State, const char* _First1, const char* _Last1, size_t _Count) const {
-        return _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
+        return _STD _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
     }
 
     bool __CLR_OR_THIS_CALL do_always_noconv() const noexcept override {
@@ -1462,8 +1462,8 @@ protected:
     virtual result __CLR_OR_THIS_CALL do_in(mbstate_t&, const char8_t* _First1, const char8_t* _Last1,
         const char8_t*& _Mid1, char16_t* _First2, char16_t* _Last2, char16_t*& _Mid2) const {
         // convert UTF-8 [_First1, _Last1) to UTF-16 [_First2, _Last2)
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
 
         _Codecvt_guard<char8_t, char16_t> _Guard{_First1, _Mid1, _First2, _Mid2};
 
@@ -1541,8 +1541,8 @@ protected:
     virtual result __CLR_OR_THIS_CALL do_out(mbstate_t&, const char16_t* _First1, const char16_t* _Last1,
         const char16_t*& _Mid1, char8_t* _First2, char8_t* _Last2, char8_t*& _Mid2) const {
         // convert UTF-16 [_First1, _Last1) to UTF-8 [_First2, _Last2)
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
 
         _Codecvt_guard<char16_t, char8_t> _Guard{_First1, _Mid1, _First2, _Mid2};
 
@@ -1608,7 +1608,7 @@ protected:
         mbstate_t&, const char8_t* _First1, const char8_t* _Last1, size_t _Count) const {
         // return p - _First1, for the largest value p in [_First1, _Last1] such that [_First1, p) successfully
         // converts to at most _Count UTF-16 code units
-        _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First1, _Last1);
 
         const auto _Old_first1 = _First1;
 
@@ -1743,8 +1743,8 @@ protected:
     virtual result __CLR_OR_THIS_CALL do_in(mbstate_t&, const char8_t* _First1, const char8_t* _Last1,
         const char8_t*& _Mid1, char32_t* _First2, char32_t* _Last2, char32_t*& _Mid2) const {
         // convert UTF-8 [_First1, _Last1) to UTF-32 [_First2, _Last2)
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
 
         _Codecvt_guard<char8_t, char32_t> _Guard{_First1, _Mid1, _First2, _Mid2};
 
@@ -1807,8 +1807,8 @@ protected:
     virtual result __CLR_OR_THIS_CALL do_out(mbstate_t&, const char32_t* _First1, const char32_t* _Last1,
         const char32_t*& _Mid1, char8_t* _First2, char8_t* _Last2, char8_t*& _Mid2) const {
         // convert UTF-32 [_First1, _Last1) to UTF-8 [_First2, _Last2)
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
 
         _Codecvt_guard<char32_t, char8_t> _Guard{_First1, _Mid1, _First2, _Mid2};
 
@@ -1863,7 +1863,7 @@ protected:
         mbstate_t&, const char8_t* _First1, const char8_t* _Last1, size_t _Count) const {
         // return p - _First1, for the largest value p in [_First1, _Last1] such that [_First1, p) successfully
         // converts to at most _Count UTF-32 code units
-        _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First1, _Last1);
 
         const auto _Old_first1 = _First1;
 
@@ -1998,8 +1998,8 @@ protected:
         wchar_t* _First2, wchar_t* _Last2, wchar_t*& _Mid2) const {
         // convert bytes [_First1, _Last1) to [_First2, _Last2)
         mbstate_t _Mystate{};
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
         _Mid1 = _First1;
         _Mid2 = _First2;
         for (;;) {
@@ -2011,7 +2011,7 @@ protected:
                 return partial;
             }
 
-            int _Bytes = _Mbrtowc(_Mid2, _Mid1, static_cast<size_t>(_Last1 - _Mid1), &_Mystate, &_Cvt);
+            int _Bytes = ::_Mbrtowc(_Mid2, _Mid1, static_cast<size_t>(_Last1 - _Mid1), &_Mystate, &_Cvt);
             switch (_Bytes) {
             case -2: // partial conversion
                 return partial;
@@ -2034,15 +2034,15 @@ protected:
     virtual result __CLR_OR_THIS_CALL do_out(mbstate_t& _State, const wchar_t* _First1, const wchar_t* _Last1,
         const wchar_t*& _Mid1, char* _First2, char* _Last2, char*& _Mid2) const {
         // convert [_First1, _Last1) to bytes [_First2, _Last2)
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
         _Mid1 = _First1;
         _Mid2 = _First2;
         int _Bytes;
 
         while (_Mid1 != _Last1 && _Mid2 != _Last2) {
             if (MB_LEN_MAX <= _Last2 - _Mid2) {
-                if ((_Bytes = _Wcrtomb(_Mid2, *_Mid1, &_State, &_Cvt)) < 0) {
+                if ((_Bytes = ::_Wcrtomb(_Mid2, *_Mid1, &_State, &_Cvt)) < 0) {
                     return error; // locale-specific wcrtomb failed
                 } else {
                     ++_Mid1;
@@ -2052,7 +2052,7 @@ protected:
                 char _Buf[MB_LEN_MAX];
                 mbstate_t _Stsave = _State;
 
-                if ((_Bytes = _Wcrtomb(_Buf, *_Mid1, &_State, &_Cvt)) < 0) {
+                if ((_Bytes = ::_Wcrtomb(_Buf, *_Mid1, &_State, &_Cvt)) < 0) {
                     return error; // locale-specific wcrtomb failed
                 } else if (_Last2 - _Mid2 < _Bytes) { // converted too many, roll back and return previous
                     _State = _Stsave;
@@ -2070,14 +2070,14 @@ protected:
 
     virtual result __CLR_OR_THIS_CALL do_unshift(mbstate_t& _State, char* _First2, char* _Last2, char*& _Mid2) const {
         // generate bytes to return to default shift state
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First2, _Last2);
         _Mid2       = _First2;
         result _Ans = ok;
         int _Bytes;
         char _Buf[MB_LEN_MAX];
         mbstate_t _Stsave = _State;
 
-        if ((_Bytes = _Wcrtomb(_Buf, L'\0', &_State, &_Cvt)) <= 0) {
+        if ((_Bytes = ::_Wcrtomb(_Buf, L'\0', &_State, &_Cvt)) <= 0) {
             _Ans = error; // locale-specific wcrtomb failed
         } else if (_Last2 - _Mid2 < --_Bytes) { // converted too many, roll back and return
             _State = _Stsave;
@@ -2093,12 +2093,12 @@ protected:
         mbstate_t& _State, const char* _First1, const char* _Last1, size_t _Count) const {
         // return p - _First1, for the largest value p in [_First1, _Last1] such that [_First1, p) successfully
         // converts to at most _Count wide characters
-        _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First1, _Last1);
         const auto _Old_first1 = _First1;
 
         for (; _Count > 0u && _First1 != _Last1; --_Count) {
             wchar_t _Ch;
-            int _Bytes = _Mbrtowc(&_Ch, _First1, static_cast<size_t>(_Last1 - _First1), &_State, &_Cvt);
+            int _Bytes = ::_Mbrtowc(&_Ch, _First1, static_cast<size_t>(_Last1 - _First1), &_State, &_Cvt);
             if (_Bytes < 0) { // partial or failed conversion
                 break;
             }
@@ -2197,8 +2197,8 @@ protected:
         unsigned short* _First2, unsigned short* _Last2, unsigned short*& _Mid2) const {
         // convert bytes [_First1, _Last1) to [_First2, _Last2)
         mbstate_t _Mystate{};
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
         _Mid1 = _First1;
         _Mid2 = _First2;
         for (;;) {
@@ -2210,7 +2210,7 @@ protected:
                 return partial;
             }
 
-            int _Bytes = _Mbrtowc(
+            int _Bytes = ::_Mbrtowc(
                 reinterpret_cast<wchar_t*>(_Mid2), _Mid1, static_cast<size_t>(_Last1 - _Mid1), &_Mystate, &_Cvt);
             switch (_Bytes) {
             case -2: // partial conversion
@@ -2234,15 +2234,15 @@ protected:
     virtual result __CLR_OR_THIS_CALL do_out(mbstate_t& _State, const unsigned short* _First1,
         const unsigned short* _Last1, const unsigned short*& _Mid1, char* _First2, char* _Last2, char*& _Mid2) const {
         // convert [_First1, _Last1) to bytes [_First2, _Last2)
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
         _Mid1 = _First1;
         _Mid2 = _First2;
         int _Bytes;
 
         while (_Mid1 != _Last1 && _Mid2 != _Last2) {
             if (MB_LEN_MAX <= _Last2 - _Mid2) {
-                if ((_Bytes = _Wcrtomb(_Mid2, *_Mid1, &_State, &_Cvt)) < 0) {
+                if ((_Bytes = ::_Wcrtomb(_Mid2, *_Mid1, &_State, &_Cvt)) < 0) {
                     return error; // locale-specific wcrtomb failed
                 } else {
                     ++_Mid1;
@@ -2252,7 +2252,7 @@ protected:
                 char _Buf[MB_LEN_MAX];
                 mbstate_t _Stsave = _State;
 
-                if ((_Bytes = _Wcrtomb(_Buf, *_Mid1, &_State, &_Cvt)) < 0) {
+                if ((_Bytes = ::_Wcrtomb(_Buf, *_Mid1, &_State, &_Cvt)) < 0) {
                     return error; // locale-specific wcrtomb failed
                 } else if (_Last2 - _Mid2 < _Bytes) { // converted too many, roll back and return previous
                     _State = _Stsave;
@@ -2270,14 +2270,14 @@ protected:
 
     virtual result __CLR_OR_THIS_CALL do_unshift(mbstate_t& _State, char* _First2, char* _Last2, char*& _Mid2) const {
         // generate bytes to return to default shift state
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First2, _Last2);
         _Mid2       = _First2;
         result _Ans = ok;
         int _Bytes;
         char _Buf[MB_LEN_MAX];
         mbstate_t _Stsave = _State;
 
-        if ((_Bytes = _Wcrtomb(_Buf, L'\0', &_State, &_Cvt)) <= 0) {
+        if ((_Bytes = ::_Wcrtomb(_Buf, L'\0', &_State, &_Cvt)) <= 0) {
             _Ans = error; // locale-specific wcrtomb failed
         } else if (_Last2 - _Mid2 < --_Bytes) { // converted too many, roll back and return
             _State = _Stsave;
@@ -2294,12 +2294,12 @@ protected:
         mbstate_t& _State, const char* _First1, const char* _Last1, size_t _Count) const {
         // return p - _First1, for the largest value p in [_First1, _Last1] such that [_First1, p) successfully
         // converts to at most _Count wide characters
-        _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First1, _Last1);
         const auto _Old_first1 = _First1;
 
         for (; _Count > 0u && _First1 != _Last1; --_Count) {
             wchar_t _Ch;
-            int _Bytes = _Mbrtowc(&_Ch, _First1, static_cast<size_t>(_Last1 - _First1), &_State, &_Cvt);
+            int _Bytes = ::_Mbrtowc(&_Ch, _First1, static_cast<size_t>(_Last1 - _First1), &_State, &_Cvt);
             if (_Bytes < 0) { // partial or failed conversion
                 break;
             }
@@ -2564,7 +2564,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_is(const _Elem* _First, const _Elem* _Last,
         mask* _Dest) const { // get mask sequence for elements in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
             *_Dest = _Ctype._Table[static_cast<unsigned char>(narrow(*_First))];
         }
@@ -2574,7 +2574,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_scan_is(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) that fits mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && !is(_Maskval, *_First)) {
             ++_First;
         }
@@ -2584,7 +2584,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_scan_not(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) not fitting mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && is(_Maskval, *_First)) {
             ++_First;
         }
@@ -2598,16 +2598,16 @@ protected:
             return _Ch;
         }
 
-        return widen(static_cast<char>(_Tolower(_Byte, &_Ctype)));
+        return widen(static_cast<char>(::_Tolower(_Byte, &_Ctype)));
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_tolower(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to lower case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) { // convert *_First to lower case
             unsigned char _Byte = static_cast<unsigned char>(narrow(*_First, '\0'));
             if (_Byte != '\0') {
-                *_First = (widen(static_cast<char>(_Tolower(_Byte, &_Ctype))));
+                *_First = (widen(static_cast<char>(::_Tolower(_Byte, &_Ctype))));
             }
         }
         return _First;
@@ -2619,16 +2619,16 @@ protected:
             return _Ch;
         }
 
-        return widen(static_cast<char>(_Toupper(_Byte, &_Ctype)));
+        return widen(static_cast<char>(::_Toupper(_Byte, &_Ctype)));
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_toupper(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to upper case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) { // convert *_First to upper case
             unsigned char _Byte = static_cast<unsigned char>(narrow(*_First, '\0'));
             if (_Byte != '\0') {
-                *_First = (widen(static_cast<char>(_Toupper(_Byte, &_Ctype))));
+                *_First = (widen(static_cast<char>(::_Toupper(_Byte, &_Ctype))));
             }
         }
 
@@ -2636,14 +2636,14 @@ protected:
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_widen(char _Byte) const { // widen char
-        return _Maklocchr(_Byte, static_cast<_Elem*>(nullptr), _Cvt);
+        return _STD _Maklocchr(_Byte, static_cast<_Elem*>(nullptr), _Cvt);
     }
 
     virtual const char* __CLR_OR_THIS_CALL do_widen(
         const char* _First, const char* _Last, _Elem* _Dest) const { // widen chars in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
-            *_Dest = _Maklocchr(*_First, static_cast<_Elem*>(nullptr), _Cvt);
+            *_Dest = _STD _Maklocchr(*_First, static_cast<_Elem*>(nullptr), _Cvt);
         }
 
         return _First;
@@ -2655,7 +2655,7 @@ protected:
             return '\0';
         }
 
-        if ((_Byte = _Maklocbyte(_Ch, _Cvt)) == '\0') {
+        if ((_Byte = _STD _Maklocbyte(_Ch, _Cvt)) == '\0') {
             return _Dflt;
         }
 
@@ -2668,7 +2668,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_narrow(const _Elem* _First, const _Elem* _Last, char _Dflt,
         char* _Dest) const { // narrow elements in [_First, _Last) to chars
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
             *_Dest = _Donarrow(*_First, _Dflt);
         }
@@ -2705,7 +2705,7 @@ public:
 
     const _Elem* __CLR_OR_THIS_CALL is(const _Elem* _First, const _Elem* _Last,
         mask* _Dest) const { // get mask sequence for elements in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
             *_Dest = _Ctype._Table[static_cast<unsigned char>(*_First)];
         }
@@ -2715,7 +2715,7 @@ public:
 
     const _Elem* __CLR_OR_THIS_CALL scan_is(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) that fits mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && !is(_Maskval, *_First)) {
             ++_First;
         }
@@ -2725,7 +2725,7 @@ public:
 
     const _Elem* __CLR_OR_THIS_CALL scan_not(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) not fitting mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && is(_Maskval, *_First)) {
             ++_First;
         }
@@ -2830,28 +2830,28 @@ protected:
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_tolower(_Elem _Ch) const { // convert element to lower case
-        return static_cast<_Elem>(_Tolower(static_cast<unsigned char>(_Ch), &_Ctype));
+        return static_cast<_Elem>(::_Tolower(static_cast<unsigned char>(_Ch), &_Ctype));
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_tolower(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to lower case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) {
-            *_First = static_cast<_Elem>(_Tolower(static_cast<unsigned char>(*_First), &_Ctype));
+            *_First = static_cast<_Elem>(::_Tolower(static_cast<unsigned char>(*_First), &_Ctype));
         }
 
         return _First;
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_toupper(_Elem _Ch) const { // convert element to upper case
-        return static_cast<_Elem>(_Toupper(static_cast<unsigned char>(_Ch), &_Ctype));
+        return static_cast<_Elem>(::_Toupper(static_cast<unsigned char>(_Ch), &_Ctype));
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_toupper(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to upper case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) {
-            *_First = static_cast<_Elem>(_Toupper(static_cast<unsigned char>(*_First), &_Ctype));
+            *_First = static_cast<_Elem>(::_Toupper(static_cast<unsigned char>(*_First), &_Ctype));
         }
 
         return _First;
@@ -2863,7 +2863,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_widen(
         const char* _First, const char* _Last, _Elem* _Dest) const { // widen chars in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         _CSTD memcpy(_Dest, _First, static_cast<size_t>(_Last - _First));
         return _Last;
     }
@@ -2874,7 +2874,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_narrow(const _Elem* _First, const _Elem* _Last, char,
         char* _Dest) const { // narrow elements in [_First, _Last) to chars
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         _CSTD memcpy(_Dest, _First, static_cast<size_t>(_Last - _First));
         return _Last;
     }
@@ -2986,13 +2986,13 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_is(const _Elem* _First, const _Elem* _Last,
         mask* _Dest) const { // get mask sequence for elements in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         return _CSTD _Getwctypes(_First, _Last, _Dest, &_Ctype);
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_scan_is(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) that fits mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && !is(_Maskval, *_First)) {
             ++_First;
         }
@@ -3002,7 +3002,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_scan_not(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) not fitting mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && is(_Maskval, *_First)) {
             ++_First;
         }
@@ -3011,28 +3011,28 @@ protected:
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_tolower(_Elem _Ch) const { // convert element to lower case
-        return _Towlower(_Ch, &_Ctype);
+        return ::_Towlower(_Ch, &_Ctype);
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_tolower(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to lower case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) {
-            *_First = _Towlower(*_First, &_Ctype);
+            *_First = ::_Towlower(*_First, &_Ctype);
         }
 
         return _First;
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_toupper(_Elem _Ch) const { // convert element to upper case
-        return _Towupper(_Ch, &_Ctype);
+        return ::_Towupper(_Ch, &_Ctype);
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_toupper(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to upper case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) {
-            *_First = _Towupper(*_First, &_Ctype);
+            *_First = ::_Towupper(*_First, &_Ctype);
         }
 
         return _First;
@@ -3041,7 +3041,7 @@ protected:
     _Elem __CLR_OR_THIS_CALL _Dowiden(char _Byte) const { // widen char
         mbstate_t _Mbst = {};
         wchar_t _Wc;
-        return _Mbrtowc(&_Wc, &_Byte, 1, &_Mbst, &_Cvt) < 0 ? static_cast<wchar_t>(WEOF) : _Wc;
+        return ::_Mbrtowc(&_Wc, &_Byte, 1, &_Mbst, &_Cvt) < 0 ? static_cast<wchar_t>(WEOF) : _Wc;
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_widen(char _Byte) const { // widen char
@@ -3050,7 +3050,7 @@ protected:
 
     virtual const char* __CLR_OR_THIS_CALL do_widen(
         const char* _First, const char* _Last, _Elem* _Dest) const { // widen chars in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
             *_Dest = _Dowiden(*_First);
         }
@@ -3061,7 +3061,7 @@ protected:
     char __CLR_OR_THIS_CALL _Donarrow(_Elem _Ch, char _Dflt) const { // narrow element to char
         char _Buf[MB_LEN_MAX];
         mbstate_t _Mbst = {};
-        return _Wcrtomb(_Buf, _Ch, &_Mbst, &_Cvt) != 1 ? _Dflt : _Buf[0];
+        return ::_Wcrtomb(_Buf, _Ch, &_Mbst, &_Cvt) != 1 ? _Dflt : _Buf[0];
     }
 
     virtual char __CLR_OR_THIS_CALL do_narrow(_Elem _Ch, char _Dflt) const { // narrow element to char
@@ -3070,7 +3070,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_narrow(const _Elem* _First, const _Elem* _Last, char _Dflt,
         char* _Dest) const { // narrow elements in [_First, _Last) to chars
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
             *_Dest = _Donarrow(*_First, _Dflt);
         }
@@ -3187,14 +3187,14 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_is(const _Elem* _First, const _Elem* _Last,
         mask* _Dest) const { // get mask sequence for elements in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         return reinterpret_cast<const _Elem*>(_CSTD _Getwctypes(
             reinterpret_cast<const wchar_t*>(_First), reinterpret_cast<const wchar_t*>(_Last), _Dest, &_Ctype));
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_scan_is(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) that fits mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && !is(_Maskval, *_First)) {
             ++_First;
         }
@@ -3204,7 +3204,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_scan_not(mask _Maskval, const _Elem* _First,
         const _Elem* _Last) const { // find first in [_First, _Last) not fitting mask classification
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         while (_First != _Last && is(_Maskval, *_First)) {
             ++_First;
         }
@@ -3213,28 +3213,28 @@ protected:
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_tolower(_Elem _Ch) const { // convert element to lower case
-        return _Towlower(_Ch, &_Ctype);
+        return ::_Towlower(_Ch, &_Ctype);
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_tolower(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to lower case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) {
-            *_First = _Towlower(*_First, &_Ctype);
+            *_First = ::_Towlower(*_First, &_Ctype);
         }
 
         return _First;
     }
 
     virtual _Elem __CLR_OR_THIS_CALL do_toupper(_Elem _Ch) const { // convert element to upper case
-        return _Towupper(_Ch, &_Ctype);
+        return ::_Towupper(_Ch, &_Ctype);
     }
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_toupper(_Elem* _First,
         const _Elem* _Last) const { // convert [_First, _Last) in place to upper case
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First) {
-            *_First = _Towupper(*_First, &_Ctype);
+            *_First = ::_Towupper(*_First, &_Ctype);
         }
 
         return _First;
@@ -3244,7 +3244,7 @@ protected:
         mbstate_t _Mbst = {};
         unsigned short _Wc;
 
-        if (_Mbrtowc(reinterpret_cast<wchar_t*>(&_Wc), &_Byte, 1, &_Mbst, &_Cvt) < 0) {
+        if (::_Mbrtowc(reinterpret_cast<wchar_t*>(&_Wc), &_Byte, 1, &_Mbst, &_Cvt) < 0) {
             return static_cast<unsigned short>(WEOF);
         }
 
@@ -3257,7 +3257,7 @@ protected:
 
     virtual const char* __CLR_OR_THIS_CALL do_widen(
         const char* _First, const char* _Last, _Elem* _Dest) const { // widen chars in [_First, _Last)
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
             *_Dest = _Dowiden(*_First);
         }
@@ -3268,7 +3268,7 @@ protected:
     char __CLR_OR_THIS_CALL _Donarrow(_Elem _Ch, char _Dflt) const { // narrow element to char
         char _Buf[MB_LEN_MAX];
         mbstate_t _Mbst = {};
-        return _Wcrtomb(_Buf, _Ch, &_Mbst, &_Cvt) != 1 ? _Dflt : _Buf[0];
+        return ::_Wcrtomb(_Buf, _Ch, &_Mbst, &_Cvt) != 1 ? _Dflt : _Buf[0];
     }
 
     virtual char __CLR_OR_THIS_CALL do_narrow(_Elem _Ch, char _Dflt) const { // narrow element to char
@@ -3277,7 +3277,7 @@ protected:
 
     virtual const _Elem* __CLR_OR_THIS_CALL do_narrow(const _Elem* _First, const _Elem* _Last, char _Dflt,
         char* _Dest) const { // narrow elements in [_First, _Last) to chars
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         for (; _First != _Last; ++_First, ++_Dest) {
             *_Dest = _Donarrow(*_First, _Dflt);
         }

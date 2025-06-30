@@ -125,7 +125,7 @@ public:
     }
 
     _NODISCARD const char* __CLR_OR_THIS_CALL what() const noexcept override { // get message string
-        return _Future_error_map(_Mycode.value());
+        return _STD _Future_error_map(_Mycode.value());
     }
 
 #if !_HAS_EXCEPTIONS
@@ -153,17 +153,17 @@ public:
     }
 
     string message(int _Errcode) const override {
-        const char* _Name = _Future_error_map(_Errcode);
+        const char* _Name = _STD _Future_error_map(_Errcode);
         if (_Name) {
             return _Name;
         }
 
-        return _Syserror_map(_Errcode);
+        return _STD _Syserror_map(_Errcode);
     }
 };
 
 _EXPORT_STD _NODISCARD inline const error_category& future_category() noexcept {
-    return _Immortalize_memcpy_image<_Future_error_category2>();
+    return _STD _Immortalize_memcpy_image<_Future_error_category2>();
 }
 
 template <class _Ty>
@@ -281,7 +281,7 @@ public:
     virtual _Ty& _Get_value(bool _Get_only_once) {
         unique_lock<mutex> _Lock(_Mtx);
         if (_Get_only_once && _Retrieved) {
-            _Throw_future_error2(future_errc::future_already_retrieved);
+            _STD _Throw_future_error2(future_errc::future_already_retrieved);
         }
 
         if (_Exception) {
@@ -326,7 +326,7 @@ public:
     void _Set_value_raw(const _Ty& _Val, unique_lock<mutex>* _Lock, bool _At_thread_exit) {
         // store a result while inside a locked block
         if (_Already_has_stored_result()) {
-            _Throw_future_error2(future_errc::promise_already_satisfied);
+            _STD _Throw_future_error2(future_errc::promise_already_satisfied);
         }
 
         _Emplace_result(_Val);
@@ -341,7 +341,7 @@ public:
     void _Set_value_raw(_Ty&& _Val, unique_lock<mutex>* _Lock, bool _At_thread_exit) {
         // store a result while inside a locked block
         if (_Already_has_stored_result()) {
-            _Throw_future_error2(future_errc::promise_already_satisfied);
+            _STD _Throw_future_error2(future_errc::promise_already_satisfied);
         }
 
         _Emplace_result(_STD forward<_Ty>(_Val));
@@ -356,7 +356,7 @@ public:
     void _Set_exception_raw(exception_ptr _Exc, unique_lock<mutex>* _Lock, bool _At_thread_exit) {
         // store a result while inside a locked block
         if (_Already_has_stored_result()) {
-            _Throw_future_error2(future_errc::promise_already_satisfied);
+            _STD _Throw_future_error2(future_errc::promise_already_satisfied);
         }
 
         _STL_ASSERT(_Exc != nullptr, "promise<T>::set_exception/set_exception_at_thread_exit called with a null "
@@ -702,7 +702,7 @@ public:
 
     void wait() const { // wait for signal
         if (!valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         _Assoc_state->_Wait();
@@ -711,7 +711,7 @@ public:
     template <class _Rep, class _Per>
     future_status wait_for(const chrono::duration<_Rep, _Per>& _Rel_time) const { // wait for duration
         if (!valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         return _Assoc_state->_Wait_for(_Rel_time);
@@ -721,7 +721,7 @@ public:
     future_status wait_until(const chrono::time_point<_Clock, _Dur>& _Abs_time) const { // wait until time point
         static_assert(chrono::_Is_clock_v<_Clock>, "Clock type required");
         if (!valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         return _Assoc_state->_Wait_until(_Abs_time);
@@ -729,7 +729,7 @@ public:
 
     _Ty& _Get_value() const {
         if (!valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         return _Assoc_state->_Get_value(_Get_only_once);
@@ -737,7 +737,7 @@ public:
 
     void _Set_value(const _Ty& _Val, bool _Defer) { // store a result
         if (!valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         _Assoc_state->_Set_value(_Val, _Defer);
@@ -745,7 +745,7 @@ public:
 
     void _Set_value(_Ty&& _Val, bool _Defer) { // store a result
         if (!valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         _Assoc_state->_Set_value(_STD forward<_Ty>(_Val), _Defer);
@@ -759,7 +759,7 @@ public:
 
     void _Set_exception(exception_ptr _Exc, bool _Defer) { // store a result
         if (!valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         _Assoc_state->_Set_exception(_Exc, _Defer);
@@ -977,7 +977,7 @@ public:
 
     _State_manager<_Ty>& _Get_state_for_set() {
         if (!_State.valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         return _State;
@@ -985,11 +985,11 @@ public:
 
     _State_manager<_Ty>& _Get_state_for_future() {
         if (!_State.valid()) {
-            _Throw_future_error2(future_errc::no_state);
+            _STD _Throw_future_error2(future_errc::no_state);
         }
 
         if (_Future_retrieved) {
-            _Throw_future_error2(future_errc::future_already_retrieved);
+            _STD _Throw_future_error2(future_errc::future_already_retrieved);
         }
 
         _Future_retrieved = true;
@@ -1021,7 +1021,7 @@ public:
     promise() : _MyPromise(new _Associated_state<_Ty>) {}
 
     template <class _Alloc>
-    promise(allocator_arg_t, const _Alloc& _Al) : _MyPromise(_Make_associated_state<_Ty>(_Al)) {}
+    promise(allocator_arg_t, const _Alloc& _Al) : _MyPromise(_STD _Make_associated_state<_Ty>(_Al)) {}
 
     promise(promise&&) = default;
 
@@ -1083,7 +1083,7 @@ public:
     promise() : _MyPromise(new _Associated_state<_Ty*>) {}
 
     template <class _Alloc>
-    promise(allocator_arg_t, const _Alloc& _Al) : _MyPromise(_Make_associated_state<_Ty*>(_Al)) {}
+    promise(allocator_arg_t, const _Alloc& _Al) : _MyPromise(_STD _Make_associated_state<_Ty*>(_Al)) {}
 
     promise(promise&&) = default;
 
@@ -1137,7 +1137,7 @@ public:
     promise() : _MyPromise(new _Associated_state<int>) {}
 
     template <class _Alloc>
-    promise(allocator_arg_t, const _Alloc& _Al) : _MyPromise(_Make_associated_state<int>(_Al)) {}
+    promise(allocator_arg_t, const _Alloc& _Al) : _MyPromise(_STD _Make_associated_state<int>(_Al)) {}
 
     promise(promise&&) = default;
 
@@ -1245,7 +1245,7 @@ public:
 
     void operator()(_ArgTypes... _Args) {
         if (_MyPromise._Is_ready()) {
-            _Throw_future_error2(future_errc::promise_already_satisfied);
+            _STD _Throw_future_error2(future_errc::promise_already_satisfied);
         }
 
         _MyStateManagerType& _State = _MyPromise._Get_state_for_set();
@@ -1255,12 +1255,12 @@ public:
 
     void make_ready_at_thread_exit(_ArgTypes... _Args) {
         if (_MyPromise._Is_ready()) {
-            _Throw_future_error2(future_errc::promise_already_satisfied);
+            _STD _Throw_future_error2(future_errc::promise_already_satisfied);
         }
 
         _MyStateManagerType& _State = _MyPromise._Get_state_for_set();
         if (_State._Ptr()->_Already_has_stored_result()) {
-            _Throw_future_error2(future_errc::promise_already_satisfied);
+            _STD _Throw_future_error2(future_errc::promise_already_satisfied);
         }
 
         _MyStateType* _Ptr = static_cast<_MyStateType*>(_State._Ptr());
@@ -1312,7 +1312,7 @@ decltype(auto) _Invoke_stored_explicit(
 
 template <class... _Types>
 decltype(auto) _Invoke_stored(tuple<_Types...>&& _Tuple) { // invoke() a tuple
-    return _Invoke_stored_explicit(_STD move(_Tuple), index_sequence_for<_Types...>{});
+    return _STD _Invoke_stored_explicit(_STD move(_Tuple), index_sequence_for<_Types...>{});
 }
 
 template <class... _Types>
@@ -1339,7 +1339,7 @@ public:
     _Fake_no_copy_callable_adapter& operator=(_Fake_no_copy_callable_adapter&&)      = delete;
 
     decltype(auto) operator()() {
-        return _Invoke_stored(_STD move(_Storage));
+        return _STD _Invoke_stored(_STD move(_Storage));
     }
 
 private:
@@ -1365,8 +1365,8 @@ _NODISCARD_ASYNC future<_Invoke_result_t<decay_t<_Fty>, decay_t<_ArgTypes>...>> 
     using _Ret   = _Invoke_result_t<decay_t<_Fty>, decay_t<_ArgTypes>...>;
     using _Ptype = _P_arg_type_t<_Ret>;
     _Promise<_Ptype> _Pr(
-        _Get_associated_state<_Ret>(_Policy, _Fake_no_copy_callable_adapter<_Fty, _ArgTypes...>(
-                                                 _STD forward<_Fty>(_Fnarg), _STD forward<_ArgTypes>(_Args)...)));
+        _STD _Get_associated_state<_Ret>(_Policy, _Fake_no_copy_callable_adapter<_Fty, _ArgTypes...>(
+                                                      _STD forward<_Fty>(_Fnarg), _STD forward<_ArgTypes>(_Args)...)));
 
     return future<_Ret>(_From_raw_state_tag{}, _Pr._Get_state_for_future());
 }

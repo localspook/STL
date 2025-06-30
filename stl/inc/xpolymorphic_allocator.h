@@ -230,7 +230,7 @@ namespace pmr {
 
         _NODISCARD_RAW_PTR_ALLOC __declspec(allocator) _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count) {
             // get space for _Count objects of type _Ty from _Resource
-            void* const _Vp = _Resource->allocate(_Get_size_of_n<sizeof(_Ty)>(_Count), alignof(_Ty));
+            void* const _Vp = _Resource->allocate(_STD _Get_size_of_n<sizeof(_Ty)>(_Count), alignof(_Ty));
             return static_cast<_Ty*>(_Vp);
         }
 
@@ -254,7 +254,7 @@ namespace pmr {
         template <class _Uty>
         _NODISCARD_RAW_PTR_ALLOC __declspec(allocator) _Uty* allocate_object(
             _CRT_GUARDOVERFLOW const size_t _Count = 1) {
-            void* const _Vp = allocate_bytes(_Get_size_of_n<sizeof(_Uty)>(_Count), alignof(_Uty));
+            void* const _Vp = allocate_bytes(_STD _Get_size_of_n<sizeof(_Uty)>(_Count), alignof(_Uty));
             return static_cast<_Uty*>(_Vp);
         }
 

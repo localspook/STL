@@ -143,7 +143,7 @@ public:
         ptrdiff_t _Current = _Counter.load(memory_order_relaxed);
         for (;;) {
             while (_Current == 0) {
-                const auto _Remaining_timeout = _Semaphore_remaining_timeout(_Deadline);
+                const auto _Remaining_timeout = _STD _Semaphore_remaining_timeout(_Deadline);
                 if (_Remaining_timeout == 0) {
                     return false;
                 }
@@ -167,7 +167,7 @@ public:
         ptrdiff_t _Current = _Counter.load(memory_order_relaxed);
         for (;;) {
             while (_Current == 0) {
-                const unsigned long _Remaining_timeout = _Semaphore_remaining_timeout(_Abs_time);
+                const unsigned long _Remaining_timeout = _STD _Semaphore_remaining_timeout(_Abs_time);
                 if (_Remaining_timeout == 0) {
                     return false;
                 }
@@ -191,7 +191,7 @@ private:
         _Waiting.fetch_add(1);
         ptrdiff_t _Current = _Counter.load();
         if (_Current == 0) {
-            __std_atomic_wait_direct(&_Counter, &_Current, sizeof(_Current), _Remaining_timeout);
+            ::__std_atomic_wait_direct(&_Counter, &_Current, sizeof(_Current), _Remaining_timeout);
         }
         _Waiting.fetch_sub(1, memory_order_relaxed);
     }
@@ -261,11 +261,11 @@ public:
             }
             _STL_VERIFY(_Prev == 0, "Invariant: semaphore counter is non-negative and doesn't exceed max(), "
                                     "possibly caused by memory corruption");
-            const auto _Remaining_timeout = _Semaphore_remaining_timeout(_Deadline);
+            const auto _Remaining_timeout = _STD _Semaphore_remaining_timeout(_Deadline);
             if (_Remaining_timeout == 0) {
                 return false;
             }
-            __std_atomic_wait_direct(&_Counter, &_Prev, sizeof(_Prev), _Remaining_timeout);
+            ::__std_atomic_wait_direct(&_Counter, &_Prev, sizeof(_Prev), _Remaining_timeout);
         }
     }
 
@@ -282,12 +282,12 @@ public:
             _STL_VERIFY(_Prev == 0, "Invariant: semaphore counter is non-negative and doesn't exceed max(), "
                                     "possibly caused by memory corruption");
 
-            const unsigned long _Remaining_timeout = _Semaphore_remaining_timeout(_Abs_time);
+            const unsigned long _Remaining_timeout = _STD _Semaphore_remaining_timeout(_Abs_time);
             if (_Remaining_timeout == 0) {
                 return false;
             }
 
-            __std_atomic_wait_direct(&_Counter, &_Prev, sizeof(_Prev), _Remaining_timeout);
+            ::__std_atomic_wait_direct(&_Counter, &_Prev, sizeof(_Prev), _Remaining_timeout);
         }
     }
 

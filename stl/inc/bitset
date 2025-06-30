@@ -155,12 +155,12 @@ private:
                 bool _Result;
 
                 if constexpr (sizeof(_Elem) == 1) {
-                    _Result = __std_bitset_from_string_1(_Array, reinterpret_cast<const char*>(_Ptr), sizeof(_Array),
+                    _Result = ::__std_bitset_from_string_1(_Array, reinterpret_cast<const char*>(_Ptr), sizeof(_Array),
                         _Bits, _Count, static_cast<char>(_Elem0), static_cast<char>(_Elem1));
                 } else {
                     _STL_INTERNAL_STATIC_ASSERT(sizeof(_Elem) == 2);
-                    _Result = __std_bitset_from_string_2(_Array, reinterpret_cast<const wchar_t*>(_Ptr), sizeof(_Array),
-                        _Bits, _Count, static_cast<wchar_t>(_Elem0), static_cast<wchar_t>(_Elem1));
+                    _Result = ::__std_bitset_from_string_2(_Array, reinterpret_cast<const wchar_t*>(_Ptr),
+                        sizeof(_Array), _Bits, _Count, static_cast<wchar_t>(_Elem0), static_cast<wchar_t>(_Elem1));
                 }
 
                 if (!_Result) {
@@ -424,7 +424,7 @@ public:
     }
 
     _NODISCARD _CONSTEXPR23 size_t count() const noexcept { // count number of set bits
-        return _Select_popcount_impl<_Ty>([this](auto _Popcount_impl) {
+        return _STD _Select_popcount_impl<_Ty>([this](auto _Popcount_impl) {
             size_t _Val = 0;
             for (size_t _Wpos = 0; _Wpos <= _Words; ++_Wpos) {
                 _Val += _Popcount_impl(_Array[_Wpos]);
@@ -520,13 +520,13 @@ public:
 #if _USE_STD_VECTOR_ALGORITHMS
         constexpr size_t _Bitset_to_string_vector_threshold = 32;
         if constexpr (_Bits >= _Bitset_to_string_vector_threshold && is_integral_v<_Elem> && sizeof(_Elem) <= 2) {
-            if (!_Is_constant_evaluated()) {
+            if (!_STD _Is_constant_evaluated()) {
                 if constexpr (sizeof(_Elem) == 1) {
-                    __std_bitset_to_string_1(reinterpret_cast<char*>(_Buf), _Array, _Len, static_cast<char>(_Elem0),
+                    ::__std_bitset_to_string_1(reinterpret_cast<char*>(_Buf), _Array, _Len, static_cast<char>(_Elem0),
                         static_cast<char>(_Elem1));
                 } else {
                     _STL_INTERNAL_STATIC_ASSERT(sizeof(_Elem) == 2);
-                    __std_bitset_to_string_2(reinterpret_cast<wchar_t*>(_Buf), _Array, _Len,
+                    ::__std_bitset_to_string_2(reinterpret_cast<wchar_t*>(_Buf), _Array, _Len,
                         static_cast<wchar_t>(_Elem0), static_cast<wchar_t>(_Elem1));
                 }
 
@@ -572,15 +572,15 @@ private:
     }
 
     [[noreturn]] static void _Xinv() {
-        _Xinvalid_argument("invalid bitset char");
+        _STD _Xinvalid_argument("invalid bitset char");
     }
 
     [[noreturn]] static void _Xoflo() {
-        _Xoverflow_error("bitset overflow");
+        _STD _Xoverflow_error("bitset overflow");
     }
 
     [[noreturn]] static void _Xran() {
-        _Xout_of_range("invalid bitset position");
+        _STD _Xout_of_range("invalid bitset position");
     }
 
     _Ty _Array[_Words + 1];
@@ -676,7 +676,7 @@ struct hash<bitset<_Bits>> {
     using _RESULT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS   = size_t;
 
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(const bitset<_Bits>& _Keyval) _CONST_CALL_OPERATOR noexcept {
-        return _Hash_representation(_Keyval._Array);
+        return _STD _Hash_representation(_Keyval._Array);
     }
 };
 _STD_END

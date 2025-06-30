@@ -116,22 +116,24 @@ protected:
         _Minussign    = nullptr;
 
         _Tidy_guard<_Mpunct> _Guard{this};
-        _Grouping = _Maklocstr(_Ptr->mon_grouping, static_cast<char*>(nullptr), _Cvt);
+        _Grouping = _STD _Maklocstr(_Ptr->mon_grouping, static_cast<char*>(nullptr), _Cvt);
         if constexpr (is_same_v<_Elem, wchar_t>) {
-            _Currencysign = _Maklocwcs(_International ? _Ptr->_W_int_curr_symbol : _Ptr->_W_currency_symbol);
-            _Plussign     = _Maklocwcs(4 < static_cast<unsigned int>(_Ptr->p_sign_posn) ? L"" : _Ptr->_W_positive_sign);
-            _Minussign = _Maklocwcs(4 < static_cast<unsigned int>(_Ptr->n_sign_posn) ? L"-" : _Ptr->_W_negative_sign);
+            _Currencysign = _STD _Maklocwcs(_International ? _Ptr->_W_int_curr_symbol : _Ptr->_W_currency_symbol);
+            _Plussign =
+                _STD _Maklocwcs(4 < static_cast<unsigned int>(_Ptr->p_sign_posn) ? L"" : _Ptr->_W_positive_sign);
+            _Minussign =
+                _STD _Maklocwcs(4 < static_cast<unsigned int>(_Ptr->n_sign_posn) ? L"-" : _Ptr->_W_negative_sign);
             _Decimalpoint = _Ptr->_W_mon_decimal_point[0];
             _Kseparator   = _Ptr->_W_mon_thousands_sep[0];
         } else {
-            _Currencysign = _Maklocstr(
+            _Currencysign = _STD _Maklocstr(
                 _International ? _Ptr->int_curr_symbol : _Ptr->currency_symbol, static_cast<_Elem*>(nullptr), _Cvt);
-            _Plussign = _Maklocstr(4 < static_cast<unsigned int>(_Ptr->p_sign_posn) ? "" : _Ptr->positive_sign,
+            _Plussign = _STD _Maklocstr(4 < static_cast<unsigned int>(_Ptr->p_sign_posn) ? "" : _Ptr->positive_sign,
                 static_cast<_Elem*>(nullptr), _Cvt);
-            _Minussign = _Maklocstr(4 < static_cast<unsigned int>(_Ptr->n_sign_posn) ? "-" : _Ptr->negative_sign,
+            _Minussign = _STD _Maklocstr(4 < static_cast<unsigned int>(_Ptr->n_sign_posn) ? "-" : _Ptr->negative_sign,
                 static_cast<_Elem*>(nullptr), _Cvt);
-            _Decimalpoint = _Maklocchr(_Ptr->mon_decimal_point[0], static_cast<_Elem*>(nullptr), _Cvt);
-            _Kseparator   = _Maklocchr(_Ptr->mon_thousands_sep[0], static_cast<_Elem*>(nullptr), _Cvt);
+            _Decimalpoint = _STD _Maklocchr(_Ptr->mon_decimal_point[0], static_cast<_Elem*>(nullptr), _Cvt);
+            _Kseparator   = _STD _Maklocchr(_Ptr->mon_thousands_sep[0], static_cast<_Elem*>(nullptr), _Cvt);
         }
 
         _Guard._Target = nullptr;
@@ -359,7 +361,7 @@ protected:
             const char* _Eb = _Str.c_str();
             char* _Ep;
             int _Errno             = 0;
-            const long double _Ans = _Stodx_v3(_Eb, &_Ep, &_Errno); // convert and "widen" double to long double
+            const long double _Ans = _STD _Stodx_v3(_Eb, &_Ep, &_Errno); // convert and "widen" double to long double
 
             if (_Ep == _Eb || _Errno != 0) {
                 _State |= ios_base::failbit;
@@ -400,7 +402,7 @@ protected:
 private:
     string _Getmfld(_InIt& _First, _InIt& _Last, bool _Intl, ios_base& _Iosbase,
         _Elem (&_Atoms)[12]) const { // get monetary field from [_First, _Last) into string_type
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         const _Mpunct<_Elem>* _Ppunct_fac;
         if (_Intl) {
             _Ppunct_fac = _STD addressof(_STD use_facet<_Mypunct1>(_Iosbase.getloc())); // international
@@ -472,7 +474,7 @@ private:
                     const _Elem _Kseparator = _Grouping.empty() ? _Elem{} : _Ppunct_fac->thousands_sep();
 
                     if (_Kseparator == _Elem{} || CHAR_MAX <= static_cast<unsigned char>(*_Grouping.c_str())) {
-                        for (; _First != _Last && (_Idx = _Find_elem(_Atoms, *_First)) < 10; ++_First) {
+                        for (; _First != _Last && (_Idx = _STD _Find_elem(_Atoms, *_First)) < 10; ++_First) {
                             _Val += _Src[_Idx]; // no grouping, just gather digits
                         }
                     } else { // grouping specified, gather digits and group sizes
@@ -481,7 +483,7 @@ private:
                         size_t _Group = 0;
 
                         for (; _First != _Last; ++_First) {
-                            if ((_Idx = _Find_elem(_Atoms, *_First)) < 10) { // got a digit, add to group size
+                            if ((_Idx = _STD _Find_elem(_Atoms, *_First)) < 10) { // got a digit, add to group size
                                 _Val += _Src[_Idx];
                                 if (_Groups[_Group] != CHAR_MAX) {
                                     ++_Groups[_Group];
@@ -523,7 +525,7 @@ private:
                     if (_First != _Last && _Point != _Elem{}
                         && *_First == _Point) { // seen decimal point, gather fraction digits
                         while (++_First != _Last && _Fracdigseen < _Fracdigits
-                               && (_Idx = _Find_elem(_Atoms, *_First)) < 10) {
+                               && (_Idx = _STD _Find_elem(_Atoms, *_First)) < 10) {
                             _Val += _Src[_Idx];
                             ++_Fracdigseen;
                         }
@@ -702,7 +704,7 @@ protected:
 
         size_t _Size = _Val.size();
         size_t _Idx  = _Idx0;
-        for (; _Idx < _Size && _Find_elem(_Atoms, _Val[_Idx]) < 10; ++_Idx) { // count digits
+        for (; _Idx < _Size && _STD _Find_elem(_Atoms, _Val[_Idx]) < 10; ++_Idx) { // count digits
         }
 
         string_type _Val2(&_Val[_Idx0], _Idx - _Idx0);

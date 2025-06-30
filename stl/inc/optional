@@ -415,28 +415,28 @@ public:
 
     _NODISCARD constexpr const _Ty& value() const& {
         if (!this->_Has_value) {
-            _Throw_bad_optional_access();
+            _STD _Throw_bad_optional_access();
         }
 
         return this->_Value;
     }
     _NODISCARD constexpr _Ty& value() & {
         if (!this->_Has_value) {
-            _Throw_bad_optional_access();
+            _STD _Throw_bad_optional_access();
         }
 
         return this->_Value;
     }
     _NODISCARD constexpr _Ty&& value() && {
         if (!this->_Has_value) {
-            _Throw_bad_optional_access();
+            _STD _Throw_bad_optional_access();
         }
 
         return _STD move(this->_Value);
     }
     _NODISCARD constexpr const _Ty&& value() const&& {
         if (!this->_Has_value) {
-            _Throw_bad_optional_access();
+            _STD _Throw_bad_optional_access();
         }
 
         return _STD move(this->_Value);

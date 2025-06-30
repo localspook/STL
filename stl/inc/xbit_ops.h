@@ -38,10 +38,10 @@ _NODISCARD inline unsigned long _Floor_of_log_2(size_t _Value) noexcept { // ret
 #else // ^^^ defined(_M_CEE_PURE) / !defined(_M_CEE_PURE) vvv
 #ifdef _WIN64
     // CodeQL [SM02313] _Result is always initialized: the code above guarantees that _Value is non-zero.
-    _BitScanReverse64(&_Result, _Value);
+    ::_BitScanReverse64(&_Result, _Value);
 #else // ^^^ 64-bit / 32-bit vvv
     // CodeQL [SM02313] _Result is always initialized: the code above guarantees that _Value is non-zero.
-    _BitScanReverse(&_Result, _Value);
+    ::_BitScanReverse(&_Result, _Value);
 #endif // ^^^ 32-bit ^^^
 #endif // ^^^ !defined(_M_CEE_PURE) ^^^
 
@@ -50,13 +50,13 @@ _NODISCARD inline unsigned long _Floor_of_log_2(size_t _Value) noexcept { // ret
 
 _NODISCARD inline unsigned long _Ceiling_of_log_2(const size_t _Value) noexcept { // returns ceil(log_2(_Value))
                                                                                   // pre: _Value > 1
-    return 1 + _Floor_of_log_2(_Value - 1);
+    return 1 + _STD _Floor_of_log_2(_Value - 1);
 }
 
 _NODISCARD inline uint32_t _Bit_scan_reverse(const uint32_t _Value) noexcept {
     unsigned long _Index; // Intentionally uninitialized for better codegen
 
-    if (_BitScanReverse(&_Index, _Value)) {
+    if (::_BitScanReverse(&_Index, _Value)) {
         return _Index + 1;
     }
 
@@ -67,19 +67,19 @@ _NODISCARD inline uint32_t _Bit_scan_reverse(const uint64_t _Value) noexcept {
     unsigned long _Index; // Intentionally uninitialized for better codegen
 
 #ifdef _WIN64
-    if (_BitScanReverse64(&_Index, _Value)) {
+    if (::_BitScanReverse64(&_Index, _Value)) {
         return _Index + 1;
     }
 #else // ^^^ 64-bit / 32-bit vvv
     uint32_t _Ui32 = static_cast<uint32_t>(_Value >> 32);
 
-    if (_BitScanReverse(&_Index, _Ui32)) {
+    if (::_BitScanReverse(&_Index, _Ui32)) {
         return _Index + 1 + 32;
     }
 
     _Ui32 = static_cast<uint32_t>(_Value);
 
-    if (_BitScanReverse(&_Index, _Ui32)) {
+    if (::_BitScanReverse(&_Index, _Ui32)) {
         return _Index + 1;
     }
 #endif // ^^^ 32-bit ^^^

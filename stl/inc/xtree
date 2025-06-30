@@ -339,7 +339,7 @@ struct _Tree_node {
     char _Color; // _Red or _Black, _Black if head
     char _Isnil; // true only if head (also nil) node; TRANSITION, should be bool
     value_type _Myval = // the stored value, unused if head
-        _Returns_exactly<value_type>(); // fake a viable constructor to workaround GH-2749
+        _STD _Returns_exactly<value_type>(); // fake a viable constructor to workaround GH-2749
 
     enum _Redbl { // colors for link to parent
         _Red,
@@ -354,9 +354,9 @@ struct _Tree_node {
     static _Nodeptr _Buyheadnode(_Alloc& _Al) {
         static_assert(is_same_v<typename _Alloc::value_type, _Tree_node>, "Bad _Buyheadnode call");
         const auto _Pnode = _Al.allocate(1);
-        _Construct_in_place(_Pnode->_Left, _Pnode);
-        _Construct_in_place(_Pnode->_Parent, _Pnode);
-        _Construct_in_place(_Pnode->_Right, _Pnode);
+        _STD _Construct_in_place(_Pnode->_Left, _Pnode);
+        _STD _Construct_in_place(_Pnode->_Parent, _Pnode);
+        _STD _Construct_in_place(_Pnode->_Right, _Pnode);
         _Pnode->_Color = _Black;
         _Pnode->_Isnil = true;
         return _Pnode;
@@ -369,9 +369,9 @@ struct _Tree_node {
         _Alloc_construct_ptr<_Alloc> _Newnode(_Al);
         _Newnode._Allocate();
         allocator_traits<_Alloc>::construct(_Al, _STD addressof(_Newnode._Ptr->_Myval), _STD forward<_Valty>(_Val)...);
-        _Construct_in_place(_Newnode._Ptr->_Left, _Myhead);
-        _Construct_in_place(_Newnode._Ptr->_Parent, _Myhead);
-        _Construct_in_place(_Newnode._Ptr->_Right, _Myhead);
+        _STD _Construct_in_place(_Newnode._Ptr->_Left, _Myhead);
+        _STD _Construct_in_place(_Newnode._Ptr->_Parent, _Myhead);
+        _STD _Construct_in_place(_Newnode._Ptr->_Right, _Myhead);
         _Newnode._Ptr->_Color = _Red;
         _Newnode._Ptr->_Isnil = false;
         return _Newnode._Release();
@@ -380,9 +380,9 @@ struct _Tree_node {
     template <class _Alloc>
     static void _Freenode0(_Alloc& _Al, _Nodeptr _Ptr) noexcept {
         static_assert(is_same_v<typename _Alloc::value_type, _Tree_node>, "Bad _Freenode0 call");
-        _Destroy_in_place(_Ptr->_Left);
-        _Destroy_in_place(_Ptr->_Parent);
-        _Destroy_in_place(_Ptr->_Right);
+        _STD _Destroy_in_place(_Ptr->_Left);
+        _STD _Destroy_in_place(_Ptr->_Parent);
+        _STD _Destroy_in_place(_Ptr->_Right);
         allocator_traits<_Alloc>::deallocate(_Al, _Ptr, 1);
     }
 
@@ -425,7 +425,7 @@ struct _Tree_find_hint_result {
 };
 
 [[noreturn]] inline void _Throw_tree_length_error() {
-    _Xlength_error("map/set too long");
+    _STD _Xlength_error("map/set too long");
 }
 
 template <class _Val_types>
@@ -839,9 +839,9 @@ struct _Tree_temp_node : _Tree_temp_node_alloc<_Alnode> {
     explicit _Tree_temp_node(_Alnode& _Al_, _Nodeptr _Myhead, _Valtys&&... _Vals)
         : _Tree_temp_node_alloc<_Alnode>(_Al_) {
         _Alnode_traits::construct(this->_Al, _STD addressof(this->_Ptr->_Myval), _STD forward<_Valtys>(_Vals)...);
-        _Construct_in_place(this->_Ptr->_Left, _Myhead);
-        _Construct_in_place(this->_Ptr->_Parent, _Myhead);
-        _Construct_in_place(this->_Ptr->_Right, _Myhead);
+        _STD _Construct_in_place(this->_Ptr->_Left, _Myhead);
+        _STD _Construct_in_place(this->_Ptr->_Parent, _Myhead);
+        _STD _Construct_in_place(this->_Ptr->_Right, _Myhead);
         this->_Ptr->_Color = _Red;
         this->_Ptr->_Isnil = false;
     }
@@ -851,9 +851,9 @@ struct _Tree_temp_node : _Tree_temp_node_alloc<_Alnode> {
 
     ~_Tree_temp_node() {
         if (this->_Ptr) {
-            _Destroy_in_place(this->_Ptr->_Left);
-            _Destroy_in_place(this->_Ptr->_Parent);
-            _Destroy_in_place(this->_Ptr->_Right);
+            _STD _Destroy_in_place(this->_Ptr->_Left);
+            _STD _Destroy_in_place(this->_Ptr->_Parent);
+            _STD _Destroy_in_place(this->_Ptr->_Right);
             _Alnode_traits::destroy(this->_Al, _STD addressof(this->_Ptr->_Myval));
         }
     }
@@ -982,7 +982,7 @@ public:
                 const auto _Newhead     = _STD exchange(_Right_scary->_Myhead, _Node::_Buyheadnode(_Right_al));
                 const auto _Newsize     = _STD exchange(_Right_scary->_Mysize, size_type{0});
                 _Scary->_Erase_head(_Al);
-                _Pocma(_Al, _Right_al);
+                _STD _Pocma(_Al, _Right_al);
                 _Scary->_Myhead = _Newhead;
                 _Scary->_Mysize = _Newsize;
                 _Proxy._Bind(_Alproxy, _Scary);
@@ -1000,7 +1000,7 @@ public:
 
         clear();
         _Getcomp() = _Right._Getcomp(); // intentionally copy comparator, see LWG-2227
-        _Pocma(_Al, _Right_al);
+        _STD _Pocma(_Al, _Right_al);
         _Swap_val_excluding_comp(_Right);
 
         return *this;
@@ -1108,7 +1108,7 @@ public:
         _Scary->_Erase_head(_Getal());
 #if _ITERATOR_DEBUG_LEVEL != 0 // TRANSITION, ABI
         auto _Alproxy = _STD _Get_proxy_allocator(_Getal());
-        _Delete_plain_internal(_Alproxy, _Scary->_Myproxy);
+        _STD _Delete_plain_internal(_Alproxy, _Scary->_Myproxy);
 #endif // _ITERATOR_DEBUG_LEVEL != 0
     }
 
@@ -1131,7 +1131,7 @@ public:
                 auto _Right_al_non_const = _Right_al;
                 auto _Newhead            = _Node::_Buyheadnode(_Right_al_non_const);
                 _Node::_Freenode0(_Al, _Scary->_Myhead);
-                _Pocca(_Al, _Right_al);
+                _STD _Pocca(_Al, _Right_al);
                 _Scary->_Myhead = _Newhead;
                 _Proxy._Bind(_Alproxy, _Scary);
                 _Getcomp() = _Right._Getcomp();
@@ -1142,7 +1142,7 @@ public:
 
         clear();
         _Getcomp() = _Right._Getcomp();
-        _Pocca(_Al, _Right_al);
+        _STD _Pocca(_Al, _Right_al);
         _Copy<_Strategy::_Copy>(_Right);
 
         return *this;
@@ -1513,7 +1513,7 @@ public:
     void swap(_Tree& _Right) noexcept(_Is_nothrow_swappable<key_compare>::value) /* strengthened */ {
         using _STD swap;
         if (this != _STD addressof(_Right)) {
-            _Pocs(_Getal(), _Right._Getal());
+            _STD _Pocs(_Getal(), _Right._Getal());
             _Swap_val_excluding_comp(_Right);
             swap(_Getcomp(), _Right._Getcomp()); // intentional ADL
         }
@@ -1657,7 +1657,7 @@ protected:
 
     void _Check_grow_by_1() {
         if (max_size() == _Get_scary()->_Mysize) {
-            _Throw_tree_length_error();
+            _STD _Throw_tree_length_error();
         }
     }
 

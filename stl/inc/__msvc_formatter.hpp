@@ -152,7 +152,7 @@ struct _Formatter_base {
 public:
 #if _HAS_CXX23
     constexpr void _Set_debug_format() noexcept
-        requires (_Is_debug_enabled_fmt_type(_ArgType))
+        requires (_STD _Is_debug_enabled_fmt_type(_ArgType))
     {
         _Specs._Type = '?';
     }
@@ -160,12 +160,12 @@ public:
 
     template <class _Pc = basic_format_parse_context<_CharT>>
     constexpr _Pc::iterator parse(type_identity_t<_Pc&> _ParseCtx) {
-        return _Formatter_base_parse<_ArgType>(_Specs, _ParseCtx);
+        return _STD _Formatter_base_parse<_ArgType>(_Specs, _ParseCtx);
     }
 
     template <class _FormatContext>
     _FormatContext::iterator format(const _Ty& _Val, _FormatContext& _FormatCtx) const {
-        return _Formatter_base_format(_Specs, _Val, _FormatCtx);
+        return _STD _Formatter_base_format(_Specs, _Val, _FormatCtx);
     }
 
 private:

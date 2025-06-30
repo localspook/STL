@@ -571,7 +571,7 @@ public:
 
 private:
     [[noreturn]] static void _Xran() {
-        _Xout_of_range("invalid array<T, N> subscript");
+        _STD _Xout_of_range("invalid array<T, N> subscript");
     }
 };
 
@@ -764,7 +764,7 @@ public:
 
 private:
     [[noreturn]] static void _Xran() {
-        _Xout_of_range("invalid array<T, 0> subscript");
+        _STD _Xout_of_range("invalid array<T, 0> subscript");
     }
 };
 

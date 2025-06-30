@@ -39,7 +39,7 @@ _Ty* _Allocate_for_op_delete(size_t _Count) {
         return nullptr;
     }
 
-    const size_t _Bytes = _Get_size_of_n<sizeof(_Ty)>(_Count);
+    const size_t _Bytes = _STD _Get_size_of_n<sizeof(_Ty)>(_Count);
 #ifdef __cpp_aligned_new
     constexpr bool _Extended_alignment = alignof(_Ty) > __STDCPP_DEFAULT_NEW_ALIGNMENT__;
     if constexpr (_Extended_alignment) {
@@ -543,7 +543,7 @@ public:
 private:
     void _Grow(size_t _Newsize) { // allocate space for _Count elements and fill with default values
         if (0 < _Newsize) { // worth doing, allocate
-            _Myptr = _Allocate_for_op_delete<_Ty>(_Newsize);
+            _Myptr = _STD _Allocate_for_op_delete<_Ty>(_Newsize);
             _Tidy_deallocate_guard<valarray> _Guard{this};
             for (size_t _Idx = 0; _Idx < _Newsize; ++_Idx) {
                 _STD _Construct_in_place(_Myptr[_Idx]);
@@ -557,7 +557,7 @@ private:
     void _Grow(size_t _Newsize, const _Ty* _Ptr, size_t _Inc = 0) {
         // allocate space for _Count elements and fill with *_Ptr
         if (0 < _Newsize) { // worth doing, allocate
-            _Myptr = _Allocate_for_op_delete<_Ty>(_Newsize);
+            _Myptr = _STD _Allocate_for_op_delete<_Ty>(_Newsize);
             _Tidy_deallocate_guard<valarray> _Guard{this};
             for (size_t _Idx = 0; _Idx < _Newsize; ++_Idx, _Ptr += _Inc) {
                 _STD _Construct_in_place(_Myptr[_Idx], *_Ptr);

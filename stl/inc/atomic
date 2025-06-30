@@ -106,7 +106,7 @@ extern "C" inline void _Check_memory_order(const unsigned int _Order) noexcept {
 
 #if (defined(_M_IX86) && !defined(_M_HYBRID_X86_ARM64)) || (defined(_M_X64) && !defined(_M_ARM64EC))
 #define _ATOMIC_CHOOSE_INTRINSIC(_Order, _Result, _Intrinsic, ...) \
-    _Check_memory_order(_Order);                                   \
+    ::_Check_memory_order(_Order);                                 \
     _Result = _Intrinsic(__VA_ARGS__)
 #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
 #define _ATOMIC_CHOOSE_INTRINSIC(_Order, _Result, _Intrinsic, ...) \
@@ -134,7 +134,7 @@ extern "C" inline void _Check_memory_order(const unsigned int _Order) noexcept {
 #if _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1
 
 #define _ATOMIC_LOAD_ARM64(_Result, _Width, _Ptr, _Order_var) \
-    _Check_load_memory_order(_Order_var);                     \
+    _STD _Check_load_memory_order(_Order_var);                \
     if (_Order_var == memory_order_relaxed) {                 \
         _Result = __iso_volatile_load##_Width(_Ptr);          \
     } else {                                                  \
@@ -145,7 +145,7 @@ extern "C" inline void _Check_memory_order(const unsigned int _Order) noexcept {
 #endif // _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1
 
 #define _ATOMIC_POST_LOAD_BARRIER_AS_NEEDED(_Order_var) \
-    _Check_load_memory_order(_Order_var);               \
+    _STD _Check_load_memory_order(_Order_var);          \
     if (_Order_var != memory_order_relaxed) {           \
         _Compiler_or_memory_barrier();                  \
     }
@@ -161,12 +161,12 @@ extern "C" inline void _Check_memory_order(const unsigned int _Order) noexcept {
 
 #define _ATOMIC_STORE_SEQ_CST_X86_X64(_Width, _Ptr, _Desired) (void) _InterlockedExchange##_Width((_Ptr), (_Desired));
 #define _ATOMIC_STORE_32_SEQ_CST_X86_X64(_Ptr, _Desired) \
-    (void) _InterlockedExchange(reinterpret_cast<volatile long*>(_Ptr), static_cast<long>(_Desired));
+    (void) ::_InterlockedExchange(reinterpret_cast<volatile long*>(_Ptr), static_cast<long>(_Desired));
 
 #define _ATOMIC_STORE_64_SEQ_CST_IX86(_Ptr, _Desired) \
     _Compiler_barrier();                              \
-    __iso_volatile_store64((_Ptr), (_Desired));       \
-    _Atomic_thread_fence(_Atomic_memory_order_seq_cst);
+    ::__iso_volatile_store64((_Ptr), (_Desired));     \
+    ::_Atomic_thread_fence(_Atomic_memory_order_seq_cst);
 
 #if defined(_M_ARM)
 #define _ATOMIC_STORE_SEQ_CST(_Width, _Ptr, _Desired) _ATOMIC_STORE_SEQ_CST_ARM(_Width, (_Ptr), (_Desired))
@@ -206,7 +206,7 @@ extern "C" inline void _Atomic_thread_fence(const unsigned int _Order) noexcept 
         // _mm_mfence could have been used, but it is slower on some CPUs.
         // The memory fence provided by interlocked operations has some exceptions, but this is fine:
         // std::atomic_thread_fence works with respect to other atomics only; it may not be a full fence for all ops.
-        (void) _InterlockedIncrement(&_Guard);
+        (void) ::_InterlockedIncrement(&_Guard);
         _Compiler_barrier();
     }
 #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
@@ -345,8 +345,8 @@ _NODISCARD inline memory_order _Combine_cas_memory_orders(
         {memory_order_seq_cst, memory_order_seq_cst, memory_order_seq_cst, memory_order_seq_cst, memory_order_seq_cst,
             memory_order_seq_cst}};
 
-    _Check_memory_order(static_cast<unsigned int>(_Success));
-    _Check_load_memory_order(_Failure);
+    ::_Check_memory_order(static_cast<unsigned int>(_Success));
+    _STD _Check_load_memory_order(_Failure);
     return _Combined_memory_orders[static_cast<int>(_Success)][static_cast<int>(_Failure)];
 }
 
@@ -468,8 +468,8 @@ inline void _Atomic_lock_acquire(long& _Spinlock) noexcept {
     // The code in mentioned manual is covered by the 0BSD license.
     int _Current_backoff       = 1;
     constexpr int _Max_backoff = 64;
-    while (_InterlockedExchange(&_Spinlock, 1) != 0) {
-        while (__iso_volatile_load32(&reinterpret_cast<int&>(_Spinlock)) != 0) {
+    while (::_InterlockedExchange(&_Spinlock, 1) != 0) {
+        while (::__iso_volatile_load32(&reinterpret_cast<int&>(_Spinlock)) != 0) {
             for (int _Count_down = _Current_backoff; _Count_down != 0; --_Count_down) {
                 _mm_pause();
             }
@@ -478,7 +478,7 @@ inline void _Atomic_lock_acquire(long& _Spinlock) noexcept {
     }
 #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
     while (_InterlockedExchange_acq(&_Spinlock, 1) != 0) {
-        while (__iso_volatile_load32(&reinterpret_cast<int&>(_Spinlock)) != 0) {
+        while (::__iso_volatile_load32(&reinterpret_cast<int&>(_Spinlock)) != 0) {
             __yield();
         }
     }
@@ -492,22 +492,22 @@ inline void _Atomic_lock_release(long& _Spinlock) noexcept {
 }
 
 inline void _Atomic_lock_acquire(_Smtx_t* _Spinlock) noexcept {
-    _Smtx_lock_exclusive(_Spinlock);
+    ::_Smtx_lock_exclusive(_Spinlock);
 }
 
 inline void _Atomic_lock_release(_Smtx_t* _Spinlock) noexcept {
-    _Smtx_unlock_exclusive(_Spinlock);
+    ::_Smtx_unlock_exclusive(_Spinlock);
 }
 
 template <class _Spinlock_t>
 class _NODISCARD _Atomic_lock_guard {
 public:
     explicit _Atomic_lock_guard(_Spinlock_t& _Spinlock_) noexcept : _Spinlock(_Spinlock_) {
-        _Atomic_lock_acquire(_Spinlock);
+        _STD _Atomic_lock_acquire(_Spinlock);
     }
 
     ~_Atomic_lock_guard() {
-        _Atomic_lock_release(_Spinlock);
+        _STD _Atomic_lock_release(_Spinlock);
     }
 
     _Atomic_lock_guard(const _Atomic_lock_guard&)            = delete;
@@ -522,9 +522,9 @@ template <class _Spinlock_t>
 bool __stdcall _Atomic_wait_compare_non_lock_free(
     const void* _Storage, void* _Comparand, size_t _Size, void* _Spinlock_raw) noexcept {
     _Spinlock_t& _Spinlock = *static_cast<_Spinlock_t*>(_Spinlock_raw);
-    _Atomic_lock_acquire(_Spinlock);
+    _STD _Atomic_lock_acquire(_Spinlock);
     const auto _Cmp_result = _CSTD memcmp(_Storage, _Comparand, _Size);
-    _Atomic_lock_release(_Spinlock);
+    _STD _Atomic_lock_release(_Spinlock);
     return _Cmp_result == 0;
 }
 
@@ -534,7 +534,7 @@ inline bool __stdcall _Atomic_wait_compare_16_bytes(const void* _Storage, void* 
     const auto _Cmp               = static_cast<const long long*>(_Comparand);
     alignas(16) long long _Tmp[2] = {_Cmp[0], _Cmp[1]};
 #if defined(_M_X64) && !defined(_M_ARM64EC)
-    return _InterlockedCompareExchange128(_Dest, _Tmp[1], _Tmp[0], _Tmp) != 0;
+    return ::_InterlockedCompareExchange128(_Dest, _Tmp[1], _Tmp[0], _Tmp) != 0;
 #else // ^^^ _M_X64 / ARM64, _M_ARM64EC vvv
     return _InterlockedCompareExchange128_nf(_Dest, _Tmp[1], _Tmp[0], _Tmp) != 0;
 #endif // ^^^ ARM64, _M_ARM64EC ^^^
@@ -559,14 +559,14 @@ struct _Atomic_storage {
 
     void store(const _TVal _Value, const memory_order _Order = memory_order_seq_cst) noexcept {
         // store with sequential consistency
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
         _Guard _Lock{_Spinlock};
         _Storage = _Value;
     }
 
     _NODISCARD _TVal load(const memory_order _Order = memory_order_seq_cst) const noexcept {
         // load with sequential consistency
-        _Check_load_memory_order(_Order);
+        _STD _Check_load_memory_order(_Order);
         _Guard _Lock{_Spinlock};
         _TVal _Local(_Storage);
         return _Local;
@@ -574,7 +574,7 @@ struct _Atomic_storage {
 
     _TVal exchange(const _TVal _Value, const memory_order _Order = memory_order_seq_cst) noexcept {
         // exchange _Value with _Storage with sequential consistency
-        _Check_memory_order(static_cast<unsigned int>(_Order));
+        ::_Check_memory_order(static_cast<unsigned int>(_Order));
         _Guard _Lock{_Spinlock};
         _TVal _Result(_Storage);
         _Storage = _Value;
@@ -583,7 +583,7 @@ struct _Atomic_storage {
 
     bool compare_exchange_strong(_TVal& _Expected, const _TVal _Desired,
         const memory_order _Order = memory_order_seq_cst) noexcept { // CAS with sequential consistency, plain
-        _Check_memory_order(static_cast<unsigned int>(_Order));
+        ::_Check_memory_order(static_cast<unsigned int>(_Order));
         const auto _Storage_ptr  = _STD addressof(_Storage);
         const auto _Expected_ptr = _STD addressof(_Expected);
         bool _Result;
@@ -646,7 +646,7 @@ struct _Atomic_storage {
             } // unlock
 
             ::__std_atomic_wait_indirect(_Storage_ptr, _Expected_ptr, sizeof(_TVal), &_Spinlock,
-                &_Atomic_wait_compare_non_lock_free<decltype(_Spinlock)>, __std_atomic_wait_no_timeout);
+                &_STD _Atomic_wait_compare_non_lock_free<decltype(_Spinlock)>, __std_atomic_wait_no_timeout);
         }
     }
 
@@ -698,10 +698,10 @@ struct _Atomic_storage<_Ty, 1> { // lock-free using 1-byte intrinsics
         const auto _Mem      = _STD _Atomic_address_as<char>(_Storage);
         const char _As_bytes = _STD _Atomic_reinterpret_as<char>(_Value);
 
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
 
         if (_Order == memory_order_relaxed) {
-            __iso_volatile_store8(_Mem, _As_bytes);
+            ::__iso_volatile_store8(_Mem, _As_bytes);
         } else if (_Order == memory_order_release) {
             __STORE_RELEASE(8, _Mem, _As_bytes);
         } else {
@@ -716,7 +716,7 @@ struct _Atomic_storage<_Ty, 1> { // lock-free using 1-byte intrinsics
 #if _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1
         _ATOMIC_LOAD_ARM64(_As_bytes, 8, _Mem, _Order)
 #else // ^^^ _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1 / _STD_ATOMIC_USE_ARM64_LDAR_STLR == 0 vvv
-        _As_bytes = __iso_volatile_load8(_Mem);
+        _As_bytes = ::__iso_volatile_load8(_Mem);
         _ATOMIC_POST_LOAD_BARRIER_AS_NEEDED(_Order)
 #endif // ^^^ _STD_ATOMIC_USE_ARM64_LDAR_STLR == 0 ^^^
         return reinterpret_cast<_TVal&>(_As_bytes);
@@ -805,10 +805,10 @@ struct _Atomic_storage<_Ty, 2> { // lock-free using 2-byte intrinsics
         const auto _Mem       = _STD _Atomic_address_as<short>(_Storage);
         const short _As_bytes = _STD _Atomic_reinterpret_as<short>(_Value);
 
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
 
         if (_Order == memory_order_relaxed) {
-            __iso_volatile_store16(_Mem, _As_bytes);
+            ::__iso_volatile_store16(_Mem, _As_bytes);
         } else if (_Order == memory_order_release) {
             __STORE_RELEASE(16, _Mem, _As_bytes);
         } else {
@@ -823,7 +823,7 @@ struct _Atomic_storage<_Ty, 2> { // lock-free using 2-byte intrinsics
 #if _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1
         _ATOMIC_LOAD_ARM64(_As_bytes, 16, _Mem, _Order)
 #else // ^^^ _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1 / _STD_ATOMIC_USE_ARM64_LDAR_STLR == 0 vvv
-        _As_bytes = __iso_volatile_load16(_Mem);
+        _As_bytes = ::__iso_volatile_load16(_Mem);
         _ATOMIC_POST_LOAD_BARRIER_AS_NEEDED(_Order)
 #endif // ^^^ _STD_ATOMIC_USE_ARM64_LDAR_STLR == 0 ^^^
         return reinterpret_cast<_TVal&>(_As_bytes);
@@ -911,10 +911,10 @@ struct _Atomic_storage<_Ty, 4> { // lock-free using 4-byte intrinsics
         const auto _Mem     = _STD _Atomic_address_as<int>(_Storage);
         const int _As_bytes = _STD _Atomic_reinterpret_as<int>(_Value);
 
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
 
         if (_Order == memory_order_relaxed) {
-            __iso_volatile_store32(_Mem, _As_bytes);
+            ::__iso_volatile_store32(_Mem, _As_bytes);
         } else if (_Order == memory_order_release) {
             __STORE_RELEASE(32, _Mem, _As_bytes);
         } else {
@@ -929,7 +929,7 @@ struct _Atomic_storage<_Ty, 4> { // lock-free using 4-byte intrinsics
 #if _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1
         _ATOMIC_LOAD_ARM64(_As_bytes, 32, _Mem, _Order)
 #else // ^^^ _STD_ATOMIC_USE_ARM64_LDAR_STLR == 1 / _STD_ATOMIC_USE_ARM64_LDAR_STLR == 0 vvv
-        _As_bytes = __iso_volatile_load32(_Mem);
+        _As_bytes = ::__iso_volatile_load32(_Mem);
         _ATOMIC_POST_LOAD_BARRIER_AS_NEEDED(_Order)
 #endif // ^^^ _STD_ATOMIC_USE_ARM64_LDAR_STLR == 0 ^^^
         return reinterpret_cast<_TVal&>(_As_bytes);
@@ -1017,10 +1017,10 @@ struct _Atomic_storage<_Ty, 8> { // lock-free using 8-byte intrinsics
         const auto _Mem           = _STD _Atomic_address_as<long long>(_Storage);
         const long long _As_bytes = _STD _Atomic_reinterpret_as<long long>(_Value);
 
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
 
         if (_Order == memory_order_relaxed) {
-            __iso_volatile_store64(_Mem, _As_bytes);
+            ::__iso_volatile_store64(_Mem, _As_bytes);
         } else if (_Order == memory_order_release) {
             __STORE_RELEASE(64, _Mem, _As_bytes);
         } else {
@@ -1039,7 +1039,7 @@ struct _Atomic_storage<_Ty, 8> { // lock-free using 8-byte intrinsics
 #ifdef _M_ARM
         _As_bytes = __ldrexd(_Mem);
 #else
-        _As_bytes = __iso_volatile_load64(_Mem);
+        _As_bytes = ::__iso_volatile_load64(_Mem);
 #endif
 
         _ATOMIC_POST_LOAD_BARRIER_AS_NEEDED(_Order)
@@ -1139,14 +1139,14 @@ struct _Atomic_storage<_Ty&, 16> { // lock-free using 16-byte intrinsics
     }
 
     void store(const _TVal _Value, const memory_order _Order) noexcept { // store with given memory order
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
         (void) exchange(_Value, _Order);
     }
 
     _NODISCARD _TVal load() const noexcept { // load with sequential consistency
         long long* const _Storage_ptr = const_cast<long long*>(_STD _Atomic_address_as<const long long>(_Storage));
         _Int128 _Result{}; // atomic CAS 0 with 0
-        (void) _InterlockedCompareExchange128(_Storage_ptr, 0, 0, &_Result._Low);
+        (void) ::_InterlockedCompareExchange128(_Storage_ptr, 0, 0, &_Result._Low);
         return reinterpret_cast<_TVal&>(_Result);
     }
 
@@ -1168,13 +1168,13 @@ struct _Atomic_storage<_Ty&, 16> { // lock-free using 16-byte intrinsics
             _INVALID_MEMORY_ORDER;
             _FALLTHROUGH;
         case memory_order_seq_cst:
-            (void) _InterlockedCompareExchange128(_Storage_ptr, 0, 0, &_Result._Low);
+            (void) ::_InterlockedCompareExchange128(_Storage_ptr, 0, 0, &_Result._Low);
             break;
         }
 
         return reinterpret_cast<_TVal&>(_Result);
 #else // ^^^ _M_ARM64, _M_ARM64EC / _M_X64 vvv
-        _Check_load_memory_order(_Order);
+        _STD _Check_load_memory_order(_Order);
         return load();
 #endif // ^^^ _M_X64 ^^^
     }
@@ -1217,8 +1217,8 @@ struct _Atomic_storage<_Ty&, 16> { // lock-free using 16-byte intrinsics
                     &_Expected_temp._Low);
 #else // ^^^ _M_ARM64, _M_ARM64EC / _M_X64 vvv
                 (void) _Order;
-                _Result = _InterlockedCompareExchange128(&reinterpret_cast<long long&>(_Storage), _Desired_bytes._High,
-                    _Desired_bytes._Low, &_Expected_temp._Low);
+                _Result = ::_InterlockedCompareExchange128(&reinterpret_cast<long long&>(_Storage),
+                    _Desired_bytes._High, _Desired_bytes._Low, &_Expected_temp._Low);
 #endif // ^^^ _M_X64 ^^^
                 if (_Result) {
                     return true;
@@ -1243,8 +1243,8 @@ struct _Atomic_storage<_Ty&, 16> { // lock-free using 16-byte intrinsics
             &_Expected_temp._Low);
 #else // ^^^ _M_ARM64, _M_ARM64EC / _M_X64 vvv
         (void) _Order;
-        _Result = _InterlockedCompareExchange128(&reinterpret_cast<volatile long long&>(_Storage), _Desired_bytes._High,
-            _Desired_bytes._Low, &_Expected_temp._Low);
+        _Result = ::_InterlockedCompareExchange128(&reinterpret_cast<volatile long long&>(_Storage),
+            _Desired_bytes._High, _Desired_bytes._Low, &_Expected_temp._Low);
 #endif // ^^^ _M_X64 ^^^
         if (_Result == 0) {
             _CSTD memcpy(_STD addressof(_Expected), &_Expected_temp, sizeof(_TVal));
@@ -1343,23 +1343,23 @@ struct _Atomic_integral<_Ty, 1> : _Atomic_storage<_Ty> { // atomic integral oper
     }
 
     _TVal operator++(int) noexcept {
-        return static_cast<_TVal>(_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), 1));
+        return static_cast<_TVal>(::_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), 1));
     }
 
     _TVal operator++() noexcept {
         unsigned char _Before =
-            static_cast<unsigned char>(_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), 1));
+            static_cast<unsigned char>(::_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), 1));
         ++_Before;
         return static_cast<_TVal>(_Before);
     }
 
     _TVal operator--(int) noexcept {
-        return static_cast<_TVal>(_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), -1));
+        return static_cast<_TVal>(::_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), -1));
     }
 
     _TVal operator--() noexcept {
         unsigned char _Before =
-            static_cast<unsigned char>(_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), -1));
+            static_cast<unsigned char>(::_InterlockedExchangeAdd8(_STD _Atomic_address_as<char>(this->_Storage), -1));
         --_Before;
         return static_cast<_TVal>(_Before);
     }
@@ -1402,24 +1402,24 @@ struct _Atomic_integral<_Ty, 2> : _Atomic_storage<_Ty> { // atomic integral oper
 
     _TVal operator++(int) noexcept {
         unsigned short _After =
-            static_cast<unsigned short>(_InterlockedIncrement16(_STD _Atomic_address_as<short>(this->_Storage)));
+            static_cast<unsigned short>(::_InterlockedIncrement16(_STD _Atomic_address_as<short>(this->_Storage)));
         --_After;
         return static_cast<_TVal>(_After);
     }
 
     _TVal operator++() noexcept {
-        return static_cast<_TVal>(_InterlockedIncrement16(_STD _Atomic_address_as<short>(this->_Storage)));
+        return static_cast<_TVal>(::_InterlockedIncrement16(_STD _Atomic_address_as<short>(this->_Storage)));
     }
 
     _TVal operator--(int) noexcept {
         unsigned short _After =
-            static_cast<unsigned short>(_InterlockedDecrement16(_STD _Atomic_address_as<short>(this->_Storage)));
+            static_cast<unsigned short>(::_InterlockedDecrement16(_STD _Atomic_address_as<short>(this->_Storage)));
         ++_After;
         return static_cast<_TVal>(_After);
     }
 
     _TVal operator--() noexcept {
-        return static_cast<_TVal>(_InterlockedDecrement16(_STD _Atomic_address_as<short>(this->_Storage)));
+        return static_cast<_TVal>(::_InterlockedDecrement16(_STD _Atomic_address_as<short>(this->_Storage)));
     }
 };
 
@@ -1460,24 +1460,24 @@ struct _Atomic_integral<_Ty, 4> : _Atomic_storage<_Ty> { // atomic integral oper
 
     _TVal operator++(int) noexcept {
         unsigned long _After =
-            static_cast<unsigned long>(_InterlockedIncrement(_STD _Atomic_address_as<long>(this->_Storage)));
+            static_cast<unsigned long>(::_InterlockedIncrement(_STD _Atomic_address_as<long>(this->_Storage)));
         --_After;
         return static_cast<_TVal>(_After);
     }
 
     _TVal operator++() noexcept {
-        return static_cast<_TVal>(_InterlockedIncrement(_STD _Atomic_address_as<long>(this->_Storage)));
+        return static_cast<_TVal>(::_InterlockedIncrement(_STD _Atomic_address_as<long>(this->_Storage)));
     }
 
     _TVal operator--(int) noexcept {
         unsigned long _After =
-            static_cast<unsigned long>(_InterlockedDecrement(_STD _Atomic_address_as<long>(this->_Storage)));
+            static_cast<unsigned long>(::_InterlockedDecrement(_STD _Atomic_address_as<long>(this->_Storage)));
         ++_After;
         return static_cast<_TVal>(_After);
     }
 
     _TVal operator--() noexcept {
-        return static_cast<_TVal>(_InterlockedDecrement(_STD _Atomic_address_as<long>(this->_Storage)));
+        return static_cast<_TVal>(::_InterlockedDecrement(_STD _Atomic_address_as<long>(this->_Storage)));
     }
 };
 
@@ -1572,24 +1572,24 @@ struct _Atomic_integral<_Ty, 8> : _Atomic_storage<_Ty> { // atomic integral oper
 
     _TVal operator++(int) noexcept {
         unsigned long long _After = static_cast<unsigned long long>(
-            _InterlockedIncrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
+            ::_InterlockedIncrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
         --_After;
         return static_cast<_TVal>(_After);
     }
 
     _TVal operator++() noexcept {
-        return static_cast<_TVal>(_InterlockedIncrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
+        return static_cast<_TVal>(::_InterlockedIncrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
     }
 
     _TVal operator--(int) noexcept {
         unsigned long long _After = static_cast<unsigned long long>(
-            _InterlockedDecrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
+            ::_InterlockedDecrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
         ++_After;
         return static_cast<_TVal>(_After);
     }
 
     _TVal operator--() noexcept {
-        return static_cast<_TVal>(_InterlockedDecrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
+        return static_cast<_TVal>(::_InterlockedDecrement64(_STD _Atomic_address_as<long long>(this->_Storage)));
     }
 #endif // ^^^ !defined(_M_IX86) ^^^
 };
@@ -2227,12 +2227,12 @@ public:
     bool compare_exchange_strong(_Ty& _Expected, const _Ty _Desired, const memory_order _Success,
         const memory_order _Failure) volatile noexcept {
         static_assert(_Deprecate_non_lock_free_volatile<_Ty>, "Never fails");
-        return this->compare_exchange_strong(_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+        return this->compare_exchange_strong(_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_strong(
         _Ty& _Expected, const _Ty _Desired, const memory_order _Success, const memory_order _Failure) noexcept {
-        return this->compare_exchange_strong(_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+        return this->compare_exchange_strong(_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_weak(_Ty& _Expected, const _Ty _Desired) volatile noexcept {
@@ -2257,12 +2257,12 @@ public:
     bool compare_exchange_weak(_Ty& _Expected, const _Ty _Desired, const memory_order _Success,
         const memory_order _Failure) volatile noexcept {
         static_assert(_Deprecate_non_lock_free_volatile<_Ty>, "Never fails");
-        return this->compare_exchange_strong(_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+        return this->compare_exchange_strong(_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_weak(
         _Ty& _Expected, const _Ty _Desired, const memory_order _Success, const memory_order _Failure) noexcept {
-        return this->compare_exchange_strong(_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+        return this->compare_exchange_strong(_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
 #if _HAS_CXX20
@@ -2381,7 +2381,7 @@ public:
         const memory_order _Failure) const noexcept
         requires (!is_const_v<_Ty>)
     {
-        return compare_exchange_strong(_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+        return compare_exchange_strong(_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_weak(value_type& _Expected, const value_type _Desired) const noexcept
@@ -2401,7 +2401,7 @@ public:
         const memory_order _Failure) const noexcept
         requires (!is_const_v<_Ty>)
     {
-        return compare_exchange_strong(_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+        return compare_exchange_strong(_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     operator value_type() const noexcept {
@@ -2531,13 +2531,13 @@ _EXPORT_STD template <class _Ty>
 bool atomic_compare_exchange_strong_explicit(volatile atomic<_Ty>* const _Mem, _Identity_t<_Ty>* const _Expected,
     const _Identity_t<_Ty> _Desired, const memory_order _Success, const memory_order _Failure) noexcept {
     static_assert(_Deprecate_non_lock_free_volatile<_Ty>, "Never fails");
-    return _Mem->compare_exchange_strong(*_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+    return _Mem->compare_exchange_strong(*_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
 }
 
 _EXPORT_STD template <class _Ty>
 bool atomic_compare_exchange_strong_explicit(atomic<_Ty>* const _Mem, _Identity_t<_Ty>* const _Expected,
     const _Identity_t<_Ty> _Desired, const memory_order _Success, const memory_order _Failure) noexcept {
-    return _Mem->compare_exchange_strong(*_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+    return _Mem->compare_exchange_strong(*_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
 }
 
 _EXPORT_STD template <class _Ty>
@@ -2557,13 +2557,13 @@ _EXPORT_STD template <class _Ty>
 bool atomic_compare_exchange_weak_explicit(volatile atomic<_Ty>* const _Mem, _Identity_t<_Ty>* const _Expected,
     const _Identity_t<_Ty> _Desired, const memory_order _Success, const memory_order _Failure) noexcept {
     static_assert(_Deprecate_non_lock_free_volatile<_Ty>, "Never fails");
-    return _Mem->compare_exchange_strong(*_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+    return _Mem->compare_exchange_strong(*_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
 }
 
 _EXPORT_STD template <class _Ty>
 bool atomic_compare_exchange_weak_explicit(atomic<_Ty>* const _Mem, _Identity_t<_Ty>* const _Expected,
     const _Identity_t<_Ty> _Desired, const memory_order _Success, const memory_order _Failure) noexcept {
-    return _Mem->compare_exchange_strong(*_Expected, _Desired, _Combine_cas_memory_orders(_Success, _Failure));
+    return _Mem->compare_exchange_strong(*_Expected, _Desired, _STD _Combine_cas_memory_orders(_Success, _Failure));
 }
 
 _EXPORT_STD template <class _Ty>

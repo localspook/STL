@@ -413,7 +413,7 @@ struct _Optimistic_temporary_buffer { // temporary storage with _alloca-like att
 
     template <class _Diff>
     explicit _Optimistic_temporary_buffer(const _Diff _Requested_size) noexcept { // get temporary storage
-        const auto _Attempt = _Temporary_buffer_size(_Requested_size);
+        const auto _Attempt = _STD _Temporary_buffer_size(_Requested_size);
         // Since _Diff is a count of elements in a forward range, and forward iterators must denote objects in memory,
         // it must fit in a size_t.
         if (static_cast<size_t>(_Requested_size) <= _Optimistic_count) { // unconditionally engage stack space
@@ -422,7 +422,7 @@ struct _Optimistic_temporary_buffer { // temporary storage with _alloca-like att
             return;
         }
 
-        const pair<_Ty*, ptrdiff_t> _Raw = _Get_temporary_buffer<_Ty>(_Attempt);
+        const pair<_Ty*, ptrdiff_t> _Raw = _STD _Get_temporary_buffer<_Ty>(_Attempt);
         if (static_cast<size_t>(_Raw.second) > _Optimistic_count) { // engage heap space
             _Data     = _Raw.first;
             _Capacity = _Raw.second;
@@ -2537,7 +2537,7 @@ namespace ranges {
 
             if constexpr (_Is_any_of_v<_Pr, _STD equal_to<>, _RANGES equal_to>) {
                 if (_Count == 1) {
-                    auto _Res = _RANGES find(_First, _Last, _Val, _Pass_fn(_Proj));
+                    auto _Res = _RANGES find(_First, _Last, _Val, _STD _Pass_fn(_Proj));
                     if (_Res != _Last) {
                         auto _Res_end = _Res;
                         ++_Res_end;
@@ -2576,7 +2576,7 @@ namespace ranges {
 
             if constexpr (_Is_any_of_v<_Pr, _STD equal_to<>, _RANGES equal_to>) {
                 if (_Count == 1) {
-                    auto _Res  = _RANGES find(_Range, _Val, _Pass_fn(_Proj));
+                    auto _Res  = _RANGES find(_Range, _Val, _STD _Pass_fn(_Proj));
                     auto _Last = _RANGES end(_Range);
                     if (_Res != _Last) {
                         auto _Res_end = _Res;
@@ -4827,7 +4827,7 @@ _CONSTEXPR20 _OutIt remove_copy(_InIt _First, _InIt _Last, _OutIt _Dest, const _
 
 #if _USE_STD_VECTOR_ALGORITHMS
     if constexpr (_Vector_alg_in_find_is_safe<decltype(_UFirst), _Ty>
-                  && _Output_iterator_for_vector_alg_is_safe<decltype(_UDest), decltype(_UFirst)>()) {
+                  && _STD _Output_iterator_for_vector_alg_is_safe<decltype(_UDest), decltype(_UFirst)>()) {
         if (!_STD _Is_constant_evaluated()) {
             if (!_STD _Could_compare_equal_to_value_type<decltype(_UFirst)>(_Val)) {
                 _UDest = _STD _Copy_unchecked(_UFirst, _ULast, _UDest);
@@ -5077,7 +5077,8 @@ namespace ranges {
             _STL_INTERNAL_STATIC_ASSERT(indirect_binary_predicate<ranges::equal_to, projected<_It, _Pj>, const _Ty*>);
 
 #if _USE_STD_VECTOR_ALGORITHMS
-            if constexpr (_Vector_alg_in_find_is_safe<_It, _Ty> && _Output_iterator_for_vector_alg_is_safe<_Out, _It>()
+            if constexpr (_Vector_alg_in_find_is_safe<_It, _Ty>
+                          && _STD _Output_iterator_for_vector_alg_is_safe<_Out, _It>()
                           && sized_sentinel_for<_Se, _It> && is_same_v<_Pj, identity>) {
                 if (!_STD is_constant_evaluated()) {
                     const auto _Size = _Last - _First;
@@ -5351,7 +5352,7 @@ _CONSTEXPR20 _OutIt unique_copy(_InIt _First, _InIt _Last, _OutIt _Dest, _Pr _Pr
 
 #if _USE_STD_VECTOR_ALGORITHMS
     if constexpr (_Vector_alg_in_unique_is_safe<decltype(_UFirst), _Pr>
-                  && _Output_iterator_for_vector_alg_is_safe<decltype(_UDest), decltype(_UFirst)>()) {
+                  && _STD _Output_iterator_for_vector_alg_is_safe<decltype(_UDest), decltype(_UFirst)>()) {
         if (!_STD _Is_constant_evaluated()) {
             const auto _First_ptr = _STD _To_address(_UFirst);
             const auto _Dest_ptr  = _STD _To_address(_UDest);
@@ -5499,7 +5500,7 @@ namespace ranges {
 #if _USE_STD_VECTOR_ALGORITHMS
             if constexpr (is_same_v<_Pj, identity> && sized_sentinel_for<_Se, _It>
                           && _Vector_alg_in_unique_is_safe<_It, _Pr>
-                          && _Output_iterator_for_vector_alg_is_safe<_Out, _It>()) {
+                          && _STD _Output_iterator_for_vector_alg_is_safe<_Out, _It>()) {
                 if (!_STD is_constant_evaluated()) {
                     const auto _Size       = _Last - _First;
                     const auto _First_ptr  = _STD to_address(_First);
@@ -7366,9 +7367,9 @@ namespace ranges {
                 _RANGES _Pop_heap_unchecked(_Ubegin(_Range), _Uend(_Range), _STD _Pass_fn(_Pred), _STD _Pass_fn(_Proj));
                 return _RANGES end(_Range);
             } else {
-                auto _ULast = _Get_final_iterator_unwrapped(_Range);
+                auto _ULast = _RANGES _Get_final_iterator_unwrapped(_Range);
                 _RANGES _Pop_heap_unchecked(_Ubegin(_Range), _ULast, _STD _Pass_fn(_Pred), _STD _Pass_fn(_Proj));
-                return _Rewrap_iterator(_Range, _STD move(_ULast));
+                return _RANGES _Rewrap_iterator(_Range, _STD move(_ULast));
             }
         }
     };
@@ -9380,7 +9381,7 @@ namespace ranges {
             _STL_INTERNAL_STATIC_ASSERT(sortable<_It, _Pr, _Pj>);
             _STL_INTERNAL_CHECK(_Last - _First == _Count);
 
-            _Insertion_sort_isort_max_chunks(_First, _Last, _Count, _Pred, _Proj);
+            _STD _Insertion_sort_isort_max_chunks(_First, _Last, _Count, _Pred, _Proj);
             // merge adjacent pairs of chunks to and from temp buffer
             if (_Count <= _ISORT_MAX) {
                 return;
@@ -9438,7 +9439,7 @@ namespace ranges {
                 auto _Mid1     = _First + _Isort_max<_It>;
                 auto _Last1    = _Mid1 + static_cast<iter_difference_t<_It>>(_Chunk2);
                 auto _Last2    = _Backout._Last + _ISORT_MAX + _Chunk2;
-                _Backout._Last = _Uninitialized_merge_move(
+                _Backout._Last = _STD _Uninitialized_merge_move(
                     _STD move(_First), _STD move(_Mid1), _Last1, _Backout._Last, _Last2, _Pred, _Proj);
                 _First = _STD move(_Last1);
             }
@@ -10842,7 +10843,7 @@ template <class _FwdIt, class _Pr>
 constexpr pair<_FwdIt, _FwdIt> _Minmax_element_unchecked(_FwdIt _First, _FwdIt _Last, _Pr _Pred) {
 #if _USE_STD_VECTOR_ALGORITHMS
     if constexpr (_Is_min_max_optimization_safe<_FwdIt, _Pr>) {
-        if (!_Is_constant_evaluated()) {
+        if (!_STD _Is_constant_evaluated()) {
             const auto _First_ptr = _STD _To_address(_First);
             const auto _Result    = _STD _Minmax_element_vectorized(_First_ptr, _STD _To_address(_Last));
             if constexpr (is_pointer_v<_FwdIt>) {
@@ -11736,7 +11737,7 @@ namespace ranges {
 #if _USE_STD_VECTOR_ALGORITHMS
                     const auto _First1_ptr = _STD to_address(_First1);
                     const auto _First2_ptr = _STD to_address(_First2);
-                    const size_t _Pos      = _Mismatch_vectorized<sizeof(*_First1_ptr)>(_First1_ptr, _First2_ptr, _Num);
+                    const size_t _Pos = _STD _Mismatch_vectorized<sizeof(*_First1_ptr)>(_First1_ptr, _First2_ptr, _Num);
                     if (_Pos == _Num2) {
                         return false;
                     } else if (_Pos == _Num1) {

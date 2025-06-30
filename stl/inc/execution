@@ -213,7 +213,7 @@ public:
             "Threadpool callbacks must be noexcept to enforce termination");
         if (!_Ptp_work) {
             // usually, the last place a bailout to serial execution can occur
-            _Throw_parallelism_resources_exhausted();
+            _STD _Throw_parallelism_resources_exhausted();
         }
     }
 
@@ -221,16 +221,16 @@ public:
     _Work_ptr& operator=(const _Work_ptr&) = delete;
 
     ~_Work_ptr() noexcept {
-        __std_wait_for_threadpool_work_callbacks(_Ptp_work, true);
-        __std_close_threadpool_work(_Ptp_work);
+        ::__std_wait_for_threadpool_work_callbacks(_Ptp_work, true);
+        ::__std_close_threadpool_work(_Ptp_work);
     }
 
     void _Submit() const noexcept {
-        __std_submit_threadpool_work(_Ptp_work);
+        ::__std_submit_threadpool_work(_Ptp_work);
     }
 
     void _Submit(const size_t _Submissions) const noexcept {
-        __std_bulk_submit_threadpool_work(_Ptp_work, _Submissions);
+        ::__std_bulk_submit_threadpool_work(_Ptp_work, _Submissions);
     }
 
     void _Submit_for_chunks(const size_t _Hw_threads, const size_t _Chunks) const noexcept {
@@ -278,14 +278,14 @@ constexpr size_t _Get_least2_chunked_work_chunk_count(const size_t _Hw_threads, 
     // get the number of chunks to break work into to parallelize, assuming chunks must be of size 2
     const auto _Size_count = static_cast<size_t>(_Count); // no overflow due to forward iterators
     // we assume _Hw_threads * _Oversubscription_multiplier does not overflow
-    return _Get_chunked_work_chunk_count(_Hw_threads, _Size_count / 2);
+    return _STD _Get_chunked_work_chunk_count(_Hw_threads, _Size_count / 2);
 }
 
 struct _Parallelism_allocate_traits {
     __declspec(allocator) static void* _Allocate(const size_t _Bytes) {
         void* _Result = ::operator new(_Bytes, nothrow);
         if (!_Result) {
-            _Throw_parallelism_resources_exhausted();
+            _STD _Throw_parallelism_resources_exhausted();
         }
 
         return _Result;
@@ -295,7 +295,7 @@ struct _Parallelism_allocate_traits {
     __declspec(allocator) static void* _Allocate_aligned(const size_t _Bytes, const size_t _Align) {
         void* _Result = ::operator new(_Bytes, align_val_t{_Align}, nothrow);
         if (!_Result) {
-            _Throw_parallelism_resources_exhausted();
+            _STD _Throw_parallelism_resources_exhausted();
         }
 
         return _Result;
@@ -314,7 +314,7 @@ struct _Parallelism_allocator {
 
     _Ty* allocate(const size_t _Count) {
         return static_cast<_Ty*>(
-            _Allocate<_New_alignof<_Ty>, _Parallelism_allocate_traits>(_Get_size_of_n<sizeof(_Ty)>(_Count)));
+            _STD _Allocate<_New_alignof<_Ty>, _Parallelism_allocate_traits>(_STD _Get_size_of_n<sizeof(_Ty)>(_Count)));
     }
 
     void deallocate(_Ty* const _Ptr, const size_t _Count) {
@@ -345,8 +345,8 @@ struct _Generalized_sum_drop { // drop off point for GENERALIZED_SUM intermediat
     atomic<size_t> _Frontier;
 
     explicit _Generalized_sum_drop(const size_t _Slots)
-        : _Data(static_cast<_Ty*>(
-              _Allocate<_New_alignof<_Ty>, _Parallelism_allocate_traits>(_Get_size_of_n<sizeof(_Ty)>(_Slots)))),
+        : _Data(static_cast<_Ty*>(_STD _Allocate<_New_alignof<_Ty>, _Parallelism_allocate_traits>(
+              _STD _Get_size_of_n<sizeof(_Ty)>(_Slots)))),
           _Slots(_Slots), _Frontier(0) {}
 
     ~_Generalized_sum_drop() noexcept {
@@ -516,13 +516,13 @@ struct alignas(_Ty) alignas(size_t) alignas(_Atomic_counter_t) _Circular_buffer 
     static _Circular_buffer* _Allocate_circular_buffer(const size_t _New_log_size) {
         // allocate a circular buffer with space for 2^_New_log_size elements
         if (_New_log_size >= 32) {
-            _Throw_parallelism_resources_exhausted();
+            _STD _Throw_parallelism_resources_exhausted();
         }
 
         const size_t _Count         = static_cast<size_t>(1) << _New_log_size;
         constexpr size_t _Max_bytes = static_cast<size_t>(-1) - sizeof(_Circular_buffer);
         if (_Max_bytes / sizeof(_Ty) < _Count) {
-            _Throw_parallelism_resources_exhausted();
+            _STD _Throw_parallelism_resources_exhausted();
         }
 
         const size_t _Result_bytes = _Count * sizeof(_Ty) + sizeof(_Circular_buffer);
@@ -588,7 +588,7 @@ public:
         if (_Local_b == SIZE_MAX) {
             // we assume that any input range won't be divided into more than SIZE_MAX subproblems;
             // treat overflow of that kind as OOM
-            _Throw_parallelism_resources_exhausted();
+            _STD _Throw_parallelism_resources_exhausted();
         }
 
         const auto _Local_t = _Top.load();
@@ -1081,7 +1081,8 @@ struct _Static_partitioned_all_of_family2 { // all_of/any_of/none_of task schedu
 
     _Static_partitioned_all_of_family2(
         _FwdIt _First, const size_t _Hw_threads, const _Iter_diff_t<_FwdIt> _Count, _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred(_Pred_), _Cancel_token{} {
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred(_Pred_),
+          _Cancel_token{} {
         _Basis._Populate(_Team, _First);
     }
 
@@ -1116,7 +1117,7 @@ struct _Static_partitioned_all_of_family2 { // all_of/any_of/none_of task schedu
 template <bool _Invert, class _FwdIt, class _Pr>
 bool _All_of_family_parallel(_FwdIt _First, const _FwdIt _Last, _Pr _Pred) {
     // test if all elements in [_First, _Last) satisfy _Pred (or !_Pred if _Invert is true) in parallel
-    const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+    const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
     if (_Hw_threads > 1) { // parallelize on multiprocessor machines...
         const auto _Count = _STD distance(_First, _Last);
         if (_Count >= 2) { // ... with at least 2 elements
@@ -1197,7 +1198,7 @@ struct _Static_partitioned_for_each2 { // for_each task scheduled on the system 
     _Fn _Func;
 
     _Static_partitioned_for_each2(const size_t _Hw_threads, const _Diff _Count, _Fn _Fx)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Func(_Fx) {}
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Func(_Fx) {}
 
     _Cancellation_status _Process_chunk() {
         const auto _Key = _Team._Get_next_key();
@@ -1224,7 +1225,7 @@ void for_each(_ExPo&&, _FwdIt _First, _FwdIt _Last, _Fn _Func) noexcept /* termi
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines...
             auto _Count = _STD distance(_UFirst, _ULast);
             if (_Count >= 2) { // ... with at least 2 elements
@@ -1270,7 +1271,7 @@ _FwdIt for_each_n(_ExPo&&, _FwdIt _First, const _Diff _Count_raw, _Fn _Func) noe
     if (0 < _Count) {
         auto _UFirst = _STD _Get_unwrapped_n(_First, _Count);
         if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-            const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+            const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
             if (_Hw_threads > 1 && _Count >= 2) { // parallelize on multiprocessor machines with at least 2 elements
                 _TRY_BEGIN
                 auto _Passed_fn = _STD _Pass_fn(_Func);
@@ -1312,7 +1313,8 @@ struct _Static_partitioned_find3 {
 
     _Static_partitioned_find3(
         const size_t _Hw_threads, const _Iter_diff_t<_FwdIt> _Count, const _FwdIt _Last, const _Find_fx _Fx_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results(_Last), _Fx(_Fx_) {}
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results(_Last), _Fx(_Fx_) {
+    }
 
     _Cancellation_status _Process_chunk() {
         if (_Results._Complete()) {
@@ -1345,7 +1347,7 @@ template <class _ExPo, class _FwdIt, class _Find_fx>
 _FwdIt _Find_parallel_unchecked(_ExPo&&, const _FwdIt _First, const _FwdIt _Last, const _Find_fx _Fx) {
     // find first matching _Val, potentially in parallel
     if (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count = _STD distance(_First, _Last);
             if (_Count >= 2) {
@@ -1439,7 +1441,7 @@ struct _Static_partitioned_find_end_forward2 {
 
     _Static_partitioned_find_end_forward2(const size_t _Hw_threads, const _Iter_diff_t<_FwdIt1> _Count,
         const _FwdIt1 _Last1, const _FwdIt2 _First2, const _FwdIt2 _Last2, const _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Range2{_First2, _Last2},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Range2{_First2, _Last2},
           _Pred{_Pred_}, _Results(_Last1) {}
 
     _Cancellation_status _Process_chunk() {
@@ -1452,7 +1454,7 @@ struct _Static_partitioned_find_end_forward2 {
         const auto _Range        = _Basis._Get_chunk(_Key);
         _FwdIt1 _Result          = _Range._Last;
         for (auto _First1 = _Range._First; _First1 != _Range._Last; ++_First1) {
-            if (_Equal_rev_pred_unchecked(_First1, _Range2._First, _Range2._Last, _Pred)) {
+            if (_STD _Equal_rev_pred_unchecked(_First1, _Range2._First, _Range2._Last, _Pred)) {
                 _Result = _First1;
             }
         }
@@ -1515,7 +1517,7 @@ struct _Static_partitioned_find_end_backward3 {
 
     _Static_partitioned_find_end_backward3(const size_t _Hw_threads, const _Iter_diff_t<_BidIt1> _Count,
         const _BidIt1 _Last1, const _FwdIt2 _First2, const _FwdIt2 _Last2, const _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results(_Last1),
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results(_Last1),
           _Range2{_First2, _Last2}, _Pred{_Pred_} {}
 
     _Cancellation_status _Process_chunk() {
@@ -1562,7 +1564,7 @@ _NODISCARD _FwdIt1 find_end(_ExPo&&, _FwdIt1 _First1, const _FwdIt1 _Last1, cons
     const auto _UFirst2 = _STD _Get_unwrapped(_First2);
     const auto _ULast2  = _STD _Get_unwrapped(_Last2);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             if constexpr (_Is_ranges_bidi_iter_v<_FwdIt1>) {
                 const auto _Partition_start =
@@ -1640,7 +1642,8 @@ struct _Static_partitioned_adjacent_find3 {
 
     _Static_partitioned_adjacent_find3(
         const size_t _Hw_threads, const _Iter_diff_t<_FwdIt> _Count, const _FwdIt _Last, const _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results{_Last}, _Pred{_Pred_} {}
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results{_Last},
+          _Pred{_Pred_} {}
 
     _Cancellation_status _Process_chunk() {
         if (_Results._Complete()) {
@@ -1683,7 +1686,7 @@ _NODISCARD _FwdIt adjacent_find(_ExPo&&, _FwdIt _First, _FwdIt _Last, _Pr _Pred)
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count = static_cast<_Iter_diff_t<_FwdIt>>(_STD distance(_UFirst, _ULast) - 1);
             if (_Count >= 2) {
@@ -1743,11 +1746,11 @@ _NODISCARD _Iter_diff_t<_FwdIt> count_if(_ExPo&&, const _FwdIt _First, const _Fw
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count = _STD distance(_UFirst, _ULast);
             if (_Count >= 2) {
-                const auto _Chunks = _Get_chunked_work_chunk_count(_Hw_threads, _Count);
+                const auto _Chunks = _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count);
                 _TRY_BEGIN
                 _Static_partitioned_count_if2 _Operation{_Count, _Chunks, _UFirst, _STD _Pass_fn(_Pred)};
                 _Iter_diff_t<_FwdIt> _Foreground_count;
@@ -1852,7 +1855,7 @@ struct _Static_partitioned_mismatch3 {
 
     _Static_partitioned_mismatch3(
         const size_t _Hw_threads, const _Diff _Count, const _FwdIt1 _First1, const _FwdIt2 _First2, const _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
           _Results(_STD _Get_unwrapped(_Basis1._Populate(_Team, _First1)),
               _STD _Get_unwrapped(_Basis2._Populate(_Team, _First2))),
           _Pred(_Pred_) {}
@@ -1904,7 +1907,7 @@ _NODISCARD pair<_FwdIt1, _FwdIt2> mismatch(
     const auto _UFirst1 = _STD _Get_unwrapped(_First1);
     const auto _ULast1  = _STD _Get_unwrapped(_Last1);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count   = _STD distance(_UFirst1, _ULast1);
             const auto _UFirst2 = _STD _Get_unwrapped_n(_First2, _Count);
@@ -1949,7 +1952,7 @@ _NODISCARD pair<_FwdIt1, _FwdIt2> mismatch(
     const auto _UFirst2 = _STD _Get_unwrapped(_First2);
     const auto _ULast2  = _STD _Get_unwrapped(_Last2);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count =
                 static_cast<_Iter_diff_t<_FwdIt1>>(_STD _Distance_min(_UFirst1, _ULast1, _UFirst2, _ULast2));
@@ -1984,7 +1987,7 @@ struct _Static_partitioned_equal2 {
     _Cancellation_token _Cancel_token;
 
     _Static_partitioned_equal2(const size_t _Hw_threads, const _Diff _Count, _Pr _Pred_, const _FwdIt1&, const _FwdIt2&)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{}, _Pred(_Pred_),
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{}, _Pred(_Pred_),
           _Cancel_token{} {}
 
     _Cancellation_status _Process_chunk() {
@@ -2025,7 +2028,7 @@ _NODISCARD bool equal(_ExPo&&, const _FwdIt1 _First1, const _FwdIt1 _Last1, cons
     const auto _UFirst1 = _STD _Get_unwrapped(_First1);
     const auto _ULast1  = _STD _Get_unwrapped(_Last1);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count   = _STD distance(_UFirst1, _ULast1);
             const auto _UFirst2 = _STD _Get_unwrapped_n(_First2, _Count);
@@ -2062,7 +2065,7 @@ _NODISCARD bool equal(_ExPo&&, const _FwdIt1 _First1, const _FwdIt1 _Last1, cons
     const auto _UFirst2 = _STD _Get_unwrapped(_First2);
     const auto _ULast2  = _STD _Get_unwrapped(_Last2);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count = _STD _Distance_any(_UFirst1, _ULast1, _UFirst2, _ULast2);
             if (_Count >= 2) {
@@ -2102,7 +2105,7 @@ struct _Static_partitioned_search3 {
     _Static_partitioned_search3(const size_t _Hw_threads, const _Iter_diff_t<_FwdItHaystack> _Count,
         const _FwdItHaystack _First1, const _FwdItHaystack _Last1, const _FwdItPat _First2_, const _FwdItPat _Last2_,
         _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results(_Last1),
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Results(_Last1),
           _First2(_First2_), _Last2(_Last2_), _Pred(_Pred_) {
         _Basis._Populate(_Team, _First1);
     }
@@ -2154,7 +2157,7 @@ _NODISCARD _FwdItHaystack search(_ExPo&&, const _FwdItHaystack _First1, _FwdItHa
     const auto _ULast1  = _STD _Get_unwrapped(_Last1);
 
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             _Iter_diff_t<_FwdItHaystack> _Count;
             if constexpr (_Is_ranges_random_iter_v<_FwdItHaystack> && _Is_ranges_random_iter_v<_FwdItPat>) {
@@ -2223,7 +2226,7 @@ struct _Static_partitioned_search_n3 {
 
     _Static_partitioned_search_n3(const size_t _Hw_threads, const _Iter_diff_t<_FwdIt> _Candidates, const _FwdIt _First,
         const _FwdIt _Last, const _Iter_diff_t<_FwdIt> _Target_count_, const _Ty& _Val_, _Pr _Pred_)
-        : _Team{_Candidates, _Get_chunked_work_chunk_count(_Hw_threads, _Candidates)}, _Basis{}, _Results(_Last),
+        : _Team{_Candidates, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Candidates)}, _Basis{}, _Results(_Last),
           _Target_count(_Target_count_), _Val(_Val_), _Pred(_Pred_) {
         _Basis._Populate(_Team, _First);
     }
@@ -2286,7 +2289,7 @@ _NODISCARD _FwdIt search_n(_ExPo&&, const _FwdIt _First, _FwdIt _Last, const _Di
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Haystack_count = _STD distance(_UFirst, _ULast);
             if (_Count > _Haystack_count) {
@@ -2321,7 +2324,7 @@ struct _Static_partitioned_unary_transform2 {
 
     _Static_partitioned_unary_transform2(
         const size_t _Hw_threads, const _Diff _Count, const _FwdIt1 _First, _Fn _Fx, const _FwdIt2&)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Source_basis{}, _Dest_basis{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Source_basis{}, _Dest_basis{},
           _Func(_Fx) {
         _Source_basis._Populate(_Team, _First);
     }
@@ -2354,7 +2357,7 @@ _FwdIt2 transform(_ExPo&&, const _FwdIt1 _First, const _FwdIt1 _Last, _FwdIt2 _D
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines...
             const auto _Count = _STD distance(_UFirst, _ULast);
             const auto _UDest = _STD _Get_unwrapped_n(_Dest, _Count);
@@ -2397,7 +2400,7 @@ struct _Static_partitioned_binary_transform2 {
 
     _Static_partitioned_binary_transform2(
         const size_t _Hw_threads, const _Diff _Count, _FwdIt1 _First1, _FwdIt2 _First2, _Fn _Fx, const _FwdIt3&)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Source1_basis{}, _Source2_basis{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Source1_basis{}, _Source2_basis{},
           _Dest_basis{}, _Func(_Fx) {
         _Source1_basis._Populate(_Team, _First1);
         _Source2_basis._Populate(_Team, _First2);
@@ -2433,7 +2436,7 @@ _FwdIt3 transform(_ExPo&&, const _FwdIt1 _First1, const _FwdIt1 _Last1, const _F
     const auto _UFirst1 = _STD _Get_unwrapped(_First1);
     const auto _ULast1  = _STD _Get_unwrapped(_Last1);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines...
             const auto _Count   = _STD distance(_UFirst1, _ULast1);
             const auto _UFirst2 = _STD _Get_unwrapped_n(_First2, _Count);
@@ -2532,7 +2535,7 @@ struct _Static_partitioned_remove_if2 {
 
     _Static_partitioned_remove_if2(
         const size_t _Hw_threads, const _Iter_diff_t<_FwdIt> _Count, const _FwdIt _First, const _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred{_Pred_},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred{_Pred_},
           _Chunk_locals(_Team._Chunks), _Results{_First} {
         _Basis._Populate(_Team, _First);
     }
@@ -2608,7 +2611,7 @@ _NODISCARD_REMOVE_ALG _FwdIt remove_if(_ExPo&&, _FwdIt _First, const _FwdIt _Las
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count = _STD distance(_UFirst, _ULast);
             if (_Count >= 2) {
@@ -2730,7 +2733,7 @@ struct _Sort_operation { // context for background threads
                 break;
             case _Steal_result::_Abort:
                 _My_ticket._Leave();
-                __std_submit_threadpool_work(_Work);
+                ::__std_submit_threadpool_work(_Work);
                 return;
             case _Steal_result::_Done:
                 return;
@@ -2749,7 +2752,7 @@ void sort(_ExPo&&, const _RanIt _First, const _RanIt _Last, _Pr _Pred) noexcept 
     const _Iter_diff_t<_RanIt> _Ideal = _ULast - _UFirst;
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
         size_t _Threads;
-        if (_Ideal > _ISORT_MAX && (_Threads = __std_parallel_algorithms_hw_threads()) > 1) {
+        if (_Ideal > _ISORT_MAX && (_Threads = ::__std_parallel_algorithms_hw_threads()) > 1) {
             // parallelize when input is large enough and we aren't on a uniprocessor machine
             _TRY_BEGIN
             _Sort_operation _Operation(_UFirst, _STD _Pass_fn(_Pred), _Threads, _Ideal); // throws
@@ -2825,14 +2828,14 @@ inline size_t _Get_stable_sort_tree_height(const size_t _Count, const size_t _Hw
     // * we want a number of chunks as close to _Ideal_chunks as we can to minimize scheduling
     //   overhead, but can use more chunks than that
     const auto _Count_max_chunks       = _Count / _ISORT_MAX;
-    const size_t _Log_count_max_chunks = _Floor_of_log_2(_Count_max_chunks);
+    const size_t _Log_count_max_chunks = _STD _Floor_of_log_2(_Count_max_chunks);
 
     // if _Log_count_max_chunks is odd, that would break our 2 to even power invariant, so
     // go to the next smaller power of 2
     const auto _Count_max_tree_height = _Log_count_max_chunks & ~static_cast<size_t>(1);
 
     const auto _Ideal_chunks       = _Hw_threads * _Oversubscription_multiplier;
-    const size_t _Log_ideal_chunks = _Floor_of_log_2(_Ideal_chunks);
+    const size_t _Log_ideal_chunks = _STD _Floor_of_log_2(_Ideal_chunks);
 #ifdef _WIN64
     constexpr size_t _Max_tree_height = 62; // to avoid ptrdiff_t overflow
 #else // ^^^ defined(_WIN64) / !defined(_WIN64) vvv
@@ -3013,7 +3016,7 @@ void stable_sort(_ExPo&&, const _BidIt _First, const _BidIt _Last, _Pr _Pred) no
     size_t _Hw_threads;
     bool _Attempt_parallelism;
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        _Hw_threads          = __std_parallel_algorithms_hw_threads();
+        _Hw_threads          = ::__std_parallel_algorithms_hw_threads();
         _Attempt_parallelism = _Hw_threads > 1;
     } else {
         _Attempt_parallelism = false;
@@ -3023,7 +3026,7 @@ void stable_sort(_ExPo&&, const _BidIt _First, const _BidIt _Last, _Pr _Pred) no
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
         if (_Attempt_parallelism) {
             // forward+ iterator overflow assumption for size_t cast
-            const auto _Tree_height = _Get_stable_sort_tree_height(static_cast<size_t>(_Count), _Hw_threads);
+            const auto _Tree_height = _STD _Get_stable_sort_tree_height(static_cast<size_t>(_Count), _Hw_threads);
             if (_Tree_height != 0) {
                 _TRY_BEGIN
                 _Static_partitioned_stable_sort3 _Operation{
@@ -3050,7 +3053,8 @@ struct _Static_partitioned_is_sorted_until2 {
 
     _Static_partitioned_is_sorted_until2(
         _FwdIt _First, _FwdIt _Last, const size_t _Hw_threads, const _Iter_diff_t<_FwdIt> _Count, _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred(_Pred_), _Results(_Last) {
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred(_Pred_),
+          _Results(_Last) {
         _Basis._Populate(_Team, _First);
     }
 
@@ -3094,7 +3098,7 @@ _NODISCARD _FwdIt is_sorted_until(_ExPo&&, _FwdIt _First, _FwdIt _Last, _Pr _Pre
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             auto _Count = _STD distance(_UFirst, _ULast);
             if (_Count >= 3) { // ... with at least 3 elements
@@ -3159,7 +3163,7 @@ struct _Static_partitioned_is_partitioned {
 
     _Static_partitioned_is_partitioned(
         const size_t _Hw_threads, const _Iter_diff_t<_FwdIt> _Count, const _FwdIt _First, _Pr _Pred_)
-        : _Team(_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)), _Basis{}, _Rightmost_true(0),
+        : _Team(_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)), _Basis{}, _Rightmost_true(0),
           _Leftmost_false(SIZE_MAX - 1), _Pred(_Pred_) {
         _Basis._Populate(_Team, _First);
     }
@@ -3249,7 +3253,7 @@ _NODISCARD bool is_partitioned(_ExPo&&, const _FwdIt _First, const _FwdIt _Last,
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _STD distance(_UFirst, _ULast);
             if (_Count >= 2) { // ... with at least 2 elements
@@ -3278,7 +3282,7 @@ struct _Static_partitioned_is_heap_until2 {
 
     _Static_partitioned_is_heap_until2(
         _RanIt _First, _RanIt _Last, const size_t _Hw_threads, const _Diff _Count, _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Range_first(_First), _Pred(_Pred_),
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Range_first(_First), _Pred(_Pred_),
           _Results(_Last) {}
 
     _Cancellation_status _Process_chunk() {
@@ -3321,7 +3325,7 @@ _NODISCARD _RanIt is_heap_until(_ExPo&&, _RanIt _First, _RanIt _Last, _Pr _Pred)
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _ULast - _UFirst;
             if (_Count >= 3) { // ... with at least 3 elements
@@ -3455,12 +3459,12 @@ _FwdIt _Partition_merge(const _FwdIt _False_first, const _FwdIt _True_first, con
             _STD advance(_Result, _Offset);
         }
 
-        _Swap_ranges_unchecked(_False_first, _True_first, _Result);
+        _STD _Swap_ranges_unchecked(_False_first, _True_first, _Result);
         return _Result;
     }
 
     // move the true range to the beginning of the false range
-    return _Swap_ranges_unchecked(_True_first, _True_last, _False_first);
+    return _STD _Swap_ranges_unchecked(_True_first, _True_last, _False_first);
 }
 
 template <class _FwdIt, class _Pr>
@@ -3492,7 +3496,7 @@ struct _Static_partitioned_partition2 {
     _Diff _Results_falses;
 
     _Static_partitioned_partition2(const size_t _Hw_threads, const _Diff _Count, const _FwdIt _First, const _Pr _Pred_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred{_Pred_},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{}, _Pred{_Pred_},
           _Chunk_locals(_Team._Chunks), _Results{_First}, _Results_falses{} {
         _Basis._Populate(_Team, _First);
     }
@@ -3546,7 +3550,7 @@ struct _Static_partitioned_partition2 {
             const auto _Merge_key   = _Team._Get_chunk_key(_Merge_index);
             const auto _Chunk_trues = _Merge_chunk_data._Chunk_trues;
 
-            _Results = _Partition_merge(_Results, _Basis._Get_first(_Merge_index, _Merge_key._Start_at),
+            _Results = _STD _Partition_merge(_Results, _Basis._Get_first(_Merge_index, _Merge_key._Start_at),
                 _STD exchange(_Merge_chunk_data._Beginning_of_falses, {}), _Results_falses, _Chunk_trues);
             _Results_falses += _Merge_key._Size - _Chunk_trues;
             _Merge_chunk_data._State.store(_Chunk_state::_Done);
@@ -3569,7 +3573,7 @@ _FwdIt partition(_ExPo&&, _FwdIt _First, const _FwdIt _Last, _Pr _Pred) noexcept
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) {
             const auto _Count = _STD distance(_UFirst, _ULast);
             if (_Count >= 2) {
@@ -3647,13 +3651,13 @@ struct _Scan_decoupled_lookback {
                 return _Local_state;
             }
 
-            __std_execution_wait_on_uchar(reinterpret_cast<const unsigned char*>(&_State), _Local_state);
+            ::__std_execution_wait_on_uchar(reinterpret_cast<const unsigned char*>(&_State), _Local_state);
         }
     }
 
     void _Store_available_state(const unsigned char _New_state) {
         _State.store(_New_state);
-        __std_execution_wake_by_address_all(&_State);
+        ::__std_execution_wake_by_address_all(&_State);
     }
 
     template <class _FwdIt, class _BinOp>
@@ -3753,7 +3757,7 @@ void _Surrender_elements_to_next_chunk(const size_t _Chunk_number,
     // _Chunk_lookback_data->_Local is already 0, so we can just publish results immediately.
     _Chunk_lookback_data->_Store_available_state(_Local_available);
 
-    const auto _Prev_chunk_lookback_data = _Prev_iter(_Chunk_lookback_data);
+    const auto _Prev_chunk_lookback_data = _STD _Prev_iter(_Chunk_lookback_data);
     _Diff _Prev_chunk_sum;
     if (_Prev_chunk_lookback_data->_Get_available_state() & _Sum_available) {
         _Prev_chunk_sum = _Prev_chunk_lookback_data->_Sum._Ref();
@@ -3798,7 +3802,7 @@ struct _Static_partitioned_set_subtraction {
 
     _Static_partitioned_set_subtraction(const size_t _Hw_threads, const _Diff _Count, _RanIt1 _First1, _RanIt2 _First2,
         const _RanIt2 _Last2, _RanIt3 _Dest_, _Pr _Pred_, _SetOper _Set_oper)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis{},
           _Index_indicator(static_cast<size_t>(_Count)), _Range2{_First2, _Last2}, _Dest(_Dest_),
           _Lookback(_Team._Chunks), _Pred(_Pred_), _Set_oper_per_chunk(_Set_oper) {
         _Basis._Populate(_Team, _First1);
@@ -3827,7 +3831,7 @@ struct _Static_partitioned_set_subtraction {
             if (_Range1_chunk_last <= _Range1_chunk_first) {
                 // All of the elements in _Range1's chunk are equal to the element at _Range1_chunk_last, so they will
                 // be handled by the next chunk.
-                _Surrender_elements_to_next_chunk<_Diff>(_Chunk_number, _Chunk_lookback_data);
+                _STD _Surrender_elements_to_next_chunk<_Diff>(_Chunk_number, _Chunk_lookback_data);
                 return _Cancellation_status::_Running;
             }
         }
@@ -3853,7 +3857,7 @@ struct _Static_partitioned_set_subtraction {
             return _Cancellation_status::_Running;
         }
 
-        const auto _Prev_chunk_lookback_data = _Prev_iter(_Chunk_lookback_data);
+        const auto _Prev_chunk_lookback_data = _STD _Prev_iter(_Chunk_lookback_data);
         if (_Prev_chunk_lookback_data->_State.load() & _Sum_available) {
             // If the predecessor sum is already complete, we can incorporate its value directly for 1 pass.
             const auto _Prev_chunk_sum = _Prev_chunk_lookback_data->_Sum._Ref();
@@ -3962,7 +3966,7 @@ _FwdIt3 set_intersection(_ExPo&&, _FwdIt1 _First1, _FwdIt1 _Last1, _FwdIt2 _Firs
     if constexpr (remove_reference_t<_ExPo>::_Parallelize && _Is_ranges_random_iter_v<_FwdIt1>
                   && _Is_ranges_random_iter_v<_FwdIt2> && _Is_cpp17_random_iter_v<_FwdIt3>) {
         // only parallelize if desired, and all of the iterators given are random access
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const _Diff _Count1 = _ULast1 - _UFirst1;
             const _Diff _Count2 = _ULast2 - _UFirst2;
@@ -4053,7 +4057,7 @@ _FwdIt3 set_difference(_ExPo&&, _FwdIt1 _First1, _FwdIt1 _Last1, _FwdIt2 _First2
     if constexpr (remove_reference_t<_ExPo>::_Parallelize && _Is_ranges_random_iter_v<_FwdIt1>
                   && _Is_ranges_random_iter_v<_FwdIt2> && _Is_cpp17_random_iter_v<_FwdIt3>) {
         // only parallelize if desired, and all of the iterators given are random access
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const _Diff _Count = _ULast1 - _UFirst1;
             if (_Count >= 2) { // ... with at least 2 elements in [_First1, _Last1)
@@ -4153,10 +4157,10 @@ _NODISCARD _Ty reduce(_ExPo&&, const _FwdIt _First, const _FwdIt _Last, _Ty _Val
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines...
             const auto _Count  = _STD distance(_UFirst, _ULast);
-            const auto _Chunks = _Get_least2_chunked_work_chunk_count(_Hw_threads, _Count);
+            const auto _Chunks = _STD _Get_least2_chunked_work_chunk_count(_Hw_threads, _Count);
             if (_Chunks > 1) {
                 _TRY_BEGIN
                 auto _Passed_fn = _STD _Pass_fn(_Reduce_op);
@@ -4252,11 +4256,11 @@ _NODISCARD _Ty transform_reduce(_ExPo&&, _FwdIt1 _First1, _FwdIt1 _Last1, _FwdIt
     auto _UFirst1      = _STD _Get_unwrapped(_First1);
     const auto _ULast1 = _STD _Get_unwrapped(_Last1);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines...
             const auto _Count  = _STD distance(_UFirst1, _ULast1);
             auto _UFirst2      = _STD _Get_unwrapped_n(_First2, _Count);
-            const auto _Chunks = _Get_least2_chunked_work_chunk_count(_Hw_threads, _Count);
+            const auto _Chunks = _STD _Get_least2_chunked_work_chunk_count(_Hw_threads, _Count);
             if (_Chunks > 1) {
                 _TRY_BEGIN
                 auto _Passed_reduce    = _STD _Pass_fn(_Reduce_op);
@@ -4349,10 +4353,10 @@ _NODISCARD _Ty transform_reduce(_ExPo&&, const _FwdIt _First, const _FwdIt _Last
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines...
             const auto _Count  = _STD distance(_UFirst, _ULast);
-            const auto _Chunks = _Get_least2_chunked_work_chunk_count(_Hw_threads, _Count);
+            const auto _Chunks = _STD _Get_least2_chunked_work_chunk_count(_Hw_threads, _Count);
             if (_Chunks > 1) {
                 _TRY_BEGIN
                 auto _Passed_reduce    = _STD _Pass_fn(_Reduce_op);
@@ -4444,7 +4448,7 @@ struct _Static_partitioned_exclusive_scan3 {
 
     _Static_partitioned_exclusive_scan3(const size_t _Hw_threads, const _Diff _Count, const _FwdIt1 _First,
         _Ty& _Initial_, _BinOp _Reduce_op_, const _FwdIt2&)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
           _Lookback(_Team._Chunks), _Intermediate_result{_Team}, _Initial(_Initial_), _Reduce_op(_Reduce_op_) {
         _Basis1._Populate(_Team, _First);
     }
@@ -4514,7 +4518,7 @@ _FwdIt2 exclusive_scan(_ExPo&&, const _FwdIt1 _First, const _FwdIt1 _Last, _FwdI
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _STD distance(_UFirst, _ULast);
             const auto _UDest = _STD _Get_unwrapped_n(_Dest, _Count);
@@ -4588,7 +4592,7 @@ struct _Static_partitioned_inclusive_scan3 {
 
     _Static_partitioned_inclusive_scan3(
         const size_t _Hw_threads, const _Diff _Count, _BinOp _Reduce_op_, _Init_ty& _Initial_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
           _Lookback(_Team._Chunks), _Intermediate_result{_Team}, _Reduce_op(_Reduce_op_), _Initial(_Initial_) {}
 
     _Cancellation_status _Process_chunk() {
@@ -4656,7 +4660,7 @@ _FwdIt2 inclusive_scan(_ExPo&&, _FwdIt1 _First, _FwdIt1 _Last, _FwdIt2 _Dest, _B
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _STD distance(_First, _Last);
             auto _UDest       = _STD _Get_unwrapped_n(_Dest, _Count);
@@ -4701,7 +4705,7 @@ _FwdIt2 inclusive_scan(_ExPo&&, _FwdIt1 _First, _FwdIt1 _Last, _FwdIt2 _Dest, _B
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _STD distance(_UFirst, _ULast);
             auto _UDest       = _STD _Get_unwrapped_n(_Dest, _Count);
@@ -4788,7 +4792,7 @@ struct _Static_partitioned_transform_exclusive_scan3 {
 
     _Static_partitioned_transform_exclusive_scan3(const size_t _Hw_threads, const _Diff _Count, const _FwdIt1 _First,
         _Ty& _Initial_, _BinOp _Reduce_op_, _UnaryOp _Transform_op_, const _FwdIt2&)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
           _Lookback(_Team._Chunks), _Intermediate_result{_Team}, _Initial(_Initial_), _Reduce_op(_Reduce_op_),
           _Transform_op(_Transform_op_) {
         _Basis1._Populate(_Team, _First);
@@ -4859,7 +4863,7 @@ _FwdIt2 transform_exclusive_scan(_ExPo&&, const _FwdIt1 _First, const _FwdIt1 _L
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _STD distance(_UFirst, _ULast);
             const auto _UDest = _STD _Get_unwrapped_n(_Dest, _Count);
@@ -4934,7 +4938,7 @@ struct _Static_partitioned_transform_inclusive_scan3 {
 
     _Static_partitioned_transform_inclusive_scan3(
         const size_t _Hw_threads, const _Diff _Count, _BinOp _Reduce_op_, _UnaryOp _Transform_op_, _Init_ty& _Initial_)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
           _Lookback(_Team._Chunks), _Intermediate_result{_Team}, _Reduce_op(_Reduce_op_), _Transform_op(_Transform_op_),
           _Initial(_Initial_) {}
 
@@ -5003,7 +5007,7 @@ _FwdIt2 transform_inclusive_scan(_ExPo&&, const _FwdIt1 _First, const _FwdIt1 _L
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _STD distance(_UFirst, _ULast);
             auto _UDest       = _STD _Get_unwrapped_n(_Dest, _Count);
@@ -5049,7 +5053,7 @@ _FwdIt2 transform_inclusive_scan(_ExPo&&, const _FwdIt1 _First, const _FwdIt1 _L
     const auto _UFirst = _STD _Get_unwrapped(_First);
     const auto _ULast  = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             const auto _Count = _STD distance(_UFirst, _ULast);
             auto _UDest       = _STD _Get_unwrapped_n(_Dest, _Count);
@@ -5095,7 +5099,8 @@ struct _Static_partitioned_adjacent_difference2 {
 
     _Static_partitioned_adjacent_difference2(
         const size_t _Hw_threads, const _Diff _Count, const _FwdIt1 _First, _BinOp _Diff_op_, const _FwdIt2&)
-        : _Team{_Count, _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{}, _Diff_op(_Diff_op_) {
+        : _Team{_Count, _STD _Get_chunked_work_chunk_count(_Hw_threads, _Count)}, _Basis1{}, _Basis2{},
+          _Diff_op(_Diff_op_) {
         _Basis1._Populate(_Team, _First);
     }
 
@@ -5151,7 +5156,7 @@ _FwdIt2 adjacent_difference(_ExPo&&, const _FwdIt1 _First, const _FwdIt1 _Last, 
     auto _UFirst      = _STD _Get_unwrapped(_First);
     const auto _ULast = _STD _Get_unwrapped(_Last);
     if constexpr (remove_reference_t<_ExPo>::_Parallelize) {
-        const size_t _Hw_threads = __std_parallel_algorithms_hw_threads();
+        const size_t _Hw_threads = ::__std_parallel_algorithms_hw_threads();
         if (_Hw_threads > 1) { // parallelize on multiprocessor machines
             auto _Count       = _STD distance(_UFirst, _ULast);
             const auto _UDest = _STD _Get_unwrapped_n(_Dest, _Count);

@@ -76,7 +76,7 @@ inline wchar_t* _Maklocwcs(const wchar_t* _Ptr) { // copy NTWCS to allocated sto
     wchar_t* _Ptrdest = static_cast<wchar_t*>(_calloc_dbg(_Count, sizeof(wchar_t), _CRT_BLOCK, __FILE__, __LINE__));
 
     if (!_Ptrdest) {
-        _Xbad_alloc();
+        _STD _Xbad_alloc();
     }
 
     _CSTD wmemcpy(_Ptrdest, _Ptr, _Count);
@@ -121,7 +121,7 @@ public:
         _Init(_Lobj);
         if (_Kseparator == 0) {
             _Kseparator = // NB: differs from "C" locale
-                _Maklocchr(',', static_cast<_Elem*>(nullptr), _Lobj._Getcvt());
+                _STD _Maklocchr(',', static_cast<_Elem*>(nullptr), _Lobj._Getcvt());
         }
         _END_LOCINFO()
     }
@@ -158,21 +158,21 @@ protected:
         _Truename  = nullptr;
 
         _Tidy_guard<numpunct> _Guard{this};
-        _Grouping      = _Maklocstr(_Isdef ? "" : _Ptr->grouping, static_cast<char*>(nullptr), _Cvt);
-        _Falsename     = _Maklocstr(_Lobj._Getfalse(), static_cast<_Elem*>(nullptr), _Cvt);
-        _Truename      = _Maklocstr(_Lobj._Gettrue(), static_cast<_Elem*>(nullptr), _Cvt);
+        _Grouping      = _STD _Maklocstr(_Isdef ? "" : _Ptr->grouping, static_cast<char*>(nullptr), _Cvt);
+        _Falsename     = _STD _Maklocstr(_Lobj._Getfalse(), static_cast<_Elem*>(nullptr), _Cvt);
+        _Truename      = _STD _Maklocstr(_Lobj._Gettrue(), static_cast<_Elem*>(nullptr), _Cvt);
         _Guard._Target = nullptr;
 
         if (_Isdef) { // apply defaults for required facets
-            _Dp         = _Maklocchr('.', static_cast<_Elem*>(nullptr), _Cvt);
-            _Kseparator = _Maklocchr(',', static_cast<_Elem*>(nullptr), _Cvt);
+            _Dp         = _STD _Maklocchr('.', static_cast<_Elem*>(nullptr), _Cvt);
+            _Kseparator = _STD _Maklocchr(',', static_cast<_Elem*>(nullptr), _Cvt);
         } else {
             if constexpr (is_same_v<_Elem, wchar_t>) {
                 _Dp         = _Ptr->_W_decimal_point[0];
                 _Kseparator = _Ptr->_W_thousands_sep[0];
             } else {
-                _Dp         = _Maklocchr(_Ptr->decimal_point[0], static_cast<_Elem*>(nullptr), _Cvt);
-                _Kseparator = _Maklocchr(_Ptr->thousands_sep[0], static_cast<_Elem*>(nullptr), _Cvt);
+                _Dp         = _STD _Maklocchr(_Ptr->decimal_point[0], static_cast<_Elem*>(nullptr), _Cvt);
+                _Kseparator = _STD _Maklocchr(_Ptr->thousands_sep[0], static_cast<_Elem*>(nullptr), _Cvt);
             }
         }
     }
@@ -341,14 +341,14 @@ public:
 protected:
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         bool& _Val) const { // get bool from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         if (_Iosbase.flags() & ios_base::boolalpha) { // get false name or true name
             const auto& _Punct_fac = _STD use_facet<numpunct<_Elem>>(_Iosbase.getloc());
             basic_string<_Elem> _Str(static_cast<size_t>(1), _Elem{});
             _Str += _Punct_fac.falsename();
             _Str.push_back(_Elem{});
             _Str += _Punct_fac.truename(); // construct "\0false\0true"
-            switch (_Getloctxt(_First, _Last, 2, _Str.c_str(), _Case_sensitive::_Yes)) {
+            switch (_STD _Getloctxt(_First, _Last, 2, _Str.c_str(), _Case_sensitive::_Yes)) {
             case 0:
                 _Val = false;
                 break;
@@ -391,7 +391,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         unsigned short& _Val) const { // get unsigned short from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_Max_int_dig];
         const auto _Parse_result =
             _Parse_int_with_locale(_Ac, _First, _Last, _Iosbase.flags(), _Iosbase.getloc()); // gather field
@@ -443,7 +443,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         long& _Val) const { // get long from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_Max_int_dig];
         const auto _Parse_result =
             _Parse_int_with_locale(_Ac, _First, _Last, _Iosbase.flags(), _Iosbase.getloc()); // gather field
@@ -469,7 +469,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         unsigned long& _Val) const { // get unsigned long from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_Max_int_dig];
         const auto _Parse_result =
             _Parse_int_with_locale(_Ac, _First, _Last, _Iosbase.flags(), _Iosbase.getloc()); // gather field
@@ -495,7 +495,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         long long& _Val) const { // get long long from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_Max_int_dig];
         const auto _Parse_result =
             _Parse_int_with_locale(_Ac, _First, _Last, _Iosbase.flags(), _Iosbase.getloc()); // gather field
@@ -521,7 +521,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         unsigned long long& _Val) const { // get unsigned long long from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_Max_int_dig];
         const auto _Parse_result =
             _Parse_int_with_locale(_Ac, _First, _Last, _Iosbase.flags(), _Iosbase.getloc()); // gather field
@@ -552,7 +552,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         float& _Val) const { // get float from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_FLOATING_BUFFER_SIZE];
         const auto _Parse_result =
             _Parse_fp_with_locale(_Ac, _MAX_SIG_DIG_V2, _First, _Last, _Iosbase.getloc()); // gather field
@@ -578,7 +578,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         double& _Val) const { // get double from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_FLOATING_BUFFER_SIZE];
         const auto _Parse_result =
             _Parse_fp_with_locale(_Ac, _MAX_SIG_DIG_V2, _First, _Last, _Iosbase.getloc()); // gather field
@@ -617,7 +617,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State,
         void*& _Val) const { // get void pointer from [_First, _Last) into _Val
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         char _Ac[_Max_int_dig];
         const auto _Parse_result =
             _Parse_int_with_locale(_Ac, _First, _Last, ios_base::hex, _Iosbase.getloc()); // gather field
@@ -1353,7 +1353,7 @@ protected:
         const bool _Is_hex          = _Float_flags == (ios_base::fixed | ios_base::scientific);
         const streamsize _Precision = _Is_hex ? -1 : _Iosbase.precision(); // precision setting
         const int _Desired_precision =
-            _Float_put_desired_precision<double>(_Precision, _Float_flags); // desired precision
+            _STD _Float_put_desired_precision<double>(_Precision, _Float_flags); // desired precision
         size_t _Bufsize = static_cast<size_t>(_Desired_precision);
         if (_Is_fixed && 1e10 < _CSTD fabs(_Val)) { // f or F format
             int _Ptwo;
@@ -1380,7 +1380,7 @@ protected:
         const bool _Is_hex          = _Float_flags == (ios_base::fixed | ios_base::scientific);
         const streamsize _Precision = _Is_hex ? -1 : _Iosbase.precision(); // precision setting
         const int _Desired_precision =
-            _Float_put_desired_precision<long double>(_Precision, _Float_flags); // desired precision
+            _STD _Float_put_desired_precision<long double>(_Precision, _Float_flags); // desired precision
         size_t _Bufsize = static_cast<size_t>(_Desired_precision);
         if (_Is_fixed && 1e10 < _CSTD fabsl(_Val)) { // f or F format
             int _Ptwo;

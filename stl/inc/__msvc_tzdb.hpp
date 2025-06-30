@@ -102,28 +102,28 @@ struct _Tzdb_deleter;
 template <>
 struct _Tzdb_deleter<__std_tzdb_time_zones_info> {
     _STATIC_CALL_OPERATOR void operator()(__std_tzdb_time_zones_info* _Info) _CONST_CALL_OPERATOR noexcept {
-        __std_tzdb_delete_time_zones(_Info);
+        ::__std_tzdb_delete_time_zones(_Info);
     }
 };
 
 template <>
 struct _Tzdb_deleter<__std_tzdb_current_zone_info> {
     _STATIC_CALL_OPERATOR void operator()(__std_tzdb_current_zone_info* _Info) _CONST_CALL_OPERATOR noexcept {
-        __std_tzdb_delete_current_zone(_Info);
+        ::__std_tzdb_delete_current_zone(_Info);
     }
 };
 
 template <>
 struct _Tzdb_deleter<__std_tzdb_sys_info> {
     _STATIC_CALL_OPERATOR void operator()(__std_tzdb_sys_info* _Info) _CONST_CALL_OPERATOR noexcept {
-        __std_tzdb_delete_sys_info(_Info);
+        ::__std_tzdb_delete_sys_info(_Info);
     }
 };
 
 template <>
 struct _Tzdb_deleter<__std_tzdb_leap_info[]> {
     _STATIC_CALL_OPERATOR void operator()(__std_tzdb_leap_info* _Info) _CONST_CALL_OPERATOR noexcept {
-        __std_tzdb_delete_leap_seconds(_Info);
+        ::__std_tzdb_delete_leap_seconds(_Info);
     }
 };
 
@@ -141,15 +141,15 @@ public:
     constexpr _Crt_allocator(const _Crt_allocator<_Other>&) noexcept {}
 
     _NODISCARD __declspec(allocator) _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count) {
-        const auto _Ptr = __std_calloc_crt(_Count, sizeof(_Ty));
+        const auto _Ptr = ::__std_calloc_crt(_Count, sizeof(_Ty));
         if (!_Ptr) {
-            _Xbad_alloc();
+            _STD _Xbad_alloc();
         }
         return static_cast<_Ty*>(_Ptr);
     }
 
     void deallocate(_Ty* const _Ptr, size_t) noexcept {
-        __std_free_crt(_Ptr);
+        ::__std_free_crt(_Ptr);
     }
 
     template <class _Other>

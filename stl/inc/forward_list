@@ -241,7 +241,7 @@ struct _Flist_node { // forward_list node
     using _Nodeptr = _Rebind_pointer_t<_Voidptr, _Flist_node>;
 
     _Nodeptr _Next;
-    _Value_type _Myval = _Returns_exactly<_Value_type>(); // fake a viable constructor to workaround GH-2749
+    _Value_type _Myval = _STD _Returns_exactly<_Value_type>(); // fake a viable constructor to workaround GH-2749
 
     _Flist_node()                              = default;
     _Flist_node(const _Flist_node&)            = delete;
@@ -249,7 +249,7 @@ struct _Flist_node { // forward_list node
 
     template <class _Alnode>
     static void _Freenode(_Alnode& _Al, _Nodeptr _Pnode) noexcept {
-        _Destroy_in_place(_Pnode->_Next);
+        _STD _Destroy_in_place(_Pnode->_Next);
         allocator_traits<_Alnode>::destroy(_Al, _STD addressof(_Pnode->_Myval));
         _Al.deallocate(_Pnode, 1);
     }
@@ -448,7 +448,7 @@ struct _Flist_insert_after_op2 {
         for (; 0 < _Count; --_Count) {
             _Newnode._Allocate(); // throws
             _Alnode_traits::construct(_Al, _STD addressof(_Newnode._Ptr->_Myval), _Carg...); // throws
-            _Construct_in_place(_Tail->_Next, _Newnode._Ptr);
+            _STD _Construct_in_place(_Tail->_Next, _Newnode._Ptr);
             _Tail = _Newnode._Ptr;
         }
 
@@ -476,7 +476,7 @@ struct _Flist_insert_after_op2 {
             _Newnode._Allocate(); // throws
             _Alnode_traits::construct(_Al, _STD addressof(_Newnode._Ptr->_Myval), *_First); // throws
             const auto _Newtail = _Newnode._Release();
-            _Construct_in_place(_Tail->_Next, _Newtail);
+            _STD _Construct_in_place(_Tail->_Next, _Newtail);
             _Tail = _Newtail;
             ++_First; // throws
         }
@@ -489,7 +489,7 @@ struct _Flist_insert_after_op2 {
             return _After;
         }
 
-        _Construct_in_place(_Local_tail->_Next, _After->_Next);
+        _STD _Construct_in_place(_Local_tail->_Next, _After->_Next);
         _After->_Next = _Head;
         _Tail         = pointer{};
 
@@ -501,7 +501,7 @@ struct _Flist_insert_after_op2 {
             return;
         }
 
-        _Construct_in_place(_Tail->_Next, pointer{});
+        _STD _Construct_in_place(_Tail->_Next, pointer{});
         pointer _Subject = _Head;
         while (_Subject) {
             value_type::_Freenode(_Al, _STD exchange(_Subject, _Subject->_Next));
@@ -676,7 +676,7 @@ public:
                 _Mypair._Myval2._Orphan_all();
                 clear();
                 _Mypair._Myval2._Reload_proxy(_STD _Get_proxy_allocator(_Al), _STD _Get_proxy_allocator(_Right_al));
-                _Pocma(_Al, _Right_al);
+                _STD _Pocma(_Al, _Right_al);
                 _Take_head(_Right);
                 return *this;
             }
@@ -688,7 +688,7 @@ public:
         }
 
         clear();
-        _Pocma(_Al, _Right_al);
+        _STD _Pocma(_Al, _Right_al);
         _Take_head(_Right);
         return *this;
     }
@@ -734,7 +734,7 @@ private:
         _Newnode._Allocate(); // throws
         _Alnode_traits::construct(
             _Newnode._Al, _STD addressof(_Newnode._Ptr->_Myval), _STD forward<_Valty>(_Val)...); // throws
-        _Construct_in_place(_Newnode._Ptr->_Next, _Pnode->_Next);
+        _STD _Construct_in_place(_Newnode._Ptr->_Next, _Pnode->_Next);
         _Pnode->_Next = _Newnode._Release();
     }
 
@@ -765,7 +765,7 @@ public:
         clear();
 #if _ITERATOR_DEBUG_LEVEL != 0 // TRANSITION, ABI
         auto _Alproxy = _STD _Get_proxy_allocator(_Getal());
-        _Delete_plain_internal(_Alproxy, _Mypair._Myval2._Myproxy);
+        _STD _Delete_plain_internal(_Alproxy, _Mypair._Myval2._Myproxy);
 #endif // _ITERATOR_DEBUG_LEVEL != 0
     }
 
@@ -784,7 +784,7 @@ public:
             }
         }
 
-        _Pocca(_Al, _Right_al);
+        _STD _Pocca(_Al, _Right_al);
         _Assign_unchecked(_Right._Unchecked_begin(), _Right._Unchecked_end());
 
         return *this;
@@ -1115,7 +1115,7 @@ public:
     void swap(forward_list& _Right) noexcept /* strengthened */ {
         using _STD swap;
         if (this != _STD addressof(_Right)) {
-            _Pocs(_Getal(), _Right._Getal());
+            _STD _Pocs(_Getal(), _Right._Getal());
             _Swap_proxy_and_iterators(_Right);
             swap(_Mypair._Myval2._Myhead, _Right._Mypair._Myval2._Myhead); // intentional ADL
         }

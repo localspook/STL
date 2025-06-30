@@ -194,7 +194,7 @@ protected:
 
     int __CLR_OR_THIS_CALL do_length(
         _Statype& _State, const _Byte* _First1, const _Byte* _Last1, size_t _Count) const noexcept override {
-        return _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
+        return _STD _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
     }
 
     bool __CLR_OR_THIS_CALL do_always_noconv() const noexcept override {
@@ -411,7 +411,7 @@ protected:
 
     int __CLR_OR_THIS_CALL do_length(
         _Statype& _State, const _Byte* _First1, const _Byte* _Last1, size_t _Count) const noexcept override {
-        return _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
+        return _STD _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
     }
 
     bool __CLR_OR_THIS_CALL do_always_noconv() const noexcept override {
@@ -658,7 +658,7 @@ protected:
 
     int __CLR_OR_THIS_CALL do_length(
         _Statype& _State, const _Byte* _First1, const _Byte* _Last1, size_t _Count) const noexcept override {
-        return _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
+        return _STD _Codecvt_do_length(*this, _State, _First1, _Last1, _Count);
     }
 
     bool __CLR_OR_THIS_CALL do_always_noconv() const noexcept override {

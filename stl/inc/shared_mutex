@@ -33,27 +33,27 @@ public:
     shared_mutex& operator=(const shared_mutex&) = delete;
 
     void lock() noexcept /* strengthened */ { // lock exclusive
-        _Smtx_lock_exclusive(&_Myhandle);
+        ::_Smtx_lock_exclusive(&_Myhandle);
     }
 
     _NODISCARD_TRY_CHANGE_STATE bool try_lock() noexcept /* strengthened */ { // try to lock exclusive
-        return _Smtx_try_lock_exclusive(&_Myhandle) != 0;
+        return ::_Smtx_try_lock_exclusive(&_Myhandle) != 0;
     }
 
     void unlock() noexcept /* strengthened */ { // unlock exclusive
-        _Smtx_unlock_exclusive(&_Myhandle);
+        ::_Smtx_unlock_exclusive(&_Myhandle);
     }
 
     void lock_shared() noexcept /* strengthened */ { // lock non-exclusive
-        _Smtx_lock_shared(&_Myhandle);
+        ::_Smtx_lock_shared(&_Myhandle);
     }
 
     _NODISCARD_TRY_CHANGE_STATE bool try_lock_shared() noexcept /* strengthened */ { // try to lock non-exclusive
-        return _Smtx_try_lock_shared(&_Myhandle) != 0;
+        return ::_Smtx_try_lock_shared(&_Myhandle) != 0;
     }
 
     void unlock_shared() noexcept /* strengthened */ { // unlock non-exclusive
-        _Smtx_unlock_shared(&_Myhandle);
+        ::_Smtx_unlock_shared(&_Myhandle);
     }
 
     _NODISCARD native_handle_type native_handle() noexcept /* strengthened */ { // get native handle
@@ -101,7 +101,7 @@ public:
     template <class _Rep, class _Period>
     _NODISCARD_TRY_CHANGE_STATE bool try_lock_for(
         const chrono::duration<_Rep, _Period>& _Rel_time) { // try to lock for duration
-        return try_lock_until(_To_absolute_time(_Rel_time));
+        return try_lock_until(_STD _To_absolute_time(_Rel_time));
     }
 
     template <class _Clock, class _Duration>
@@ -160,7 +160,7 @@ public:
     template <class _Rep, class _Period>
     _NODISCARD_TRY_CHANGE_STATE bool try_lock_shared_for(const chrono::duration<_Rep, _Period>& _Rel_time) {
         // try to lock non-exclusive for relative time
-        return try_lock_shared_until(_To_absolute_time(_Rel_time));
+        return try_lock_shared_until(_STD _To_absolute_time(_Rel_time));
     }
 
     template <class _Clock, class _Duration>
@@ -289,7 +289,7 @@ public:
 
     void unlock() { // try to unlock the mutex
         if (!_Pmtx || !_Owns) {
-            _Throw_system_error(errc::operation_not_permitted);
+            _STD _Throw_system_error(errc::operation_not_permitted);
         }
 
         _Pmtx->unlock_shared();
@@ -326,11 +326,11 @@ private:
 
     void _Validate() const { // check if the mutex can be locked
         if (!_Pmtx) {
-            _Throw_system_error(errc::operation_not_permitted);
+            _STD _Throw_system_error(errc::operation_not_permitted);
         }
 
         if (_Owns) {
-            _Throw_system_error(errc::resource_deadlock_would_occur);
+            _STD _Throw_system_error(errc::resource_deadlock_would_occur);
         }
     }
 };

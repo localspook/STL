@@ -377,14 +377,14 @@ struct _Fs_file {
 
     _Fs_file(const wchar_t* const _File_name, const __std_access_rights _Desired_access,
         const __std_fs_file_flags _Flags, __std_win_error* const _Err) {
-        *_Err = __std_fs_open_handle(&_Raw, _File_name, _Desired_access, _Flags);
+        *_Err = ::__std_fs_open_handle(&_Raw, _File_name, _Desired_access, _Flags);
     }
 
     _Fs_file(const _Fs_file&)            = delete;
     _Fs_file& operator=(const _Fs_file&) = delete;
 
     ~_Fs_file() {
-        __std_fs_close_handle(_Raw);
+        ::__std_fs_close_handle(_Raw);
     }
 
     _NODISCARD void* _Get() const {

@@ -161,7 +161,7 @@ ios_base::iostate _Do_on_maybe_unicode_console(
 
     FILE* const _File_stream = _Filebuf->_Myfile;
     const __std_unicode_console_retrieval_result _Unicode_console_retrieval_result{
-        __std_get_unicode_console_handle_from_file_stream(_File_stream)};
+        ::__std_get_unicode_console_handle_from_file_stream(_File_stream)};
 
     // See the documentation for __std_unicode_console_retrieval_result to understand why we do this.
     bool _Is_unicode_console;
@@ -209,7 +209,7 @@ ios_base::iostate _Do_on_maybe_unicode_console(
 template <int = 0>
 ios_base::iostate _Print_noformat_unicode(ostream& _Ostr, const string_view _Str) {
     const auto _Unicode_console = [&](const __std_unicode_console_handle _Console_handle) {
-        return __std_print_to_unicode_console(_Console_handle, _Str.data(), _Str.size());
+        return ::__std_print_to_unicode_console(_Console_handle, _Str.data(), _Str.size());
     };
 
     const auto _Fallback = [&] { return _STD _Print_noformat_nonunicode(_Ostr, _Str); };
@@ -220,7 +220,7 @@ ios_base::iostate _Print_noformat_unicode(ostream& _Ostr, const string_view _Str
 template <int = 0>
 ios_base::iostate _Print_newline_only_unicode(ostream& _Ostr) {
     const auto _Unicode_console = [](const __std_unicode_console_handle _Console_handle) {
-        return __std_print_newline_only_to_unicode_console(_Console_handle);
+        return ::__std_print_newline_only_to_unicode_console(_Console_handle);
     };
 
     const auto _Fallback = [&] { return _STD _Print_newline_only_nonunicode(_Ostr); };
@@ -282,7 +282,7 @@ void _Print_impl(const _Add_newline _Add_nl, ostream& _Ostr, const format_string
             _STD _Vprint_nonunicode_impl(_Add_nl, _Ostr, _Fmt.get(), _STD make_format_args(_Args...));
         }
     } else {
-        const string _Unescaped_str{_Unescape_braces(_Add_nl, _Fmt.get())};
+        const string _Unescaped_str{_STD _Unescape_braces(_Add_nl, _Fmt.get())};
         _STD _Print_noformat(_Ostr, _Unescaped_str);
     }
 }

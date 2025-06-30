@@ -422,7 +422,7 @@ _NODISCARD remove_cv_t<_Ty> any_cast(const any& _Any) {
 
     const auto _Ptr = _STD any_cast<_Remove_cvref_t<_Ty>>(&_Any);
     if (!_Ptr) {
-        _Throw_bad_any_cast();
+        _STD _Throw_bad_any_cast();
     }
 
     return static_cast<remove_cv_t<_Ty>>(*_Ptr);
@@ -434,7 +434,7 @@ _NODISCARD remove_cv_t<_Ty> any_cast(any& _Any) {
 
     const auto _Ptr = _STD any_cast<_Remove_cvref_t<_Ty>>(&_Any);
     if (!_Ptr) {
-        _Throw_bad_any_cast();
+        _STD _Throw_bad_any_cast();
     }
 
     return static_cast<remove_cv_t<_Ty>>(*_Ptr);
@@ -446,7 +446,7 @@ _NODISCARD remove_cv_t<_Ty> any_cast(any&& _Any) {
 
     const auto _Ptr = _STD any_cast<_Remove_cvref_t<_Ty>>(&_Any);
     if (!_Ptr) {
-        _Throw_bad_any_cast();
+        _STD _Throw_bad_any_cast();
     }
 
     return static_cast<remove_cv_t<_Ty>>(_STD move(*_Ptr));

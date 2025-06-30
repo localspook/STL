@@ -274,7 +274,7 @@ public:
             return true;
         } else {
             index_type _Result{1};
-            const bool _Overflow = (_Mul_overflow(static_cast<index_type>(_Extents), _Result, _Result) || ...);
+            const bool _Overflow = (_STD _Mul_overflow(static_cast<index_type>(_Extents), _Result, _Result) || ...);
             return !_Overflow;
         }
     }
@@ -294,7 +294,7 @@ public:
                 }
 
                 if (!_Overflow) {
-                    _Overflow = _Mul_overflow(_Ext, _Result, _Result);
+                    _Overflow = _STD _Mul_overflow(_Ext, _Result, _Result);
                 }
             }
 
@@ -860,8 +860,8 @@ private:
 
                 if (!_Found_zero && !_Overflow) {
                     index_type _Prod;
-                    _Overflow = _Mul_overflow(static_cast<index_type>(_Ext - 1), _Stride, _Prod)
-                             || _Add_overflow(_Req_span_size, _Prod, _Req_span_size);
+                    _Overflow = _STD _Mul_overflow(static_cast<index_type>(_Ext - 1), _Stride, _Prod)
+                             || _STD _Add_overflow(_Req_span_size, _Prod, _Req_span_size);
                 }
 
                 _Pairs[_Idx] = {static_cast<rank_type>(_Stride), static_cast<rank_type>(_Ext)};
@@ -890,7 +890,7 @@ public:
             for (rank_type _Idx = extents_type::_Rank - 1; _Idx-- > 0;) {
 #if _ITERATOR_DEBUG_LEVEL != 0
                 const bool _Overflow =
-                    _Mul_overflow(this->_Array[_Idx + 1], this->_Exts.extent(_Idx + 1), this->_Array[_Idx]);
+                    _STD _Mul_overflow(this->_Array[_Idx + 1], this->_Exts.extent(_Idx + 1), this->_Array[_Idx]);
                 // NB: N4950 requires value of 'layout_right::mapping<extents_type>().required_span_size()' to be
                 // representable as a value of type 'index_type', but this is not enough. We need to require every
                 // single stride to be representable as a value of type 'index_type', so we can get desired effects.
@@ -1033,7 +1033,7 @@ public:
 
             if constexpr (extents_type::rank_dynamic() != 0) {
                 const auto [_Dynamic_zero_extents, _Dynamic_one_extents] =
-                    _Count_dynamic_extents_equal_to_zero_or_one(this->_Exts);
+                    _STD _Count_dynamic_extents_equal_to_zero_or_one(this->_Exts);
 
                 const size_t _All_zero_extents = _Static_zero_extents + _Dynamic_zero_extents;
                 if (_All_zero_extents >= 2) {

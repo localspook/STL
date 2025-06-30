@@ -119,7 +119,7 @@ _NODISCARD constexpr size_t _Get_size_of_n(const size_t _Count) {
     if constexpr (_Overflow_is_possible) {
         constexpr size_t _Max_possible = static_cast<size_t>(-1) / _Ty_size;
         if (_Count > _Max_possible) {
-            _Throw_bad_array_new_length(); // multiply overflow
+            _STD _Throw_bad_array_new_length(); // multiply overflow
         }
     }
 
@@ -187,7 +187,7 @@ __declspec(allocator) void* _Allocate_manually_vector_aligned(const size_t _Byte
     // allocate _Bytes manually aligned to at least _Big_allocation_alignment
     const size_t _Block_size = _Non_user_size + _Bytes;
     if (_Block_size <= _Bytes) {
-        _Throw_bad_array_new_length(); // add overflow
+        _STD _Throw_bad_array_new_length(); // add overflow
     }
 
     const uintptr_t _Ptr_container = reinterpret_cast<uintptr_t>(_Traits::_Allocate(_Block_size));
@@ -254,7 +254,7 @@ __declspec(allocator) _CONSTEXPR20 void* _Allocate(const size_t _Bytes) {
 #if defined(_M_IX86) || defined(_M_X64)
         if (_Bytes >= _Big_allocation_threshold) {
             // boost the alignment of big allocations to help autovectorization
-            return _Allocate_manually_vector_aligned<_Traits>(_Bytes);
+            return _STD _Allocate_manually_vector_aligned<_Traits>(_Bytes);
         }
 #endif // defined(_M_IX86) || defined(_M_X64)
         return _Traits::_Allocate(_Bytes);
@@ -287,7 +287,7 @@ _CONSTEXPR20 void _Deallocate(void* _Ptr, size_t _Bytes) noexcept {
 #if defined(_M_IX86) || defined(_M_X64)
         if (_Bytes >= _Big_allocation_threshold) {
             // boost the alignment of big allocations to help autovectorization
-            _Adjust_manually_vector_aligned(_Ptr, _Bytes);
+            _STD _Adjust_manually_vector_aligned(_Ptr, _Bytes);
         }
 #endif // defined(_M_IX86) || defined(_M_X64)
         ::operator delete(_Ptr, _Bytes);
@@ -689,7 +689,7 @@ struct _Default_allocator_traits { // traits for std::allocator
         {
             (void) _Al;
             return static_cast<pointer>(
-                _Allocate<_New_alignof<value_type>>(_Get_size_of_n<sizeof(value_type)>(_Count)));
+                _STD _Allocate<_New_alignof<value_type>>(_STD _Get_size_of_n<sizeof(value_type)>(_Count)));
         }
     }
 
@@ -703,7 +703,7 @@ struct _Default_allocator_traits { // traits for std::allocator
         {
             (void) _Al;
             return static_cast<pointer>(
-                _Allocate<_New_alignof<value_type>>(_Get_size_of_n<sizeof(value_type)>(_Count)));
+                _STD _Allocate<_New_alignof<value_type>>(_STD _Get_size_of_n<sizeof(value_type)>(_Count)));
         }
     }
 
@@ -991,7 +991,7 @@ public:
 
     _NODISCARD_RAW_PTR_ALLOC _CONSTEXPR20 __declspec(allocator) _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count) {
         static_assert(sizeof(value_type) > 0, "value_type must be complete before calling allocate.");
-        return static_cast<_Ty*>(_STD _Allocate<_New_alignof<_Ty>>(_Get_size_of_n<sizeof(_Ty)>(_Count)));
+        return static_cast<_Ty*>(_STD _Allocate<_New_alignof<_Ty>>(_STD _Get_size_of_n<sizeof(_Ty)>(_Count)));
     }
 
 #if _HAS_CXX23
@@ -1136,7 +1136,7 @@ _NODISCARD constexpr _Size_type _Convert_size(const _Unsigned_type _Len)
 
     if constexpr (sizeof(_Unsigned_type) > sizeof(_Size_type)) {
         if (_Len > _STD _Max_limit<_Size_type>()) {
-            _Xlength_error("size is too long for _Size_type");
+            _STD _Xlength_error("size is too long for _Size_type");
         }
     }
 
@@ -1229,8 +1229,8 @@ public:
 
     template <class _Alloc>
     _CONSTEXPR20 void _Alloc_proxy(_Alloc&& _Al) {
-        _Container_proxy* const _New_proxy = _Unfancy(_Al.allocate(1));
-        _Construct_in_place(*_New_proxy, this);
+        _Container_proxy* const _New_proxy = _STD _Unfancy(_Al.allocate(1));
+        _STD _Construct_in_place(*_New_proxy, this);
         _Myproxy            = _New_proxy;
         _New_proxy->_Mycont = this;
     }
@@ -1238,10 +1238,10 @@ public:
     template <class _Alloc>
     _CONSTEXPR20 void _Reload_proxy(_Alloc&& _Old_alloc, _Alloc&& _New_alloc) {
         // pre: no iterators refer to the existing proxy
-        _Container_proxy* const _New_proxy = _Unfancy(_New_alloc.allocate(1));
-        _Construct_in_place(*_New_proxy, this);
+        _Container_proxy* const _New_proxy = _STD _Unfancy(_New_alloc.allocate(1));
+        _STD _Construct_in_place(*_New_proxy, this);
         _New_proxy->_Mycont = this;
-        _Delete_plain_internal(_Old_alloc, _STD exchange(_Myproxy, _New_proxy));
+        _STD _Delete_plain_internal(_Old_alloc, _STD exchange(_Myproxy, _New_proxy));
     }
 
     _Container_proxy* _Myproxy = nullptr;
@@ -1486,14 +1486,14 @@ struct _Container_proxy_ptr12 : _Basic_container_proxy_ptr12 {
 
     _CONSTEXPR20 _Container_proxy_ptr12(_Alloc& _Al_, _Leave_proxy_unbound) : _Al(_Al_) {
         // create a new unbound _Container_proxy
-        _Ptr = _Unfancy(_Al_.allocate(1));
-        _Construct_in_place(*_Ptr);
+        _Ptr = _STD _Unfancy(_Al_.allocate(1));
+        _STD _Construct_in_place(*_Ptr);
     }
 
     _CONSTEXPR20 _Container_proxy_ptr12(_Alloc& _Al_, _Container_base12& _Mycont) : _Al(_Al_) {
         // create a new _Container_proxy pointing at _Mycont
-        _Ptr = _Unfancy(_Al_.allocate(1));
-        _Construct_in_place(*_Ptr, _STD addressof(_Mycont));
+        _Ptr = _STD _Unfancy(_Al_.allocate(1));
+        _STD _Construct_in_place(*_Ptr, _STD addressof(_Mycont));
         _Mycont._Myproxy = _Ptr;
     }
 
@@ -1501,12 +1501,12 @@ struct _Container_proxy_ptr12 : _Basic_container_proxy_ptr12 {
         // Attach the proxy stored in *this to _Mycont, and destroy _Mycont's existing proxy
         // with _Old_alloc. Requires that no iterators are alive referring to _Mycont.
         _Ptr->_Mycont = _Mycont;
-        _Delete_plain_internal(_Old_alloc, _STD exchange(_Mycont->_Myproxy, _STD exchange(_Ptr, nullptr)));
+        _STD _Delete_plain_internal(_Old_alloc, _STD exchange(_Mycont->_Myproxy, _STD exchange(_Ptr, nullptr)));
     }
 
     _CONSTEXPR20 ~_Container_proxy_ptr12() {
         if (_Ptr) {
-            _Delete_plain_internal(_Al, _Ptr);
+            _STD _Delete_plain_internal(_Al, _Ptr);
         }
     }
 };
@@ -2032,7 +2032,7 @@ _CONSTEXPR20 _Alloc_ptr_t<_Alloc> _Uninitialized_fill_n(
         if (!_STD is_constant_evaluated())
 #endif // _HAS_CXX20
         {
-            _Fill_memset(_Unfancy(_First), _Val, static_cast<size_t>(_Count));
+            _STD _Fill_memset(_STD _Unfancy(_First), _Val, static_cast<size_t>(_Count));
             return _First + _Count;
         }
     } else if constexpr (_Fill_zero_memset_is_safe<_Ty*, _Ty> && _Uses_default_construct<_Alloc, _Ty*, _Ty>::value) {
@@ -2040,8 +2040,8 @@ _CONSTEXPR20 _Alloc_ptr_t<_Alloc> _Uninitialized_fill_n(
         if (!_STD is_constant_evaluated())
 #endif // _HAS_CXX20
         {
-            if (_Is_all_bits_zero(_Val)) {
-                _Fill_zero_memset(_Unfancy(_First), static_cast<size_t>(_Count));
+            if (_STD _Is_all_bits_zero(_Val)) {
+                _STD _Fill_zero_memset(_STD _Unfancy(_First), static_cast<size_t>(_Count));
                 return _First + _Count;
             }
         }
@@ -2103,8 +2103,8 @@ _CONSTEXPR20 _Alloc_ptr_t<_Alloc> _Uninitialized_value_construct_n(
         if (!_STD is_constant_evaluated())
 #endif // _HAS_CXX20
         {
-            auto _PFirst = _Unfancy(_First);
-            _Zero_range(_PFirst, _PFirst + _Count);
+            auto _PFirst = _STD _Unfancy(_First);
+            _STD _Zero_range(_PFirst, _PFirst + _Count);
             return _First + _Count;
         }
     }

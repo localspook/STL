@@ -314,13 +314,13 @@ struct _Regex_traits_base { // base of all regular expression traits
 inline size_t _Regex_transform_primary(_Out_writes_(_Last1 - _First1) _Post_readable_size_(return) char* _First1,
     char* _Last1, _In_reads_(_Last2 - _First2) const char* _First2, const char* _Last2,
     _In_opt_ const _Locinfo::_Collvec* _Vector) noexcept {
-    return __std_regex_transform_primary_char(_First1, _Last1, _First2, _Last2, _Vector);
+    return ::__std_regex_transform_primary_char(_First1, _Last1, _First2, _Last2, _Vector);
 }
 
 inline size_t _Regex_transform_primary(_Out_writes_(_Last1 - _First1) _Post_readable_size_(return) wchar_t* _First1,
     wchar_t* _Last1, _In_reads_(_Last2 - _First2) const wchar_t* _First2, const wchar_t* _Last2,
     _In_opt_ const _Locinfo::_Collvec* _Vector) noexcept {
-    return __std_regex_transform_primary_wchar_t(_First1, _Last1, _First2, _Last2, _Vector);
+    return ::__std_regex_transform_primary_wchar_t(_First1, _Last1, _First2, _Last2, _Vector);
 }
 #endif // ^^^ defined(_CPPRTTI) && !defined(_M_CEE_PURE) ^^^
 
@@ -356,13 +356,13 @@ public:
     }
 
     _Elem translate_nocase(_Elem _Ch) const { // provide case-insensitive mapping
-        return _Getctype()->tolower(_Ch);
+        return ::_Getctype()->tolower(_Ch);
     }
 
     template <class _FwdIt>
     string_type transform(_FwdIt _First, _FwdIt _Last) const { // apply locale-specific transformation
         const string_type _Str(_First, _Last);
-        return _Getcoll()->transform(_Str.data(), _Str.data() + _Str.size());
+        return ::_Getcoll()->transform(_Str.data(), _Str.data() + _Str.size());
     }
 
     template <class _FwdIt>
@@ -371,7 +371,7 @@ public:
         string_type _Res;
 #if defined(_CPPRTTI) && !defined(_M_CEE_PURE)
         if (_First != _Last) {
-            const collate<_Elem>* _Coll = _Getcoll();
+            const collate<_Elem>* _Coll = ::_Getcoll();
             const auto& _Coll_type      = typeid(*_Coll);
             // TRANSITION, ABI: GH-5394: locale creates collate objects of type collate, not collate_byname.
             // Depending on the resolution of LWG-2338, comparison to typeid(collate) might also become
@@ -406,10 +406,10 @@ public:
 
     bool isctype(_Elem _Ch, char_class_type _Fx) const {
         if (_Fx != static_cast<char_class_type>(-1)) {
-            return _Getctype()->is(_Fx, _Ch);
+            return ::_Getctype()->is(_Fx, _Ch);
         } else {
             return _Ch == '_' // assumes L'_' == '_'
-                || _Getctype()->is(_Ch_alnum, _Ch);
+                || ::_Getctype()->is(_Ch_alnum, _Ch);
         }
     }
 
@@ -441,10 +441,10 @@ public:
         };
 #undef _REGEX_CHAR_CLASS_NAME
 
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         unsigned int _Ix = 0;
         for (; _Names[_Ix]._Get<_Elem>(); ++_Ix) {
-            if (_STD equal(_Get_unwrapped(_First), _Get_unwrapped(_Last), _Names[_Ix]._Get<_Elem>(),
+            if (_STD equal(_STD _Get_unwrapped(_First), _STD _Get_unwrapped(_Last), _Names[_Ix]._Get<_Elem>(),
                     _Names[_Ix]._Get<_Elem>() + _Names[_Ix]._Len, _Cmp_icase<_Regex_traits<_Elem>>{*this})) {
                 break;
             }
@@ -633,7 +633,7 @@ inline bool _Is_word(unsigned char _UCh) {
 }
 
 inline bool _Is_word(char _Ch) {
-    return _Is_word(static_cast<unsigned char>(_Ch));
+    return _STD _Is_word(static_cast<unsigned char>(_Ch));
 }
 
 template <class _Elem>
@@ -642,7 +642,7 @@ bool _Is_word(_Elem _Ch) {
     using _UElem = make_unsigned_t<_Elem>;
 
     const auto _UCh = static_cast<_UElem>(_Ch);
-    return _UCh <= static_cast<_UElem>('z') && _Is_word(static_cast<unsigned char>(_UCh));
+    return _UCh <= static_cast<_UElem>('z') && _STD _Is_word(static_cast<unsigned char>(_UCh));
 }
 
 _EXPORT_STD template <class _BidIt>
@@ -699,16 +699,16 @@ public:
         // otherwise, zero
         static_assert(is_same_v<_Iter_value_t<_FwdIt2>, value_type>, "bad _FwdIt2 to _Iter_compare");
 
-        _Adl_verify_range(_First1, _Last1);
-        _Adl_verify_range(_First2, _Last2);
+        _STD _Adl_verify_range(_First1, _Last1);
+        _STD _Adl_verify_range(_First2, _Last2);
 
-        auto _UFirst1 = _Get_unwrapped(_First1);
-        auto _ULast1  = _Get_unwrapped(_Last1);
-        auto _UFirst2 = _Get_unwrapped(_First2);
-        auto _ULast2  = _Get_unwrapped(_Last2);
+        auto _UFirst1 = _STD _Get_unwrapped(_First1);
+        auto _ULast1  = _STD _Get_unwrapped(_Last1);
+        auto _UFirst2 = _STD _Get_unwrapped(_First2);
+        auto _ULast2  = _STD _Get_unwrapped(_Last2);
 
         if constexpr (is_pointer_v<decltype(_UFirst1)> && is_pointer_v<decltype(_UFirst2)>) {
-            return _Traits_compare<char_traits<value_type>>(
+            return _STD _Traits_compare<char_traits<value_type>>(
                 _UFirst1, static_cast<size_t>(_ULast1 - _UFirst1), _UFirst2, static_cast<size_t>(_ULast2 - _UFirst2));
         } else {
             const auto _Cmp = _STD mismatch(_UFirst1, _ULast1, _UFirst2, _ULast2, _Std_char_traits_eq<value_type>{});
@@ -1169,16 +1169,16 @@ public:
     template <class _OutIt>
     _OutIt _Format1(_OutIt _Out, const char_type* _Fmt_begin, const char_type* _Fmt_end,
         regex_constants::match_flag_type _Flags) const { // format text, replacing matches
-        return _Flags & regex_constants::format_sed ? _Format_sed(*this, _Out, _Fmt_begin, _Fmt_end, _Flags)
-                                                    : _Format_default(*this, _Out, _Fmt_begin, _Fmt_end, _Flags);
+        return _Flags & regex_constants::format_sed ? _STD _Format_sed(*this, _Out, _Fmt_begin, _Fmt_end, _Flags)
+                                                    : _STD _Format_default(*this, _Out, _Fmt_begin, _Fmt_end, _Flags);
     }
 
     template <class _OutIt>
     _OutIt format(_OutIt _Out, const char_type* _Fmt_begin, const char_type* _Fmt_end,
         regex_constants::match_flag_type _Flags = regex_constants::format_default) const {
         // format text, replacing matches
-        _Adl_verify_range(_Fmt_begin, _Fmt_end);
-        _Seek_wrapped(_Out, _Format1(_Get_unwrapped_unverified(_Out), _Fmt_begin, _Fmt_end, _Flags));
+        _STD _Adl_verify_range(_Fmt_begin, _Fmt_end);
+        _STD _Seek_wrapped(_Out, _Format1(_STD _Get_unwrapped_unverified(_Out), _Fmt_begin, _Fmt_end, _Flags));
         return _Out;
     }
 
@@ -1186,7 +1186,8 @@ public:
     _OutIt format(_OutIt _Out, const basic_string<char_type, _Traits1, _Alloc1>& _Fmt,
         regex_constants::match_flag_type _Flags = regex_constants::format_default) const {
         // format text, replacing matches
-        _Seek_wrapped(_Out, _Format1(_Get_unwrapped_unverified(_Out), _Fmt.data(), _Fmt.data() + _Fmt.size(), _Flags));
+        _STD _Seek_wrapped(
+            _Out, _Format1(_STD _Get_unwrapped_unverified(_Out), _Fmt.data(), _Fmt.data() + _Fmt.size(), _Flags));
         return _Out;
     }
 
@@ -1393,11 +1394,11 @@ private:
     void _Expand2(const unsigned int _Min_increase) { // expand buffer by at least _Min_increase
         const unsigned int _Len = _Calculate_expansion(_Min_increase);
         if (_Len - _Sz < _Min_increase) {
-            _Xregex_error(regex_constants::error_space);
+            _STD _Xregex_error(regex_constants::error_space);
         }
         _Elem* _Tmp = static_cast<_Elem*>(_CSTD realloc(_Chrs, sizeof(_Elem) * static_cast<size_t>(_Len)));
         if (!_Tmp) {
-            _Xregex_error(regex_constants::error_space);
+            _STD _Xregex_error(regex_constants::error_space);
         }
 
         _Chrs = _Tmp;
@@ -1484,7 +1485,7 @@ public:
     explicit _Node_assert(_Node_type _Ty, _Node_flags _Fl = _Fl_none) noexcept : _Node_base(_Ty, _Fl) {}
 
     ~_Node_assert() noexcept {
-        _Destroy_node(_Child);
+        _STD _Destroy_node(_Child);
     }
 
     _Node_base* _Child = nullptr;
@@ -1557,7 +1558,7 @@ public:
             _Node_if* _Tmp = _Cur;
             _Cur           = _Cur->_Child;
             _Tmp->_Child   = nullptr;
-            _Destroy_node(_Tmp, _Endif);
+            _STD _Destroy_node(_Tmp, _Endif);
         }
     }
 
@@ -1685,7 +1686,7 @@ public:
         : _Begin(_Pfirst), _End(_Plast), _Rep(_Re), _Sflags(_Sf), _Mflags(_Mf), _Ncap(_Nx),
           _Longest((_Re->_Flags & _Fl_longest) && !(_Mf & regex_constants::match_any)), _Traits(_Tr) {
         _Loop_vals.resize(_Re->_Loops);
-        _Adl_verify_range(_Pfirst, _Plast);
+        _STD _Adl_verify_range(_Pfirst, _Plast);
         if (_Re->_Flags & _Fl_begin_needs_w) {
             _Char_class_w = _Lookup_char_class(static_cast<_Elem>('W'));
         }
@@ -1983,14 +1984,14 @@ public:
 
     template <class _InIt>
     basic_regex(_InIt _First, _InIt _Last, flag_type _Flags) {
-        _Adl_verify_range(_First, _Last);
-        _Reset(_Get_unwrapped(_First), _Get_unwrapped(_Last), _Flags);
+        _STD _Adl_verify_range(_First, _Last);
+        _Reset(_STD _Get_unwrapped(_First), _STD _Get_unwrapped(_Last), _Flags);
     }
 
     template <class _InIt>
     basic_regex(_InIt _First, _InIt _Last) {
-        _Adl_verify_range(_First, _Last);
-        _Reset(_Get_unwrapped(_First), _Get_unwrapped(_Last), regex_constants::ECMAScript);
+        _STD _Adl_verify_range(_First, _Last);
+        _Reset(_STD _Get_unwrapped(_First), _STD _Get_unwrapped(_Last), regex_constants::ECMAScript);
     }
 
     basic_regex(const basic_regex& _Right)
@@ -2104,8 +2105,8 @@ public:
 
     template <class _InIt>
     basic_regex& assign(_InIt _First, _InIt _Last, flag_type _Flags = regex_constants::ECMAScript) {
-        _Adl_verify_range(_First, _Last);
-        _Reset(_Get_unwrapped(_First), _Get_unwrapped(_Last), _Flags);
+        _STD _Adl_verify_range(_First, _Last);
+        _Reset(_STD _Get_unwrapped(_First), _STD _Get_unwrapped(_Last), _Flags);
         return *this;
     }
 
@@ -2152,7 +2153,7 @@ private:
 
     void _Tidy() noexcept { // free all storage
         if (_Rep && _MT_DECR(reinterpret_cast<_Atomic_counter_t&>(_Rep->_Refs)) == 0) {
-            _Destroy_node(_Rep);
+            _STD _Destroy_node(_Rep);
         }
 
         _Rep = nullptr;
@@ -2302,16 +2303,16 @@ _EXPORT_STD template <class _BidIt, class _Alloc, class _Elem, class _RxTraits>
 bool regex_match(_BidIt _First, _BidIt _Last, match_results<_BidIt, _Alloc>& _Matches,
     const basic_regex<_Elem, _RxTraits>& _Re, regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // try to match regular expression to target text
-    _Adl_verify_range(_First, _Last);
-    return _Regex_match1(_First, _Last, _STD addressof(_Matches), _Re, _Flgs, true);
+    _STD _Adl_verify_range(_First, _Last);
+    return _STD _Regex_match1(_First, _Last, _STD addressof(_Matches), _Re, _Flgs, true);
 }
 
 _EXPORT_STD template <class _BidIt, class _Elem, class _RxTraits>
 _NODISCARD bool regex_match(_BidIt _First, _BidIt _Last, const basic_regex<_Elem, _RxTraits>& _Re,
     regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // try to match regular expression to target text
-    _Adl_verify_range(_First, _Last);
-    return _Regex_match1(_Get_unwrapped(_First), _Get_unwrapped(_Last),
+    _STD _Adl_verify_range(_First, _Last);
+    return _STD _Regex_match1(_STD _Get_unwrapped(_First), _STD _Get_unwrapped(_Last),
         static_cast<match_results<_Unwrapped_t<const _BidIt&>>*>(nullptr), _Re, _Flgs | regex_constants::match_any,
         true);
 }
@@ -2321,7 +2322,7 @@ _NODISCARD bool regex_match(_In_z_ const _Elem* _Str, const basic_regex<_Elem, _
     regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // try to match regular expression to target text
     const _Elem* _Last = _Str + char_traits<_Elem>::length(_Str);
-    return _Regex_match1(
+    return _STD _Regex_match1(
         _Str, _Last, static_cast<match_results<const _Elem*>*>(nullptr), _Re, _Flgs | regex_constants::match_any, true);
 }
 
@@ -2330,7 +2331,7 @@ bool regex_match(_In_z_ const _Elem* _Str, match_results<const _Elem*, _Alloc>& 
     const basic_regex<_Elem, _RxTraits>& _Re, regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // try to match regular expression to target text
     const _Elem* _Last = _Str + char_traits<_Elem>::length(_Str);
-    return _Regex_match1(_Str, _Last, _STD addressof(_Matches), _Re, _Flgs, true);
+    return _STD _Regex_match1(_Str, _Last, _STD addressof(_Matches), _Re, _Flgs, true);
 }
 
 _EXPORT_STD template <class _StTraits, class _StAlloc, class _Alloc, class _Elem, class _RxTraits>
@@ -2338,7 +2339,7 @@ bool regex_match(const basic_string<_Elem, _StTraits, _StAlloc>& _Str,
     match_results<typename basic_string<_Elem, _StTraits, _StAlloc>::const_iterator, _Alloc>& _Matches,
     const basic_regex<_Elem, _RxTraits>& _Re, regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // try to match regular expression to target text
-    return _Regex_match1(_Str.begin(), _Str.end(), _STD addressof(_Matches), _Re, _Flgs, true);
+    return _STD _Regex_match1(_Str.begin(), _Str.end(), _STD addressof(_Matches), _Re, _Flgs, true);
 }
 
 _EXPORT_STD template <class _StTraits, class _StAlloc, class _Alloc, class _Elem, class _RxTraits>
@@ -2350,8 +2351,8 @@ _EXPORT_STD template <class _StTraits, class _StAlloc, class _Elem, class _RxTra
 _NODISCARD bool regex_match(const basic_string<_Elem, _StTraits, _StAlloc>& _Str,
     const basic_regex<_Elem, _RxTraits>& _Re, regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // try to match regular expression to target text
-    return _Regex_match1(_Str.data(), _Str.data() + _Str.size(), static_cast<match_results<const _Elem*>*>(nullptr),
-        _Re, _Flgs | regex_constants::match_any, true);
+    return _STD _Regex_match1(_Str.data(), _Str.data() + _Str.size(),
+        static_cast<match_results<const _Elem*>*>(nullptr), _Re, _Flgs | regex_constants::match_any, true);
 }
 
 template <class _BidIt, class _Alloc, class _Elem, class _RxTraits, class _It>
@@ -2400,18 +2401,18 @@ _EXPORT_STD template <class _BidIt, class _Alloc, class _Elem, class _RxTraits>
 bool regex_search(_BidIt _First, _BidIt _Last, match_results<_BidIt, _Alloc>& _Matches,
     const basic_regex<_Elem, _RxTraits>& _Re, regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // search for regular expression match in target text
-    _Adl_verify_range(_First, _Last);
-    return _Regex_search2(_First, _Last, _STD addressof(_Matches), _Re, _Flgs, _First);
+    _STD _Adl_verify_range(_First, _Last);
+    return _STD _Regex_search2(_First, _Last, _STD addressof(_Matches), _Re, _Flgs, _First);
 }
 
 _EXPORT_STD template <class _BidIt, class _Elem, class _RxTraits>
 _NODISCARD bool regex_search(_BidIt _First, _BidIt _Last, const basic_regex<_Elem, _RxTraits>& _Re,
     regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // search for regular expression match in target text
-    _Adl_verify_range(_First, _Last);
-    return _Regex_search2(_Get_unwrapped(_First), _Get_unwrapped(_Last),
+    _STD _Adl_verify_range(_First, _Last);
+    return _STD _Regex_search2(_STD _Get_unwrapped(_First), _STD _Get_unwrapped(_Last),
         static_cast<match_results<_Unwrapped_t<const _BidIt&>>*>(nullptr), _Re, _Flgs | regex_constants::match_any,
-        _Get_unwrapped(_First));
+        _STD _Get_unwrapped(_First));
 }
 
 _EXPORT_STD template <class _Elem, class _RxTraits>
@@ -2419,7 +2420,7 @@ _NODISCARD bool regex_search(_In_z_ const _Elem* _Str, const basic_regex<_Elem, 
     regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // search for regular expression match in target text
     const _Elem* _Last = _Str + char_traits<_Elem>::length(_Str);
-    return _Regex_search2(
+    return _STD _Regex_search2(
         _Str, _Last, static_cast<match_results<const _Elem*>*>(nullptr), _Re, _Flgs | regex_constants::match_any, _Str);
 }
 
@@ -2428,7 +2429,7 @@ bool regex_search(_In_z_ const _Elem* _Str, match_results<const _Elem*, _Alloc>&
     const basic_regex<_Elem, _RxTraits>& _Re, regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // search for regular expression match in target text
     const _Elem* _Last = _Str + char_traits<_Elem>::length(_Str);
-    return _Regex_search2(_Str, _Last, _STD addressof(_Matches), _Re, _Flgs, _Str);
+    return _STD _Regex_search2(_Str, _Last, _STD addressof(_Matches), _Re, _Flgs, _Str);
 }
 
 _EXPORT_STD template <class _StTraits, class _StAlloc, class _Alloc, class _Elem, class _RxTraits>
@@ -2436,7 +2437,7 @@ bool regex_search(const basic_string<_Elem, _StTraits, _StAlloc>& _Str,
     match_results<typename basic_string<_Elem, _StTraits, _StAlloc>::const_iterator, _Alloc>& _Matches,
     const basic_regex<_Elem, _RxTraits>& _Re, regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // search for regular expression match in target text
-    return _Regex_search2(_Str.begin(), _Str.end(), _STD addressof(_Matches), _Re, _Flgs, _Str.begin());
+    return _STD _Regex_search2(_Str.begin(), _Str.end(), _STD addressof(_Matches), _Re, _Flgs, _Str.begin());
 }
 
 _EXPORT_STD template <class _StTraits, class _StAlloc, class _Alloc, class _Elem, class _RxTraits>
@@ -2452,7 +2453,7 @@ _NODISCARD bool regex_search(const basic_string<_Elem, _StTraits, _StAlloc>& _St
 
     _Iter _First = _Str.c_str();
     _Iter _Last  = _First + _Str.size();
-    return _Regex_search2(
+    return _STD _Regex_search2(
         _First, _Last, static_cast<match_results<_Iter>*>(nullptr), _Re, _Flgs | regex_constants::match_any, _First);
 }
 
@@ -2465,8 +2466,8 @@ _OutIt _Regex_replace1(_OutIt _Result, _BidIt _First, _BidIt _Last, const basic_
     regex_constants::match_flag_type _Flags = _Flgs;
     regex_constants::match_flag_type _Not_null{};
 
-    while (
-        _Regex_search2(_Pos, _Last, _STD addressof(_Matches), _Re, _Flags | _Not_null, _Pos)) { // replace at each match
+    while (_STD _Regex_search2(
+        _Pos, _Last, _STD addressof(_Matches), _Re, _Flags | _Not_null, _Pos)) { // replace at each match
         if (!(_Flgs & regex_constants::format_no_copy)) {
             _Result = _STD copy(_Matches.prefix().first, _Matches.prefix().second, _Result);
         }
@@ -2493,9 +2494,9 @@ _OutIt regex_replace(_OutIt _Result, _BidIt _First, _BidIt _Last, const basic_re
     const basic_string<_Elem, _Traits, _Alloc>& _Fmt,
     regex_constants::match_flag_type _Flgs = regex_constants::match_default) {
     // search and replace, iterator result, string format
-    _Adl_verify_range(_First, _Last);
-    _Seek_wrapped(_Result, _Regex_replace1(_Get_unwrapped_unverified(_Result), _Get_unwrapped(_First),
-                               _Get_unwrapped(_Last), _Re, _Fmt, _Flgs));
+    _STD _Adl_verify_range(_First, _Last);
+    _STD _Seek_wrapped(_Result, _STD _Regex_replace1(_STD _Get_unwrapped_unverified(_Result),
+                                    _STD _Get_unwrapped(_First), _STD _Get_unwrapped(_Last), _Re, _Fmt, _Flgs));
     return _Result;
 }
 
@@ -2568,8 +2569,8 @@ public:
     regex_iterator(_BidIt _First, _BidIt _Last, const regex_type& _Re,
         regex_constants::match_flag_type _Fl = regex_constants::match_default)
         : _Begin(_First), _End(_Last), _MyRe(_STD addressof(_Re)), _Flags(_Fl) {
-        _Adl_verify_range(_Begin, _End);
-        if (!_Regex_search2(_Begin, _End, _STD addressof(_MyVal), *_MyRe, _Flags, _Begin)) {
+        _STD _Adl_verify_range(_Begin, _End);
+        if (!_STD _Regex_search2(_Begin, _End, _STD addressof(_MyVal), *_MyRe, _Flags, _Begin)) {
             _MyRe = nullptr;
         } else {
             this->_Adopt(_MyRe);
@@ -2642,7 +2643,7 @@ public:
             }
 
             // _Adl_verify_range(_Start, _End) checked in constructor
-            if (_Regex_search2(_Start, _End, _STD addressof(_MyVal), *_MyRe,
+            if (_STD _Regex_search2(_Start, _End, _STD addressof(_MyVal), *_MyRe,
                     _Flags | regex_constants::match_not_null | regex_constants::match_continuous, _Begin)) {
                 return *this;
             }
@@ -2657,7 +2658,7 @@ public:
         }
 
         // _Adl_verify_range(_Start, _End) checked in constructor
-        if (!_Regex_search2(_Start, _End, _STD addressof(_MyVal), *_MyRe, _Tmp_flags, _Begin)) {
+        if (!_STD _Regex_search2(_Start, _End, _STD addressof(_MyVal), *_MyRe, _Tmp_flags, _Begin)) {
             // mark at end of sequence
             _MyRe = nullptr;
         }
@@ -2858,7 +2859,7 @@ private:
     }
 
     void _Init(_BidIt _First, _BidIt _Last) { // initialize
-        _Adl_verify_range(_First, _Last);
+        _STD _Adl_verify_range(_First, _Last);
         if (!_Pos._Atend()) {
             _Res = _Current();
         } else if (_Has_suffix()) { // mark suffix (no match)
@@ -3026,7 +3027,7 @@ void _Builder2<_FwdIt, _Elem, _RxTraits>::_Add_range(const _Elem _Arg0, const _E
         const string_type _Arg1_key = _Traits.transform(_Arg1_ptr, _Arg1_ptr + 1);
 
         if (_Arg0_key > _Arg1_key) {
-            _Xregex_error(regex_constants::error_range);
+            _STD _Xregex_error(regex_constants::error_range);
         }
 
         for (unsigned int _UCh = 0; _UCh < _Bmp_max; ++_UCh) {
@@ -3040,7 +3041,7 @@ void _Builder2<_FwdIt, _Elem, _RxTraits>::_Add_range(const _Elem _Arg0, const _E
             }
         }
     } else if (_Ex0 > _Ex1) {
-        _Xregex_error(regex_constants::error_range);
+        _STD _Xregex_error(regex_constants::error_range);
     } else {
         if (!_Node->_Small && _Ex0 < _Bmp_max) {
             _Node->_Small = new _Bitmap;
@@ -3132,7 +3133,7 @@ void _Builder2<_FwdIt, _Elem, _RxTraits>::_Add_equiv(const _Elem* const _First, 
     typename _RxTraits::string_type _Str = _Traits.transform_primary(_First, _Last);
 
     if (_Str.empty()) {
-        _Xregex_error(regex_constants::error_collate);
+        _STD _Xregex_error(regex_constants::error_collate);
     }
 
     for (unsigned int _Ch = 0; _Ch < _Bmp_max; ++_Ch) { // add elements
@@ -3299,7 +3300,7 @@ _Root_node* _Builder2<_FwdIt, _Elem, _RxTraits>::_End_pattern() { // wrap up
 
 template <class _FwdIt, class _Elem, class _RxTraits>
 void _Builder2<_FwdIt, _Elem, _RxTraits>::_Tidy() noexcept { // free memory
-    _Destroy_node(_Root);
+    _STD _Destroy_node(_Root);
     _Root = nullptr;
 }
 
@@ -3549,7 +3550,7 @@ template <class _BidIt, class _Elem, class _RxTraits, class _It, class _Alloc>
 bool _Matcher2<_BidIt, _Elem, _RxTraits, _It, _Alloc>::_Find_first_inner_capture_group(
     _Node_base* _Nx, _Loop_vals_v2_t* _Loop_state) {
     if (0 < _Max_stack_count && --_Max_stack_count <= 0) {
-        _Xregex_error(regex_constants::error_stack);
+        _STD _Xregex_error(regex_constants::error_stack);
     }
 
     bool _Found_group = false;
@@ -3861,15 +3862,15 @@ bool _Matcher2<_BidIt, _Elem, _RxTraits, _It, _Alloc>::_Is_wbound() const {
     if ((_Mflags & regex_constants::match_prev_avail)
         || _Tgt_state._Cur != _Begin) { // if --_Cur is valid, check for preceding word character
         if (_Tgt_state._Cur == _End) {
-            return (_Mflags & regex_constants::match_not_eow) == 0 && _Is_word(*_Prev_iter(_Tgt_state._Cur));
+            return (_Mflags & regex_constants::match_not_eow) == 0 && _STD _Is_word(*_STD _Prev_iter(_Tgt_state._Cur));
         } else {
-            return _Is_word(*_Prev_iter(_Tgt_state._Cur)) != _Is_word(*_Tgt_state._Cur);
+            return _STD _Is_word(*_STD _Prev_iter(_Tgt_state._Cur)) != _STD _Is_word(*_Tgt_state._Cur);
         }
     } else { // --_Cur is not valid
         if (_Tgt_state._Cur == _End) {
             return false;
         } else {
-            return (_Mflags & regex_constants::match_not_bow) == 0 && _Is_word(*_Tgt_state._Cur);
+            return (_Mflags & regex_constants::match_not_bow) == 0 && _STD _Is_word(*_Tgt_state._Cur);
         }
     }
 }
@@ -3890,11 +3891,11 @@ bool _Is_ecmascript_line_terminator(_Elem _Ch) {
 template <class _BidIt, class _Elem, class _RxTraits, class _It, class _Alloc>
 bool _Matcher2<_BidIt, _Elem, _RxTraits, _It, _Alloc>::_Match_pat(_Node_base* _Nx) { // check for match
     if (0 < _Max_stack_count && --_Max_stack_count <= 0) {
-        _Xregex_error(regex_constants::error_stack);
+        _STD _Xregex_error(regex_constants::error_stack);
     }
 
     if (0 < _Max_complexity_count && --_Max_complexity_count <= 0) {
-        _Xregex_error(regex_constants::error_complexity);
+        _STD _Xregex_error(regex_constants::error_complexity);
     }
 
     bool _Failed = false;
@@ -4290,7 +4291,7 @@ _BidIt _Matcher2<_BidIt, _Elem, _RxTraits, _It, _Alloc>::_Skip(
 
 template <class _FwdIt, class _Elem, class _RxTraits>
 [[noreturn]] void _Parser2<_FwdIt, _Elem, _RxTraits>::_Error(regex_constants::error_type _Code) { // handle error
-    _Xregex_error(_Code);
+    _STD _Xregex_error(_Code);
 }
 
 template <class _FwdIt, class _Elem, class _RxTraits>
@@ -4676,7 +4677,7 @@ void _Parser2<_FwdIt, _Elem, _RxTraits>::_Do_capture_group() { // add capture gr
     ++_Grp_idx;
 
     if (_Grp_idx >= 1000) { // hardcoded limit
-        _Xregex_error(regex_constants::error_stack);
+        _STD _Xregex_error(regex_constants::error_stack);
     }
 
     _Node_base* _Pos1 = _Nfa._Begin_capture_group(_Grp_idx);

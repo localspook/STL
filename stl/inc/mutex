@@ -49,7 +49,7 @@ public:
     _Mutex_base& operator=(const _Mutex_base&) = delete;
 
     void lock() {
-        if (_Mtx_lock(_Mymtx()) != _Thrd_result::_Success) {
+        if (::_Mtx_lock(_Mymtx()) != _Thrd_result::_Success) {
             // undefined behavior, only occurs for plain mutexes (N4950 [thread.mutex.requirements.mutex.general]/6)
             _STD _Throw_Cpp_error(_RESOURCE_DEADLOCK_WOULD_OCCUR);
         }
@@ -64,11 +64,11 @@ public:
 
     _NODISCARD_TRY_CHANGE_STATE bool try_lock() noexcept /* strengthened */ {
         // false may be from undefined behavior for plain mutexes (N4950 [thread.mutex.requirements.mutex.general]/6)
-        return _Mtx_trylock(_Mymtx()) == _Thrd_result::_Success;
+        return ::_Mtx_trylock(_Mymtx()) == _Thrd_result::_Success;
     }
 
     void unlock() noexcept /* strengthened */ {
-        _Mtx_unlock(_Mymtx());
+        ::_Mtx_unlock(_Mymtx());
     }
 
     // native_handle_type and native_handle() have intentionally been removed. See GH-3820.
@@ -213,7 +213,7 @@ public:
 
     void unlock() {
         if (!_Pmtx || !_Owns) {
-            _Throw_system_error(errc::operation_not_permitted);
+            _STD _Throw_system_error(errc::operation_not_permitted);
         }
 
         _Pmtx->unlock();
@@ -250,11 +250,11 @@ private:
 
     void _Validate() const { // check if the mutex can be locked
         if (!_Pmtx) {
-            _Throw_system_error(errc::operation_not_permitted);
+            _STD _Throw_system_error(errc::operation_not_permitted);
         }
 
         if (_Owns) {
-            _Throw_system_error(errc::resource_deadlock_would_occur);
+            _STD _Throw_system_error(errc::resource_deadlock_would_occur);
         }
     }
 };
@@ -345,7 +345,7 @@ int _Try_lock_range(const int _First, const int _Last, _LockN&... _LkN) {
 
 template <class _Lock0, class _Lock1, class _Lock2, class... _LockN>
 int _Try_lock1(_Lock0& _Lk0, _Lock1& _Lk1, _Lock2& _Lk2, _LockN&... _LkN) { // try to lock 3 or more locks
-    return _Try_lock_range(0, sizeof...(_LockN) + 3, _Lk0, _Lk1, _Lk2, _LkN...);
+    return _STD _Try_lock_range(0, sizeof...(_LockN) + 3, _Lk0, _Lk1, _Lk2, _LkN...);
 }
 
 template <class _Lock0, class _Lock1>
@@ -366,14 +366,14 @@ int _Try_lock1(_Lock0& _Lk0, _Lock1& _Lk1) {
 
 _EXPORT_STD template <class _Lock0, class _Lock1, class... _LockN>
 _NODISCARD_TRY_CHANGE_STATE int try_lock(_Lock0& _Lk0, _Lock1& _Lk1, _LockN&... _LkN) { // try to lock multiple locks
-    return _Try_lock1(_Lk0, _Lk1, _LkN...);
+    return _STD _Try_lock1(_Lk0, _Lk1, _LkN...);
 }
 
 template <class... _LockN>
 int _Lock_attempt(const int _Hard_lock, _LockN&... _LkN) {
     // attempt to lock 3 or more locks, starting by locking _LkN[_Hard_lock] and trying to lock the rest
     using _Indices = index_sequence_for<_LockN...>;
-    _Lock_from_locks(_Hard_lock, _Indices{}, _LkN...);
+    _STD _Lock_from_locks(_Hard_lock, _Indices{}, _LkN...);
     int _Failed        = -1;
     int _Backout_start = _Hard_lock; // that is, unlock _Hard_lock
 
@@ -404,7 +404,7 @@ void _Lock_nonmember1(_Lock0& _Lk0, _Lock1& _Lk1, _Lock2& _Lk2, _LockN&... _LkN)
     // lock 3 or more locks, without deadlock
     int _Hard_lock = 0;
     while (_Hard_lock != -1) {
-        _Hard_lock = _Lock_attempt(_Hard_lock, _Lk0, _Lk1, _Lk2, _LkN...);
+        _Hard_lock = _STD _Lock_attempt(_Hard_lock, _Lk0, _Lk1, _Lk2, _LkN...);
     }
 }
 
@@ -427,13 +427,13 @@ bool _Lock_attempt_small(_Lock0& _Lk0, _Lock1& _Lk1) {
 template <class _Lock0, class _Lock1>
 void _Lock_nonmember1(_Lock0& _Lk0, _Lock1& _Lk1) {
     // lock 2 locks, without deadlock, special case for better codegen and reduced metaprogramming for common case
-    while (_Lock_attempt_small(_Lk0, _Lk1) && _Lock_attempt_small(_Lk1, _Lk0)) { // keep trying
+    while (_STD _Lock_attempt_small(_Lk0, _Lk1) && _STD _Lock_attempt_small(_Lk1, _Lk0)) { // keep trying
     }
 }
 
 _EXPORT_STD template <class _Lock0, class _Lock1, class... _LockN>
 void lock(_Lock0& _Lk0, _Lock1& _Lk1, _LockN&... _LkN) { // lock multiple locks, without deadlock
-    _Lock_nonmember1(_Lk0, _Lk1, _LkN...);
+    _STD _Lock_nonmember1(_Lk0, _Lk1, _LkN...);
 }
 
 _EXPORT_STD template <class _Mutex>
@@ -536,16 +536,16 @@ public:
     condition_variable& operator=(const condition_variable&) = delete;
 
     void notify_one() noexcept { // wake up one waiter
-        _Cnd_signal(_Mycnd());
+        ::_Cnd_signal(_Mycnd());
     }
 
     void notify_all() noexcept { // wake up all waiters
-        _Cnd_broadcast(_Mycnd());
+        ::_Cnd_broadcast(_Mycnd());
     }
 
     void wait(unique_lock<mutex>& _Lck) noexcept /* strengthened */ { // wait for signal
         // Nothing to do to comply with LWG-2135 because std::mutex lock/unlock are nothrow
-        _Cnd_wait(_Mycnd(), _Lck.mutex()->_Mymtx());
+        ::_Cnd_wait(_Mycnd(), _Lck.mutex()->_Mymtx());
     }
 
     template <class _Predicate>
@@ -562,13 +562,13 @@ public:
             // we don't unlock-and-relock _Lck for this case because it's not observable
             return cv_status::timeout;
         }
-        return wait_until(_Lck, _To_absolute_time(_Rel_time));
+        return wait_until(_Lck, _STD _To_absolute_time(_Rel_time));
     }
 
     template <class _Rep, class _Period, class _Predicate>
     bool wait_for(unique_lock<mutex>& _Lck, const chrono::duration<_Rep, _Period>& _Rel_time, _Predicate _Pred) {
         // wait for signal with timeout and check predicate
-        return wait_until(_Lck, _To_absolute_time(_Rel_time), _STD _Pass_fn(_Pred));
+        return wait_until(_Lck, _STD _To_absolute_time(_Rel_time), _STD _Pass_fn(_Pred));
     }
 
     template <class _Clock, class _Duration>
@@ -578,7 +578,7 @@ public:
 #if _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(
             _Lck.owns_lock(), "wait_until's caller must own the lock argument (N4958 [thread.condition.condvar]/17)");
-        _STL_VERIFY(_Mtx_current_owns(_Lck.mutex()->_Mymtx()),
+        _STL_VERIFY(::_Mtx_current_owns(_Lck.mutex()->_Mymtx()),
             "wait_until's calling thread must hold the lock argument's mutex (N4958 [thread.condition.condvar]/17)");
 #endif // _ITERATOR_DEBUG_LEVEL != 0
         for (;;) {
@@ -588,9 +588,9 @@ public:
                 return cv_status::timeout;
             }
 
-            const unsigned long _Rel_ms_count = _Clamped_rel_time_ms_count(_Abs_time - _Now)._Count;
+            const unsigned long _Rel_ms_count = _STD _Clamped_rel_time_ms_count(_Abs_time - _Now)._Count;
 
-            const _Thrd_result _Res = _Cnd_timedwait_for_unchecked(_Mycnd(), _Lck.mutex()->_Mymtx(), _Rel_ms_count);
+            const _Thrd_result _Res = ::_Cnd_timedwait_for_unchecked(_Mycnd(), _Lck.mutex()->_Mymtx(), _Rel_ms_count);
             if (_Res == _Thrd_result::_Success) {
                 return cv_status::no_timeout;
             }
@@ -614,11 +614,11 @@ public:
     // native_handle_type and native_handle() have intentionally been removed. See GH-3820.
 
     void _Register(unique_lock<mutex>& _Lck, int* _Ready) noexcept { // register this object for release at thread exit
-        _Cnd_register_at_thread_exit(_Mycnd(), _Lck.release()->_Mymtx(), _Ready);
+        ::_Cnd_register_at_thread_exit(_Mycnd(), _Lck.release()->_Mymtx(), _Ready);
     }
 
     void _Unregister(mutex& _Mtx) noexcept { // unregister this object for release at thread exit
-        _Cnd_unregister_at_thread_exit(_Mtx._Mymtx());
+        ::_Cnd_unregister_at_thread_exit(_Mtx._Mymtx());
     }
 
 private:
@@ -675,7 +675,7 @@ public:
     template <class _Rep, class _Period>
     _NODISCARD_TRY_CHANGE_STATE bool try_lock_for(
         const chrono::duration<_Rep, _Period>& _Rel_time) { // try to lock for duration
-        return try_lock_until(_To_absolute_time(_Rel_time));
+        return try_lock_until(_STD _To_absolute_time(_Rel_time));
     }
 
     template <class _Clock, class _Duration>
@@ -769,7 +769,7 @@ public:
     template <class _Rep, class _Period>
     _NODISCARD_TRY_CHANGE_STATE bool try_lock_for(
         const chrono::duration<_Rep, _Period>& _Rel_time) { // try to lock for duration
-        return try_lock_until(_To_absolute_time(_Rel_time));
+        return try_lock_until(_STD _To_absolute_time(_Rel_time));
     }
 
     template <class _Clock, class _Duration>

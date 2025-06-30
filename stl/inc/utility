@@ -874,8 +874,8 @@ template <class _Rx, class _Ty>
 _NODISCARD constexpr bool _In_range(const _Ty _Value) noexcept {
     _STL_INTERNAL_STATIC_ASSERT(_Is_nonbool_integral<_Rx> && _Is_nonbool_integral<_Ty>); // allows character types
 
-    constexpr auto _Ty_min = _Min_limit<_Ty>();
-    constexpr auto _Rx_min = _Min_limit<_Rx>();
+    constexpr auto _Ty_min = _STD _Min_limit<_Ty>();
+    constexpr auto _Rx_min = _STD _Min_limit<_Rx>();
 
     if constexpr (_STD _Cmp_less(_Ty_min, _Rx_min)) {
         if (_Value < _Ty{_Rx_min}) {
@@ -883,8 +883,8 @@ _NODISCARD constexpr bool _In_range(const _Ty _Value) noexcept {
         }
     }
 
-    constexpr auto _Ty_max = _Max_limit<_Ty>();
-    constexpr auto _Rx_max = _Max_limit<_Rx>();
+    constexpr auto _Ty_max = _STD _Max_limit<_Ty>();
+    constexpr auto _Rx_max = _STD _Max_limit<_Rx>();
 
     if constexpr (_STD _Cmp_greater(_Ty_max, _Rx_max)) {
         if (_Value > _Ty{_Rx_max}) {

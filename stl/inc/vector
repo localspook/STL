@@ -718,7 +718,7 @@ public:
 
     _CONSTEXPR20 vector(initializer_list<_Ty> _Ilist, const _Alloc& _Al = _Alloc())
         : _Mypair(_One_then_variadic_args_t{}, _Al) {
-        _Construct_n(_Convert_size<size_type>(_Ilist.size()), _Ilist.begin(), _Ilist.end());
+        _Construct_n(_STD _Convert_size<size_type>(_Ilist.size()), _Ilist.begin(), _Ilist.end());
     }
 
 #if _HAS_CXX23
@@ -726,8 +726,8 @@ public:
     constexpr vector(from_range_t, _Rng&& _Range, const _Alloc& _Al = _Alloc())
         : _Mypair(_One_then_variadic_args_t{}, _Al) {
         if constexpr (_RANGES sized_range<_Rng> || _RANGES forward_range<_Rng>) {
-            const auto _Length = _To_unsigned_like(_RANGES distance(_Range));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Length = _STD _To_unsigned_like(_RANGES distance(_Range));
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             _Construct_n(_Count, _RANGES _Ubegin(_Range), _RANGES _Uend(_Range));
         } else {
             auto _Alproxy = _STD _Get_proxy_allocator(_Getal());
@@ -781,7 +781,7 @@ public:
                     _Buy_raw(_Count);
                     _Tidy_guard<vector> _Guard{this};
                     _My_data._Mylast =
-                        _Uninitialized_move(_Right_data._Myfirst, _Right_data._Mylast, _My_data._Myfirst, _Al);
+                        _STD _Uninitialized_move(_Right_data._Myfirst, _Right_data._Mylast, _My_data._Myfirst, _Al);
 
                     _ASAN_VECTOR_CREATE;
                     _Guard._Target = nullptr;
@@ -821,7 +821,7 @@ public:
         }
 #endif // _ITERATOR_DEBUG_LEVEL != 0
 
-        _Pocma(_Al, _Right_al);
+        _STD _Pocma(_Al, _Right_al);
         _Mypair._Myval2._Take_contents(_Right._Mypair._Myval2);
         return *this;
     }
@@ -830,7 +830,7 @@ public:
         _Tidy();
 #if _ITERATOR_DEBUG_LEVEL != 0
         auto _Alproxy = _STD _Get_proxy_allocator(_Getal());
-        _Delete_plain_internal(_Alproxy, _STD exchange(_Mypair._Myval2._Myproxy, nullptr));
+        _STD _Delete_plain_internal(_Alproxy, _STD exchange(_Mypair._Myval2._Myproxy, nullptr));
 #endif // _ITERATOR_DEBUG_LEVEL != 0
     }
 
@@ -860,7 +860,7 @@ private:
             _STD _Construct_in_place(*_Mylast, _STD forward<_Valty>(_Val)...);
         } else {
             _ASAN_VECTOR_EXTEND_GUARD(static_cast<size_type>(_Mylast - _My_data._Myfirst) + 1);
-            _Alty_traits::construct(_Getal(), _Unfancy(_Mylast), _STD forward<_Valty>(_Val)...);
+            _Alty_traits::construct(_Getal(), _STD _Unfancy(_Mylast), _STD forward<_Valty>(_Val)...);
             _ASAN_VECTOR_RELEASE_GUARD;
         }
 
@@ -975,23 +975,23 @@ private:
             const size_type _Newsize = _Oldsize + _Count;
             size_type _Newcapacity   = _Calculate_growth(_Newsize);
 
-            const pointer _Newvec           = _Allocate_at_least_helper(_Al, _Newcapacity);
+            const pointer _Newvec           = _STD _Allocate_at_least_helper(_Al, _Newcapacity);
             const pointer _Constructed_last = _Newvec + _Oldsize + _Count;
 
             _Reallocation_guard _Guard{_Al, _Newvec, _Newcapacity, _Constructed_last, _Constructed_last};
             auto& _Constructed_first = _Guard._Constructed_first;
 
-            _Uninitialized_copy_n(_STD move(_First), _Count, _Newvec + _Oldsize, _Al);
+            _STD _Uninitialized_copy_n(_STD move(_First), _Count, _Newvec + _Oldsize, _Al);
             _Constructed_first = _Newvec + _Oldsize;
 
             if (_Count == 1) { // one at back, provide strong guarantee
                 if constexpr (is_nothrow_move_constructible_v<_Ty> || !is_copy_constructible_v<_Ty>) {
-                    _Uninitialized_move(_Oldfirst, _Oldlast, _Newvec, _Al);
+                    _STD _Uninitialized_move(_Oldfirst, _Oldlast, _Newvec, _Al);
                 } else {
-                    _Uninitialized_copy(_Oldfirst, _Oldlast, _Newvec, _Al);
+                    _STD _Uninitialized_copy(_Oldfirst, _Oldlast, _Newvec, _Al);
                 }
             } else { // provide basic guarantee
-                _Uninitialized_move(_Oldfirst, _Oldlast, _Newvec, _Al);
+                _STD _Uninitialized_move(_Oldfirst, _Oldlast, _Newvec, _Al);
             }
 
             _Guard._New_begin = nullptr;
@@ -1000,7 +1000,7 @@ private:
                  // Performance note: except for one-at-back, the strong guarantee is unnecessary here.
 
             _ASAN_VECTOR_EXTEND_GUARD(static_cast<size_type>(_Oldlast - _Oldfirst) + _Count);
-            _Mylast = _Uninitialized_copy_n(_STD move(_First), _Count, _Oldlast, _Al);
+            _Mylast = _STD _Uninitialized_copy_n(_STD move(_First), _Count, _Oldlast, _Al);
             _ASAN_VECTOR_RELEASE_GUARD;
 
             _Orphan_range(_Oldlast, _Oldlast);
@@ -1013,8 +1013,8 @@ public:
     template <_Container_compatible_range<_Ty> _Rng>
     constexpr void append_range(_Rng&& _Range) {
         if constexpr (_RANGES forward_range<_Rng> || _RANGES sized_range<_Rng>) {
-            const auto _Length = _To_unsigned_like(_RANGES distance(_Range));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Length = _STD _To_unsigned_like(_RANGES distance(_Range));
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             _Append_counted_range(_RANGES _Ubegin(_Range), _Count);
         } else {
             _Append_uncounted_range(_RANGES _Ubegin(_Range), _RANGES _Uend(_Range));
@@ -1043,10 +1043,10 @@ public:
                 // after constructing _Obj, provide basic guarantee
                 _Orphan_range(_Whereptr, _Oldlast);
                 _ASAN_VECTOR_EXTEND_GUARD(static_cast<size_type>(_Oldlast - _My_data._Myfirst) + 1);
-                _Alty_traits::construct(_Al, _Unfancy(_Oldlast), _STD move(_Oldlast[-1]));
+                _Alty_traits::construct(_Al, _STD _Unfancy(_Oldlast), _STD move(_Oldlast[-1]));
                 _ASAN_VECTOR_RELEASE_GUARD;
                 ++_My_data._Mylast;
-                _Move_backward_unchecked(_Whereptr, _Oldlast - 1, _Oldlast);
+                _STD _Move_backward_unchecked(_Whereptr, _Oldlast - 1, _Oldlast);
                 *_Whereptr = _STD move(_Obj._Get_value());
             }
 
@@ -1093,25 +1093,25 @@ public:
             const size_type _Newsize = _Oldsize + _Count;
             size_type _Newcapacity   = _Calculate_growth(_Newsize);
 
-            const pointer _Newvec           = _Allocate_at_least_helper(_Al, _Newcapacity);
+            const pointer _Newvec           = _STD _Allocate_at_least_helper(_Al, _Newcapacity);
             const pointer _Constructed_last = _Newvec + _Whereoff + _Count;
 
             _Reallocation_guard _Guard{_Al, _Newvec, _Newcapacity, _Constructed_last, _Constructed_last};
             auto& _Constructed_first = _Guard._Constructed_first;
 
-            _Uninitialized_fill_n(_Newvec + _Whereoff, _Count, _Val, _Al);
+            _STD _Uninitialized_fill_n(_Newvec + _Whereoff, _Count, _Val, _Al);
             _Constructed_first = _Newvec + _Whereoff;
 
             if (_One_at_back) { // provide strong guarantee
                 if constexpr (is_nothrow_move_constructible_v<_Ty> || !is_copy_constructible_v<_Ty>) {
-                    _Uninitialized_move(_Oldfirst, _Oldlast, _Newvec, _Al);
+                    _STD _Uninitialized_move(_Oldfirst, _Oldlast, _Newvec, _Al);
                 } else {
-                    _Uninitialized_copy(_Oldfirst, _Oldlast, _Newvec, _Al);
+                    _STD _Uninitialized_copy(_Oldfirst, _Oldlast, _Newvec, _Al);
                 }
             } else { // provide basic guarantee
-                _Uninitialized_move(_Oldfirst, _Whereptr, _Newvec, _Al);
+                _STD _Uninitialized_move(_Oldfirst, _Whereptr, _Newvec, _Al);
                 _Constructed_first = _Newvec;
-                _Uninitialized_move(_Whereptr, _Oldlast, _Newvec + _Whereoff + _Count, _Al);
+                _STD _Uninitialized_move(_Whereptr, _Oldlast, _Newvec + _Whereoff + _Count, _Al);
             }
 
             _Guard._New_begin = nullptr;
@@ -1126,12 +1126,12 @@ public:
 
             _ASAN_VECTOR_EXTEND_GUARD(static_cast<size_type>(_Oldlast - _My_data._Myfirst) + _Count);
             if (_Count > _Affected_elements) { // new stuff spills off end
-                _Mylast = _Uninitialized_fill_n(_Oldlast, _Count - _Affected_elements, _Tmp, _Al);
-                _Mylast = _Uninitialized_move(_Whereptr, _Oldlast, _Mylast, _Al);
+                _Mylast = _STD _Uninitialized_fill_n(_Oldlast, _Count - _Affected_elements, _Tmp, _Al);
+                _Mylast = _STD _Uninitialized_move(_Whereptr, _Oldlast, _Mylast, _Al);
                 _STD fill(_Whereptr, _Oldlast, _Tmp);
             } else { // new stuff can all be assigned
-                _Mylast = _Uninitialized_move(_Oldlast - _Count, _Oldlast, _Oldlast, _Al);
-                _Move_backward_unchecked(_Whereptr, _Oldlast - _Count, _Oldlast);
+                _Mylast = _STD _Uninitialized_move(_Oldlast - _Count, _Oldlast, _Oldlast, _Al);
+                _STD _Move_backward_unchecked(_Whereptr, _Oldlast - _Count, _Oldlast);
                 _STD fill_n(_Whereptr, _Count, _Tmp);
             }
             _ASAN_VECTOR_RELEASE_GUARD;
@@ -1283,7 +1283,7 @@ public:
 #if _HAS_CXX20
         } else if constexpr (forward_iterator<_Iter>) {
             const auto _Length = _STD _To_unsigned_like(_RANGES distance(_UFirst, _ULast));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             _Insert_counted_range(_Where, _UFirst, _Count);
 #endif // _HAS_CXX20
         } else {
@@ -1306,8 +1306,8 @@ public:
         const auto _Whereoff = static_cast<size_type>(_Whereptr - _Oldfirst);
 
         if constexpr (_RANGES forward_range<_Rng> || _RANGES sized_range<_Rng>) {
-            const auto _Length = _To_unsigned_like(_RANGES distance(_Range));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Length = _STD _To_unsigned_like(_RANGES distance(_Range));
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             _Insert_counted_range(_Where, _RANGES _Ubegin(_Range), _Count);
         } else {
             _Insert_uncounted_range(_Where, _RANGES _Ubegin(_Range), _RANGES _Uend(_Range));
@@ -1327,7 +1327,7 @@ public:
 #endif // _ITERATOR_DEBUG_LEVEL == 2
         const auto _Whereoff = static_cast<size_type>(_Whereptr - _Oldfirst);
 
-        const auto _Count = _Convert_size<size_type>(_Ilist.size());
+        const auto _Count = _STD _Convert_size<size_type>(_Ilist.size());
         _Insert_counted_range(_Where, _Ilist.begin(), _Count);
         return _Make_iterator_offset(_Whereoff);
     }
@@ -1345,7 +1345,7 @@ public:
 #endif // _HAS_CXX20
         {
             const auto _Valptr = _STD addressof(_Val);
-            _STL_VERIFY(!(_Unfancy(_Myfirst) <= _Valptr && _Valptr < _Unfancy(_Mylast)),
+            _STL_VERIFY(!(_STD _Unfancy(_Myfirst) <= _Valptr && _Valptr < _STD _Unfancy(_Mylast)),
                 "assignment value cannot be a reference into the container");
         }
 #endif // _ITERATOR_DEBUG_LEVEL == 2
@@ -1358,11 +1358,11 @@ public:
         if (_Newsize > _Oldcapacity) { // reallocate
             _Clear_and_reserve_geometric(_Newsize);
             if constexpr (_Nothrow_construct) {
-                _Mylast = _Uninitialized_fill_n(_Myfirst, _Newsize, _Val, _Al);
+                _Mylast = _STD _Uninitialized_fill_n(_Myfirst, _Newsize, _Val, _Al);
                 _ASAN_VECTOR_CREATE;
             } else {
                 _ASAN_VECTOR_CREATE_GUARD;
-                _Mylast = _Uninitialized_fill_n(_Myfirst, _Newsize, _Val, _Al);
+                _Mylast = _STD _Uninitialized_fill_n(_Myfirst, _Newsize, _Val, _Al);
             }
 
             return;
@@ -1373,16 +1373,16 @@ public:
             _STD fill(_Myfirst, _Mylast, _Val);
             if constexpr (_Nothrow_construct) {
                 _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Newsize - _Oldsize));
-                _Mylast = _Uninitialized_fill_n(_Mylast, _Newsize - _Oldsize, _Val, _Al);
+                _Mylast = _STD _Uninitialized_fill_n(_Mylast, _Newsize - _Oldsize, _Val, _Al);
             } else {
                 _ASAN_VECTOR_EXTEND_GUARD(_Newsize);
-                _Mylast = _Uninitialized_fill_n(_Mylast, _Newsize - _Oldsize, _Val, _Al);
+                _Mylast = _STD _Uninitialized_fill_n(_Mylast, _Newsize - _Oldsize, _Val, _Al);
                 _ASAN_VECTOR_RELEASE_GUARD;
             }
         } else {
             const pointer _Newlast = _Myfirst + _Newsize;
             _STD fill(_Myfirst, _Newlast, _Val);
-            _Destroy_range(_Newlast, _Mylast, _Al);
+            _STD _Destroy_range(_Newlast, _Mylast, _Al);
             _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Newsize - _Oldsize));
             _Mylast = _Newlast;
         }
@@ -1409,7 +1409,7 @@ private:
         // If we've exhausted both: Trim does nothing, then Append does nothing.
 
         // Trim.
-        _Destroy_range(_Next, _Mylast, _Getal());
+        _STD _Destroy_range(_Next, _Mylast, _Getal());
         _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Next - _Mylast)); // negative when destroying elements
         _Mylast = _Next;
 
@@ -1450,7 +1450,7 @@ private:
                 if (!_STD is_constant_evaluated())
 #endif // _HAS_CXX20
                 {
-                    _Copy_memmove_n(_First, static_cast<size_t>(_Oldsize), _Myfirst);
+                    _STD _Copy_memmove_n(_First, static_cast<size_t>(_Oldsize), _Myfirst);
                     _First += _Oldsize;
                     _Copied = true;
                 }
@@ -1506,8 +1506,8 @@ public:
         static_assert(assignable_from<_Ty&, _RANGES range_reference_t<_Rng>>,
             "Elements must be assignable from the range's reference type (N4993 [sequence.reqmts]/60).");
         if constexpr (_RANGES sized_range<_Rng> || _RANGES forward_range<_Rng>) {
-            const auto _Length = _To_unsigned_like(_RANGES distance(_Range));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Length = _STD _To_unsigned_like(_RANGES distance(_Range));
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             _Assign_counted_range(_RANGES _Ubegin(_Range), _Count);
         } else {
             _Assign_uncounted_range(_RANGES _Ubegin(_Range), _RANGES _Uend(_Range));
@@ -1516,7 +1516,7 @@ public:
 #endif // _HAS_CXX23
 
     _CONSTEXPR20 void assign(const initializer_list<_Ty> _Ilist) {
-        const auto _Count = _Convert_size<size_type>(_Ilist.size());
+        const auto _Count = _STD _Convert_size<size_type>(_Ilist.size());
         _Assign_counted_range(_Ilist.begin(), _Count);
     }
 
@@ -1534,7 +1534,7 @@ public:
             }
         }
 
-        _Pocca(_Al, _Right_al);
+        _STD _Pocca(_Al, _Right_al);
         auto& _Right_data = _Right._Mypair._Myval2;
         _Assign_counted_range(_Right_data._Myfirst, static_cast<size_type>(_Right_data._Mylast - _Right_data._Myfirst));
 
@@ -1542,7 +1542,7 @@ public:
     }
 
     _CONSTEXPR20 vector& operator=(initializer_list<_Ty> _Ilist) {
-        const auto _Count = _Convert_size<size_type>(_Ilist.size());
+        const auto _Count = _STD _Convert_size<size_type>(_Ilist.size());
         _Assign_counted_range(_Ilist.begin(), _Count);
         return *this;
     }
@@ -1562,23 +1562,23 @@ private:
         const auto _Oldsize    = static_cast<size_type>(_Mylast - _Myfirst);
         size_type _Newcapacity = _Calculate_growth(_Newsize);
 
-        const pointer _Newvec         = _Allocate_at_least_helper(_Al, _Newcapacity);
+        const pointer _Newvec         = _STD _Allocate_at_least_helper(_Al, _Newcapacity);
         const pointer _Appended_first = _Newvec + _Oldsize;
 
         _Reallocation_guard _Guard{_Al, _Newvec, _Newcapacity, _Appended_first, _Appended_first};
         auto& _Appended_last = _Guard._Constructed_last;
 
         if constexpr (is_same_v<_Ty2, _Ty>) {
-            _Appended_last = _Uninitialized_fill_n(_Appended_first, _Newsize - _Oldsize, _Val, _Al);
+            _Appended_last = _STD _Uninitialized_fill_n(_Appended_first, _Newsize - _Oldsize, _Val, _Al);
         } else {
             _STL_INTERNAL_STATIC_ASSERT(is_same_v<_Ty2, _Value_init_tag>);
-            _Appended_last = _Uninitialized_value_construct_n(_Appended_first, _Newsize - _Oldsize, _Al);
+            _Appended_last = _STD _Uninitialized_value_construct_n(_Appended_first, _Newsize - _Oldsize, _Al);
         }
 
         if constexpr (is_nothrow_move_constructible_v<_Ty> || !is_copy_constructible_v<_Ty>) {
-            _Uninitialized_move(_Myfirst, _Mylast, _Newvec, _Al);
+            _STD _Uninitialized_move(_Myfirst, _Mylast, _Newvec, _Al);
         } else {
-            _Uninitialized_copy(_Myfirst, _Mylast, _Newvec, _Al);
+            _STD _Uninitialized_copy(_Myfirst, _Mylast, _Newvec, _Al);
         }
 
         _Guard._New_begin = nullptr;
@@ -1596,7 +1596,7 @@ private:
         if (_Newsize < _Oldsize) { // trim
             const pointer _Newlast = _Myfirst + _Newsize;
             _Orphan_range(_Newlast, _Mylast);
-            _Destroy_range(_Newlast, _Mylast, _Al);
+            _STD _Destroy_range(_Newlast, _Mylast, _Al);
             _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Newsize - _Oldsize));
             _Mylast = _Newlast;
             return;
@@ -1612,10 +1612,10 @@ private:
             _ASAN_VECTOR_EXTEND_GUARD(_Newsize);
             const pointer _Oldlast = _Mylast;
             if constexpr (is_same_v<_Ty2, _Ty>) {
-                _Mylast = _Uninitialized_fill_n(_Oldlast, _Newsize - _Oldsize, _Val, _Al);
+                _Mylast = _STD _Uninitialized_fill_n(_Oldlast, _Newsize - _Oldsize, _Val, _Al);
             } else {
                 _STL_INTERNAL_STATIC_ASSERT(is_same_v<_Ty2, _Value_init_tag>);
-                _Mylast = _Uninitialized_value_construct_n(_Oldlast, _Newsize - _Oldsize, _Al);
+                _Mylast = _STD _Uninitialized_value_construct_n(_Oldlast, _Newsize - _Oldsize, _Al);
             }
             _ASAN_VECTOR_RELEASE_GUARD;
             _Orphan_range(_Oldlast, _Oldlast);
@@ -1650,7 +1650,7 @@ private:
 
         pointer _Newvec;
         if constexpr (_Policy == _Reallocation_policy::_At_least) {
-            _Newvec = _Allocate_at_least_helper(_Al, _Newcapacity);
+            _Newvec = _STD _Allocate_at_least_helper(_Al, _Newcapacity);
         } else {
             _STL_INTERNAL_STATIC_ASSERT(_Policy == _Reallocation_policy::_Exactly);
             _Newvec = _Al.allocate(_Newcapacity);
@@ -1659,9 +1659,9 @@ private:
         _Simple_reallocation_guard _Guard{_Al, _Newvec, _Newcapacity};
 
         if constexpr (is_nothrow_move_constructible_v<_Ty> || !is_copy_constructible_v<_Ty>) {
-            _Uninitialized_move(_Myfirst, _Mylast, _Newvec, _Al);
+            _STD _Uninitialized_move(_Myfirst, _Mylast, _Newvec, _Al);
         } else {
-            _Uninitialized_copy(_Myfirst, _Mylast, _Newvec, _Al);
+            _STD _Uninitialized_copy(_Myfirst, _Mylast, _Newvec, _Al);
         }
 
         _Guard._New_begin = nullptr;
@@ -1707,7 +1707,7 @@ private:
         const size_type _Newcapacity = _Calculate_growth(_Newsize);
 
         if (_Myfirst) { // destroy and deallocate old array
-            _Destroy_range(_Myfirst, _Mylast, _Al);
+            _STD _Destroy_range(_Myfirst, _Mylast, _Al);
             _ASAN_VECTOR_REMOVE;
             _Al.deallocate(_Myfirst, static_cast<size_type>(_Myend - _Myfirst));
 
@@ -1754,7 +1754,7 @@ public:
 #endif
 
         _Orphan_range(_Mylast - 1, _Mylast);
-        _Alty_traits::destroy(_Getal(), _Unfancy(_Mylast - 1));
+        _Alty_traits::destroy(_Getal(), _STD _Unfancy(_Mylast - 1));
         _ASAN_VECTOR_MODIFY(-1);
         --_Mylast;
     }
@@ -1773,7 +1773,7 @@ public:
 
         _Orphan_range(_Whereptr, _Mylast);
         _STD _Move_unchecked(_Whereptr + 1, _Mylast, _Whereptr);
-        _Alty_traits::destroy(_Getal(), _Unfancy(_Mylast - 1));
+        _Alty_traits::destroy(_Getal(), _STD _Unfancy(_Mylast - 1));
         _ASAN_VECTOR_MODIFY(-1);
         --_Mylast;
         return iterator(_Whereptr, _STD addressof(_My_data));
@@ -1796,7 +1796,7 @@ public:
             _Orphan_range(_Firstptr, _Mylast);
 
             const pointer _Newlast = _STD _Move_unchecked(_Lastptr, _Mylast, _Firstptr);
-            _Destroy_range(_Newlast, _Mylast, _Getal());
+            _STD _Destroy_range(_Newlast, _Mylast, _Getal());
             _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Newlast - _Mylast)); // negative when destroying elements
             _Mylast = _Newlast;
         }
@@ -1817,14 +1817,14 @@ public:
         }
 
         _My_data._Orphan_all();
-        _Destroy_range(_Myfirst, _Mylast, _Getal());
+        _STD _Destroy_range(_Myfirst, _Mylast, _Getal());
         _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Myfirst - _Mylast)); // negative when destroying elements
         _Mylast = _Myfirst;
     }
 
     _CONSTEXPR20 void swap(vector& _Right) noexcept /* strengthened */ {
         if (this != _STD addressof(_Right)) {
-            _Pocs(_Getal(), _Right._Getal());
+            _STD _Pocs(_Getal(), _Right._Getal());
             _Mypair._Myval2._Swap_val(_Right._Mypair._Myval2);
         }
     }
@@ -1890,19 +1890,19 @@ public:
     }
 
     _NODISCARD _CONSTEXPR20 _Ty* _Unchecked_begin() noexcept {
-        return _Unfancy_maybe_null(_Mypair._Myval2._Myfirst);
+        return _STD _Unfancy_maybe_null(_Mypair._Myval2._Myfirst);
     }
 
     _NODISCARD _CONSTEXPR20 const _Ty* _Unchecked_begin() const noexcept {
-        return _Unfancy_maybe_null(_Mypair._Myval2._Myfirst);
+        return _STD _Unfancy_maybe_null(_Mypair._Myval2._Myfirst);
     }
 
     _NODISCARD _CONSTEXPR20 _Ty* _Unchecked_end() noexcept {
-        return _Unfancy_maybe_null(_Mypair._Myval2._Mylast);
+        return _STD _Unfancy_maybe_null(_Mypair._Myval2._Mylast);
     }
 
     _NODISCARD _CONSTEXPR20 const _Ty* _Unchecked_end() const noexcept {
-        return _Unfancy_maybe_null(_Mypair._Myval2._Mylast);
+        return _STD _Unfancy_maybe_null(_Mypair._Myval2._Mylast);
     }
 
     _NODISCARD_EMPTY_MEMBER _CONSTEXPR20 bool empty() const noexcept {
@@ -2148,11 +2148,11 @@ private:
         if (_Newsize > _Oldcapacity) {
             _Clear_and_reserve_geometric(_Newsize);
             if constexpr (_Nothrow_construct) {
-                _Mylast = _Uninitialized_move(_First, _Last, _Myfirst, _Al);
+                _Mylast = _STD _Uninitialized_move(_First, _Last, _Myfirst, _Al);
                 _ASAN_VECTOR_CREATE;
             } else {
                 _ASAN_VECTOR_CREATE_GUARD;
-                _Mylast = _Uninitialized_move(_First, _Last, _Myfirst, _Al);
+                _Mylast = _STD _Uninitialized_move(_First, _Last, _Myfirst, _Al);
             }
 
             return;
@@ -2165,27 +2165,27 @@ private:
 
             if constexpr (_Nothrow_construct) {
                 _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Newsize - _Oldsize));
-                _Mylast = _Uninitialized_move(_Mid, _Last, _Mylast, _Al);
+                _Mylast = _STD _Uninitialized_move(_Mid, _Last, _Mylast, _Al);
             } else {
                 _ASAN_VECTOR_EXTEND_GUARD(_Newsize);
-                _Mylast = _Uninitialized_move(_Mid, _Last, _Mylast, _Al);
+                _Mylast = _STD _Uninitialized_move(_Mid, _Last, _Mylast, _Al);
                 _ASAN_VECTOR_RELEASE_GUARD;
             }
         } else {
             const pointer _Newlast = _Myfirst + _Newsize;
             _STD _Move_unchecked(_First, _Last, _Myfirst);
-            _Destroy_range(_Newlast, _Mylast, _Al);
+            _STD _Destroy_range(_Newlast, _Mylast, _Al);
             _ASAN_VECTOR_MODIFY(static_cast<difference_type>(_Newsize - _Oldsize));
             _Mylast = _Newlast;
         }
     }
 
     [[noreturn]] static void _Xlength() {
-        _Xlength_error("vector too long");
+        _STD _Xlength_error("vector too long");
     }
 
     [[noreturn]] static void _Xrange() {
-        _Xout_of_range("invalid vector subscript");
+        _STD _Xout_of_range("invalid vector subscript");
     }
 
 #if _ITERATOR_DEBUG_LEVEL == 2
@@ -2312,7 +2312,7 @@ struct _Vbase_compare_three_way {
 #endif // ^^^ !_HAS_CXX20 ^^^
         }
 
-        const int _Bit_index = _Countr_zero(_Differing_bits); // number of least significant bits that match
+        const int _Bit_index = _STD _Countr_zero(_Differing_bits); // number of least significant bits that match
         _STL_INTERNAL_CHECK(_Bit_index < _VBITS); // because we return early for equality
 
         const _Vbase _Mask = _Vbase{1} << _Bit_index; // selects the least significant bit that differs
@@ -2862,7 +2862,7 @@ public:
 #if _ITERATOR_DEBUG_LEVEL != 0
         this->_Orphan_all();
         auto _Alproxy = _STD _Get_proxy_allocator(this->_Getal());
-        _Delete_plain_internal(_Alproxy, _STD exchange(this->_Myproxy, nullptr));
+        _STD _Delete_plain_internal(_Alproxy, _STD exchange(this->_Myproxy, nullptr));
 #endif // _ITERATOR_DEBUG_LEVEL != 0
 
 #if _MSVC_STL_DESTRUCTOR_TOMBSTONES
@@ -2950,8 +2950,8 @@ public:
     template <_Container_compatible_range<bool> _Rng>
     constexpr vector(from_range_t, _Rng&& _Range, const _Alloc& _Al = _Alloc()) : _Mybase(_Al) {
         if constexpr (_RANGES forward_range<_Rng> || _RANGES sized_range<_Rng>) {
-            const auto _Length = _To_unsigned_like(_RANGES distance(_Range));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Length = _STD _To_unsigned_like(_RANGES distance(_Range));
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             _Assign_counted_range(_RANGES _Ubegin(_Range), _Count);
         } else {
             _Assign_uncounted_range(_RANGES _Ubegin(_Range), _RANGES _Uend(_Range));
@@ -3360,8 +3360,8 @@ public:
             "Elements must be assignable from the range's reference type (N4993 [sequence.reqmts]/60).");
         clear();
         if constexpr (_RANGES forward_range<_Rng> || _RANGES sized_range<_Rng>) {
-            const auto _Length = _To_unsigned_like(_RANGES distance(_Range));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Length = _STD _To_unsigned_like(_RANGES distance(_Range));
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             _Assign_counted_range(_RANGES _Ubegin(_Range), _Count);
         } else {
             _Assign_uncounted_range(_RANGES _Ubegin(_Range), _RANGES _Uend(_Range));
@@ -3421,10 +3421,10 @@ public:
         const difference_type _Old_off = _Where - begin();
 
         if constexpr (_RANGES forward_range<_Rng> || _RANGES sized_range<_Rng>) {
-            const auto _Length = _To_unsigned_like(_RANGES distance(_Range));
-            const auto _Count  = _Convert_size<size_type>(_Length);
+            const auto _Length = _STD _To_unsigned_like(_RANGES distance(_Range));
+            const auto _Count  = _STD _Convert_size<size_type>(_Length);
             const auto _Off    = static_cast<difference_type>(_Insert_x(_Where, _Count));
-            _Copy_n_unchecked4(_RANGES _Ubegin(_Range), _Count, begin() + _Off);
+            _STD _Copy_n_unchecked4(_RANGES _Ubegin(_Range), _Count, begin() + _Off);
         } else {
             auto _UFirst         = _RANGES _Ubegin(_Range);
             const auto _ULast    = _RANGES _Uend(_Range);
@@ -3450,7 +3450,7 @@ public:
         _STL_VERIFY(end() > _Where, "vector<bool> erase iterator outside range");
 #endif
 
-        _STD copy(_Next_iter(_Where), end(), _Where);
+        _STD copy(_STD _Next_iter(_Where), end(), _Where);
 
 #if _ITERATOR_DEBUG_LEVEL == 2
         _Orphan_range(static_cast<size_type>(_Off), this->_Mysize);
@@ -3608,11 +3608,11 @@ public:
     }
 
     [[noreturn]] static void _Xlen() {
-        _Xlength_error("vector<bool> too long");
+        _STD _Xlength_error("vector<bool> too long");
     }
 
     [[noreturn]] static void _Xran() {
-        _Xout_of_range("invalid vector<bool> subscript");
+        _STD _Xout_of_range("invalid vector<bool> subscript");
     }
 };
 
@@ -3623,7 +3623,7 @@ struct hash<vector<bool, _Alloc>> {
 
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(
         const vector<bool, _Alloc>& _Keyval) _CONST_CALL_OPERATOR noexcept {
-        return _Hash_array_representation(_Keyval._Myvec.data(), _Keyval._Myvec.size());
+        return _STD _Hash_array_representation(_Keyval._Myvec.data(), _Keyval._Myvec.size());
     }
 };
 
@@ -3733,12 +3733,12 @@ _NODISCARD _CONSTEXPR20 _VbIt _Find_vbool(_VbIt _First, const _VbIt _Last, const
         const auto _LastSourceMask = static_cast<_Vbase>(-1) >> (_VBITS - _Last._Myoff);
         const auto _SourceMask     = _FirstSourceMask & _LastSourceMask;
         const auto _SelectVal      = (_Val ? *_VbFirst : ~*_VbFirst) & _SourceMask;
-        const auto _Count          = _Countr_zero(_SelectVal);
+        const auto _Count          = _STD _Countr_zero(_SelectVal);
         return _Count == _VBITS ? _Last : _First + static_cast<_Iter_diff_t<_VbIt>>(_Count - _First._Myoff);
     }
 
     const auto _FirstVal   = (_Val ? *_VbFirst : ~*_VbFirst) & _FirstSourceMask;
-    const auto _FirstCount = _Countr_zero(_FirstVal);
+    const auto _FirstCount = _STD _Countr_zero(_FirstVal);
     if (_FirstCount != _VBITS) {
         return _First + static_cast<_Iter_diff_t<_VbIt>>(_FirstCount - _First._Myoff);
     }
@@ -3747,7 +3747,7 @@ _NODISCARD _CONSTEXPR20 _VbIt _Find_vbool(_VbIt _First, const _VbIt _Last, const
     auto _TotalCount = static_cast<_Iter_diff_t<_VbIt>>(_VBITS - _First._Myoff);
     for (; _VbFirst != _VbLast; ++_VbFirst, _TotalCount += _VBITS) {
         const auto _SelectVal = _Val ? *_VbFirst : ~*_VbFirst;
-        const auto _Count     = _Countr_zero(_SelectVal);
+        const auto _Count     = _STD _Countr_zero(_SelectVal);
         if (_Count != _VBITS) {
             return _First + static_cast<_Iter_diff_t<_VbIt>>(_TotalCount + _Count);
         }
@@ -3756,7 +3756,7 @@ _NODISCARD _CONSTEXPR20 _VbIt _Find_vbool(_VbIt _First, const _VbIt _Last, const
     if (_Last._Myoff != 0) {
         const auto _LastSourceMask = static_cast<_Vbase>(-1) >> (_VBITS - _Last._Myoff);
         const auto _LastVal        = (_Val ? *_VbFirst : ~*_VbFirst) & _LastSourceMask;
-        const auto _Count          = _Countr_zero(_LastVal);
+        const auto _Count          = _STD _Countr_zero(_LastVal);
         if (_Count != _VBITS) {
             return _First + static_cast<_Iter_diff_t<_VbIt>>(_TotalCount + _Count);
         }
@@ -3781,10 +3781,10 @@ _NODISCARD _CONSTEXPR20 _Iter_diff_t<_VbIt> _Count_vbool(_VbIt _First, const _Vb
         const auto _LastSourceMask = static_cast<_Vbase>(-1) >> (_VBITS - _Last._Myoff);
         const auto _SourceMask     = _FirstSourceMask & _LastSourceMask;
         const auto _SelectVal      = (_Val ? *_VbFirst : ~*_VbFirst) & _SourceMask;
-        return _Popcount(_SelectVal);
+        return _STD _Popcount(_SelectVal);
     }
 
-    return _Select_popcount_impl<_Vbase>(
+    return _STD _Select_popcount_impl<_Vbase>(
         [_Last, _Val, _VbFirst, _VbLast, _FirstSourceMask](auto _Popcount_impl) mutable noexcept {
             const auto _FirstVal       = (_Val ? *_VbFirst : ~*_VbFirst) & _FirstSourceMask;
             _Iter_diff_t<_VbIt> _Count = _Popcount_impl(_FirstVal);
@@ -3902,7 +3902,7 @@ _CONSTEXPR20 _OutIt _Copy_vbool(_VbIt _First, _VbIt _Last, _OutIt _Dest) {
                 ++_VbDest_ch;
             }
 
-            _VbDest_ch = _Copy_unchecked(_VbFirst_ch, _VbLast_ch, _VbDest_ch);
+            _VbDest_ch = _RANGES _Copy_unchecked(_VbFirst_ch, _VbLast_ch, _VbDest_ch);
 
             // Copy remaining last bits
             if (_UnalignedLastBits != 0) {

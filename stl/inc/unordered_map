@@ -439,7 +439,7 @@ public:
             return _Target._Duplicate->_Myval.second;
         }
 
-        _Xout_of_range("invalid unordered_map<K, T> key");
+        _STD _Xout_of_range("invalid unordered_map<K, T> key");
     }
 
     _NODISCARD const mapped_type& at(const key_type& _Keyval) const {
@@ -448,7 +448,7 @@ public:
             return _Target._Duplicate->_Myval.second;
         }
 
-        _Xout_of_range("invalid unordered_map<K, T> key");
+        _STD _Xout_of_range("invalid unordered_map<K, T> key");
     }
 
     using _Mybase::_Unchecked_begin;

@@ -223,7 +223,7 @@ namespace stdext {
                 return _Target._Duplicate->_Myval.second;
             }
 
-            _Xout_of_range("invalid hash_map<K, T> key");
+            _STD _Xout_of_range("invalid hash_map<K, T> key");
         }
 
         _NODISCARD const mapped_type& at(const key_type& _Keyval) const {
@@ -232,7 +232,7 @@ namespace stdext {
                 return _Target._Duplicate->_Myval.second;
             }
 
-            _Xout_of_range("invalid hash_map<K, T> key");
+            _STD _Xout_of_range("invalid hash_map<K, T> key");
         }
 
         using reverse_iterator       = _STD reverse_iterator<iterator>;

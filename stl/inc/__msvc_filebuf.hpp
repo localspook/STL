@@ -283,7 +283,7 @@ public:
             return nullptr;
         }
 
-        const auto _File = _Fiopen(_Filename, _Mode, _Prot);
+        const auto _File = _STD _Fiopen(_Filename, _Mode, _Prot);
         if (!_File) {
             return nullptr; // open failed
         }
@@ -310,7 +310,7 @@ public:
             return nullptr;
         }
 
-        const auto _File = _Fiopen(_Filename, _Mode, _Prot);
+        const auto _File = _STD _Fiopen(_Filename, _Mode, _Prot);
         if (!_File) {
             return nullptr; // open failed
         }
@@ -405,7 +405,7 @@ protected:
 
         _Reset_back(); // revert from _Mychar buffer
         if (!_Pcvt) { // no codecvt facet, put as is
-            return _Fputc(_Traits::to_char_type(_Meta), _Myfile) ? _Meta : _Traits::eof();
+            return _STD _Fputc(_Traits::to_char_type(_Meta), _Myfile) ? _Meta : _Traits::eof();
         }
 
         // put using codecvt facet
@@ -435,7 +435,7 @@ protected:
 
         case codecvt_base::noconv:
             // no conversion, put as is
-            return _Fputc(_Ch, _Myfile) ? _Meta : _Traits::eof();
+            return _STD _Fputc(_Ch, _Myfile) ? _Meta : _Traits::eof();
 
         default:
             return _Traits::eof(); // conversion failed
@@ -452,7 +452,7 @@ protected:
             return _Traits::not_eof(_Meta);
         } else if (!_Myfile || _Traits::eq_int_type(_Traits::eof(), _Meta)) {
             return _Traits::eof(); // no open C stream or EOF, fail
-        } else if (!_Pcvt && _Ungetc(_Traits::to_char_type(_Meta), _Myfile)) {
+        } else if (!_Pcvt && _STD _Ungetc(_Traits::to_char_type(_Meta), _Myfile)) {
             return _Meta; // no facet and unget succeeded, return
         } else if (_Mysb::gptr() != &_Mychar) { // putback to _Mychar
             _Mychar = _Traits::to_char_type(_Meta);
@@ -487,7 +487,7 @@ protected:
         _Reset_back(); // revert from _Mychar buffer
         if (!_Pcvt) { // no codecvt facet, just get it
             _Elem _Ch;
-            return _Fgetc(_Ch, _Myfile) ? _Traits::to_int_type(_Ch) : _Traits::eof();
+            return _STD _Fgetc(_Ch, _Myfile) ? _Traits::to_int_type(_Ch) : _Traits::eof();
         }
 
         // build string until codecvt succeeds

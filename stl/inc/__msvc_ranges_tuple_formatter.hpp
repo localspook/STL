@@ -120,8 +120,8 @@ public:
     }
 
     constexpr void advance_to(const const_iterator _It) {
-        _Adl_verify_range(_It, _Format_string.end());
-        _Adl_verify_range(_Format_string.begin(), _It);
+        _STD _Adl_verify_range(_It, _Format_string.end());
+        _STD _Adl_verify_range(_Format_string.begin(), _It);
         const auto _Diff = static_cast<size_t>(_It._Unwrapped() - _Format_string._Unchecked_begin());
         _Format_string.remove_prefix(_Diff);
     }
@@ -133,12 +133,12 @@ public:
     // _Next_arg_id < 0 means manual
     _NODISCARD constexpr size_t next_arg_id() {
         if (_Next_arg_id < 0) {
-            _Throw_format_error("Can not switch from manual to automatic indexing");
+            _STD _Throw_format_error("Can not switch from manual to automatic indexing");
         }
 
         if (_STD is_constant_evaluated()) {
             if (static_cast<size_t>(_Next_arg_id) >= _Num_args) {
-                _You_see_this_error_because_arg_id_is_out_of_range();
+                _STD _You_see_this_error_because_arg_id_is_out_of_range();
             }
         }
 
@@ -148,12 +148,12 @@ public:
     constexpr void check_arg_id(const size_t _Id) {
         if (_STD is_constant_evaluated()) {
             if (_Id >= _Num_args) {
-                _You_see_this_error_because_arg_id_is_out_of_range();
+                _STD _You_see_this_error_because_arg_id_is_out_of_range();
             }
         }
 
         if (_Next_arg_id > 0) {
-            _Throw_format_error("Can not switch from automatic to manual indexing");
+            _STD _Throw_format_error("Can not switch from automatic to manual indexing");
         }
         _Next_arg_id = -1;
     }
@@ -166,7 +166,7 @@ public:
 
             _STL_INTERNAL_CHECK(_Ctx._Arg_type[_Idx] != _Basic_format_arg_type::_None);
             if (_Ctx._Arg_type[_Idx] > _Basic_format_arg_type::_ULong_long_type) {
-                _Invalid_arg_type_for_dynamic_width_or_precision();
+                _STD _Invalid_arg_type_for_dynamic_width_or_precision();
             }
         }
     }
@@ -953,7 +953,7 @@ public:
 private:
     template <_RANGES input_range _Range, class _FormatContext>
     _FormatContext::iterator _Format(_Range&&, _FormatContext&) const {
-        _Throw_format_error("Unsupported 'basic_format_context'.");
+        _STD _Throw_format_error("Unsupported 'basic_format_context'.");
     }
 
     template <_RANGES input_range _Range, class _FormatContext>
@@ -1084,7 +1084,7 @@ public:
             const auto _Size = _STD _To_unsigned_like(_RANGES distance(_Rx));
 
             if (!_STD in_range<size_t>(_Size)) {
-                _Throw_format_error("Formatted range is too long.");
+                _STD _Throw_format_error("Formatted range is too long.");
             }
 
             const basic_string_view<_CharT> _Str(_STD to_address(_RANGES begin(_Rx)), static_cast<size_t>(_Size));

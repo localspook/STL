@@ -53,7 +53,7 @@ namespace ranges {
         };
 
         template <class _ClosureLeft, class _ClosureRight>
-        struct _Pipeline : _Base<_Pipeline<_ClosureLeft, _ClosureRight>> {
+        struct _Pipeline : _Base<::std::ranges::_Pipe::_Pipeline<_ClosureLeft, _ClosureRight>> {
             _STL_INTERNAL_STATIC_ASSERT(_Range_adaptor_closure_object<_ClosureLeft>);
             _STL_INTERNAL_STATIC_ASSERT(_Range_adaptor_closure_object<_ClosureRight>);
 
@@ -1211,7 +1211,7 @@ namespace ranges {
     }
 
     _EXPORT_STD template <template <class...> class _Container, input_range _Rng, class... _Types,
-        class _Deduced = remove_pointer_t<decltype(_To_helper<_Container, _Rng, _Types...>())>>
+        class _Deduced = remove_pointer_t<decltype(_RANGES _To_helper<_Container, _Rng, _Types...>())>>
     _NODISCARD constexpr _Deduced to(_Rng&& _Range, _Types&&... _Args) {
         return _RANGES to<_Deduced>(_STD forward<_Rng>(_Range), _STD forward<_Types>(_Args)...);
     }
@@ -1219,7 +1219,7 @@ namespace ranges {
     template <template <class...> class _Container>
     struct _To_template_fn {
         template <input_range _Rng, class... _Types,
-            class _Deduced = remove_pointer_t<decltype(_To_helper<_Container, _Rng, _Types...>())>>
+            class _Deduced = remove_pointer_t<decltype(_RANGES _To_helper<_Container, _Rng, _Types...>())>>
         _NODISCARD _STATIC_CALL_OPERATOR constexpr auto operator()(
             _Rng&& _Range, _Types&&... _Args) _CONST_CALL_OPERATOR {
             return _RANGES to<_Deduced>(_STD forward<_Rng>(_Range), _STD forward<_Types>(_Args)...);

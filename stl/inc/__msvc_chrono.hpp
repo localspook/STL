@@ -268,13 +268,13 @@ template <class _Clock, class _Duration>
 constexpr bool _Is_trivially_swappable_v<chrono::time_point<_Clock, _Duration>> = _Is_trivially_swappable_v<_Duration>;
 
 _NODISCARD constexpr intmax_t _Lcm(const intmax_t _Ax, const intmax_t _Bx) noexcept {
-    return (_Ax / _Gcd(_Ax, _Bx)) * _Bx;
+    return (_Ax / _STD _Gcd(_Ax, _Bx)) * _Bx;
 }
 
 template <class _Rep1, class _Period1, class _Rep2, class _Period2>
 struct common_type<_CHRONO duration<_Rep1, _Period1>, _CHRONO duration<_Rep2, _Period2>> {
     using type = _CHRONO duration<common_type_t<_Rep1, _Rep2>,
-        ratio<_Gcd(_Period1::num, _Period2::num), _Lcm(_Period1::den, _Period2::den)>>;
+        ratio<_STD _Gcd(_Period1::num, _Period2::num), _STD _Lcm(_Period1::den, _Period2::den)>>;
 };
 
 template <class _Clock, class _Duration1, class _Duration2>
@@ -495,7 +495,7 @@ namespace chrono {
         const auto _Floor_adjustment = _Dur - _Floored;
         const auto _Ceil_adjustment  = _Ceiled - _Dur;
         if (_Floor_adjustment < _Ceil_adjustment
-            || (_Floor_adjustment == _Ceil_adjustment && _Is_even(_Floored.count()))) {
+            || (_Floor_adjustment == _Ceil_adjustment && _CHRONO _Is_even(_Floored.count()))) {
             return _Floored;
         }
 
@@ -654,8 +654,8 @@ namespace chrono {
         static constexpr bool is_steady = true;
 
         _NODISCARD static time_point now() noexcept { // get current time
-            const long long _Freq = _Query_perf_frequency(); // doesn't change after system boot
-            const long long _Ctr  = _Query_perf_counter();
+            const long long _Freq = ::_Query_perf_frequency(); // doesn't change after system boot
+            const long long _Ctr  = ::_Query_perf_counter();
             static_assert(period::num == 1, "This assumes period::num == 1.");
             // The compiler recognizes the constants for frequency and time period and uses shifts and
             // multiplies instead of divides to calculate the nanosecond value.

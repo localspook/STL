@@ -37,7 +37,7 @@ _STL_INTERNAL_STATIC_ASSERT(_STD size(_Charconv_digits) == 36);
 template <class _RawTy>
 _NODISCARD _CONSTEXPR23 to_chars_result _Integer_to_chars(
     char* _First, char* const _Last, const _RawTy _Raw_value, const int _Base) noexcept {
-    _Adl_verify_range(_First, _Last);
+    _STD _Adl_verify_range(_First, _Last);
     _STL_ASSERT(_Base >= 2 && _Base <= 36, "invalid base in to_chars()");
 
     using _Unsigned = make_unsigned_t<_RawTy>;
@@ -152,54 +152,54 @@ _NODISCARD _CONSTEXPR23 to_chars_result _Integer_to_chars(
         return {_Last, errc::value_too_large};
     }
 
-    _Copy_n_unchecked4(_RNext, _Digits_written, _First);
+    _STD _Copy_n_unchecked4(_RNext, _Digits_written, _First);
 
     return {_First + _Digits_written, errc{}};
 }
 
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(
     char* const _First, char* const _Last, const char _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(
     char* const _First, char* const _Last, const signed char _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(char* const _First, char* const _Last, const unsigned char _Value,
     const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(
     char* const _First, char* const _Last, const short _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(char* const _First, char* const _Last, const unsigned short _Value,
     const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(
     char* const _First, char* const _Last, const int _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(char* const _First, char* const _Last, const unsigned int _Value,
     const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(
     char* const _First, char* const _Last, const long _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(char* const _First, char* const _Last, const unsigned long _Value,
     const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(
     char* const _First, char* const _Last, const long long _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 to_chars_result to_chars(char* const _First, char* const _Last,
     const unsigned long long _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_to_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_to_chars(_First, _Last, _Value, _Base);
 }
 
 _EXPORT_STD to_chars_result to_chars(char* _First, char* _Last, bool _Value, int _Base = 10) = delete;
@@ -236,7 +236,7 @@ _NODISCARD _CONSTEXPR23 unsigned char _Digit_from_char(const char _Ch) noexcept 
 template <class _RawTy>
 _NODISCARD _CONSTEXPR23 from_chars_result _Integer_from_chars(
     const char* const _First, const char* const _Last, _RawTy& _Raw_value, const int _Base) noexcept {
-    _Adl_verify_range(_First, _Last);
+    _STD _Adl_verify_range(_First, _Last);
     _STL_ASSERT(_Base >= 2 && _Base <= 36, "invalid base in from_chars()");
 
     bool _Minus_sign = false;
@@ -280,7 +280,7 @@ _NODISCARD _CONSTEXPR23 from_chars_result _Integer_from_chars(
     bool _Overflowed = false;
 
     for (; _Next != _Last; ++_Next) {
-        const unsigned char _Digit = _Digit_from_char(*_Next);
+        const unsigned char _Digit = _STD _Digit_from_char(*_Next);
 
         if (_Digit >= _Base) {
             break;
@@ -315,47 +315,47 @@ _NODISCARD _CONSTEXPR23 from_chars_result _Integer_from_chars(
 
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(
     const char* const _First, const char* const _Last, char& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last,
     signed char& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last,
     unsigned char& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last, short& _Value,
     const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last,
     unsigned short& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(
     const char* const _First, const char* const _Last, int& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last,
     unsigned int& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(
     const char* const _First, const char* const _Last, long& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last,
     unsigned long& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last,
     long long& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 _EXPORT_STD _CONSTEXPR23 from_chars_result from_chars(const char* const _First, const char* const _Last,
     unsigned long long& _Value, const int _Base = 10) noexcept /* strengthened */ {
-    return _Integer_from_chars(_First, _Last, _Value, _Base);
+    return _STD _Integer_from_chars(_First, _Last, _Value, _Base);
 }
 
 // vvvvvvvvvv DERIVED FROM corecrt_internal_big_integer.h vvvvvvvvvv
@@ -460,7 +460,7 @@ _NODISCARD inline uint32_t _Bit_scan_reverse(const _Big_integer_flt& _Xval) noex
     _STL_INTERNAL_CHECK(_Xval._Mydata[_Bx] != 0); // _Big_integer_flt should always be trimmed
 
     // CodeQL [SM02313] _Index is always initialized: we've guaranteed that _Xval._Mydata[_Bx] is non-zero.
-    _BitScanReverse(&_Index, _Xval._Mydata[_Bx]);
+    ::_BitScanReverse(&_Index, _Xval._Mydata[_Bx]);
 
     return _Index + 1 + _Bx * _Big_integer_flt::_Element_bits;
 }
@@ -486,7 +486,7 @@ _NODISCARD inline bool _Shift_left(_Big_integer_flt& _Xval, const uint32_t _Nx) 
         _Xval._Myused += _Unit_shift;
     } else {
         const bool _Bit_shifts_into_next_unit =
-            _Bit_shift > (_Big_integer_flt::_Element_bits - _Bit_scan_reverse(_Xval._Mydata[_Xval._Myused - 1]));
+            _Bit_shift > (_Big_integer_flt::_Element_bits - _STD _Bit_scan_reverse(_Xval._Mydata[_Xval._Myused - 1]));
 
         const uint32_t _New_used = _Xval._Myused + _Unit_shift + static_cast<uint32_t>(_Bit_shifts_into_next_unit);
 
@@ -599,7 +599,7 @@ _NODISCARD inline bool _Multiply(_Big_integer_flt& _Multiplicand, const uint32_t
         return true;
     }
 
-    const uint32_t _Carry = _Multiply_core(_Multiplicand._Mydata, _Multiplicand._Myused, _Multiplier);
+    const uint32_t _Carry = _STD _Multiply_core(_Multiplicand._Mydata, _Multiplicand._Myused, _Multiplier);
     if (_Carry != 0) {
         if (_Multiplicand._Myused < _Big_integer_flt::_Element_count) {
             _Multiplicand._Mydata[_Multiplicand._Myused] = _Carry;
@@ -628,13 +628,13 @@ _NODISCARD inline bool _Multiply(_Big_integer_flt& _Multiplicand, const _Big_int
     }
 
     if (_Multiplier._Myused == 1) {
-        return _Multiply(_Multiplicand, _Multiplier._Mydata[0]); // when overflow occurs, resets to zero
+        return _STD _Multiply(_Multiplicand, _Multiplier._Mydata[0]); // when overflow occurs, resets to zero
     }
 
     if (_Multiplicand._Myused == 1) {
         const uint32_t _Small_multiplier = _Multiplicand._Mydata[0];
         _Multiplicand                    = _Multiplier;
-        return _Multiply(_Multiplicand, _Small_multiplier); // when overflow occurs, resets to zero
+        return _STD _Multiply(_Multiplicand, _Small_multiplier); // when overflow occurs, resets to zero
     }
 
     // We prefer more iterations on the inner loop and fewer on the outer:
@@ -665,7 +665,7 @@ _NODISCARD inline bool _Multiply(_Big_integer_flt& _Multiplicand, const _Big_int
                 _Result._Myused          = _Iu_res + 1;
             }
 
-            _U_carry = _Add_multiply_carry(_Result._Mydata[_Iu_res], _U_cur, _Rgu2[_Iu2], _U_carry);
+            _U_carry = _STD _Add_multiply_carry(_Result._Mydata[_Iu_res], _U_cur, _Rgu2[_Iu2], _U_carry);
         }
 
         while (_U_carry != 0 && _Iu_res != _Big_integer_flt::_Element_count) {
@@ -674,7 +674,7 @@ _NODISCARD inline bool _Multiply(_Big_integer_flt& _Multiplicand, const _Big_int
                 _Result._Myused          = _Iu_res + 1;
             }
 
-            _U_carry = _Add_carry(_Result._Mydata[_Iu_res++], 0, _U_carry);
+            _U_carry = _STD _Add_carry(_Result._Mydata[_Iu_res++], 0, _U_carry);
         }
 
         if (_Iu_res == _Big_integer_flt::_Element_count) {
@@ -728,7 +728,7 @@ _NODISCARD inline bool _Multiply_by_power_of_ten(_Big_integer_flt& _Xval, const 
         _CSTD memset(_Multiplier._Mydata, 0, _Index._Zeroes * sizeof(uint32_t));
         _CSTD memcpy(_Multiplier._Mydata + _Index._Zeroes, _Source, _Index._Size * sizeof(uint32_t));
 
-        if (!_Multiply(_Xval, _Multiplier)) { // when overflow occurs, resets to zero
+        if (!_STD _Multiply(_Xval, _Multiplier)) { // when overflow occurs, resets to zero
             return false;
         }
 
@@ -744,13 +744,13 @@ _NODISCARD inline bool _Multiply_by_power_of_ten(_Big_integer_flt& _Xval, const 
         return true;
     }
 
-    return _Multiply(_Xval, _Small_powers_of_ten[_Small_power - 1]); // when overflow occurs, resets to zero
+    return _STD _Multiply(_Xval, _Small_powers_of_ten[_Small_power - 1]); // when overflow occurs, resets to zero
 }
 
 // Computes the number of zeroes higher than the most significant set bit in _Ux
 _NODISCARD inline uint32_t _Count_sequential_high_zeroes(const uint32_t _Ux) noexcept {
     unsigned long _Index; // Intentionally uninitialized for better codegen
-    return _BitScanReverse(&_Index, _Ux) ? 31 - _Index : 32;
+    return ::_BitScanReverse(&_Index, _Ux) ? 31 - _Index : 32;
 }
 
 // This high-precision integer division implementation was translated from the implementation of
@@ -851,7 +851,7 @@ _NODISCARD inline uint64_t _Divide(_Big_integer_flt& _Numerator, const _Big_inte
     uint32_t _U_den      = _Denominator._Mydata[_Cu_den - 1];
     uint32_t _U_den_next = _Denominator._Mydata[_Cu_den - 2];
 
-    const uint32_t _Cbit_shift_left  = _Count_sequential_high_zeroes(_U_den);
+    const uint32_t _Cbit_shift_left  = _STD _Count_sequential_high_zeroes(_U_den);
     const uint32_t _Cbit_shift_right = 32 - _Cbit_shift_left;
     if (_Cbit_shift_left > 0) {
         _U_den = (_U_den << _Cbit_shift_left) | (_U_den_next >> _Cbit_shift_right);
@@ -981,7 +981,7 @@ void _Assemble_floating_point_zero(const bool _Is_negative, _FloatingType& _Resu
     _Uint_type _Sign_component = _Is_negative;
     _Sign_component <<= _Floating_traits::_Sign_shift;
 
-    _Result = _Bit_cast<_FloatingType>(_Sign_component);
+    _Result = _STD _Bit_cast<_FloatingType>(_Sign_component);
 }
 
 // Stores a positive or negative infinity into the _Result object
@@ -995,7 +995,7 @@ void _Assemble_floating_point_infinity(const bool _Is_negative, _FloatingType& _
 
     constexpr _Uint_type _Exponent_component = _Floating_traits::_Shifted_exponent_mask;
 
-    _Result = _Bit_cast<_FloatingType>(_Sign_component | _Exponent_component);
+    _Result = _STD _Bit_cast<_FloatingType>(_Sign_component | _Exponent_component);
 }
 
 // Determines whether a mantissa should be rounded up according to round_to_nearest given [1] the value of the least
@@ -1128,7 +1128,7 @@ void _Assemble_floating_point_value_no_shift(const bool _Is_negative, const int3
     _Uint_type _Exponent_component = static_cast<uint32_t>(_Exponent + (_Floating_traits::_Exponent_bias - 1));
     _Exponent_component <<= _Floating_traits::_Exponent_shift;
 
-    _Result = _Bit_cast<_FloatingType>(_Sign_component | (_Exponent_component + _Mantissa));
+    _Result = _STD _Bit_cast<_FloatingType>(_Sign_component | (_Exponent_component + _Mantissa));
 }
 
 // Converts the floating-point value [sign] (mantissa / 2^(precision-1)) * 2^exponent into the correct form for
@@ -1152,13 +1152,13 @@ _NODISCARD errc _Assemble_floating_point_value(const uint64_t _Initial_mantissa,
     // Assume that the number is representable as a normal value.
     // Compute the number of bits by which we must adjust the mantissa to shift it into the correct position,
     // and compute the resulting base two exponent for the normalized mantissa:
-    const uint32_t _Initial_mantissa_bits = _Bit_scan_reverse(_Initial_mantissa);
+    const uint32_t _Initial_mantissa_bits = _STD _Bit_scan_reverse(_Initial_mantissa);
     const int32_t _Normal_mantissa_shift  = static_cast<int32_t>(_Traits::_Mantissa_bits - _Initial_mantissa_bits);
     const int32_t _Normal_exponent        = _Initial_exponent - _Normal_mantissa_shift;
 
     if (_Normal_exponent > _Traits::_Maximum_binary_exponent) {
         // The exponent is too large to be represented by the floating-point type; report the overflow condition:
-        _Assemble_floating_point_infinity(_Is_negative, _Result);
+        _STD _Assemble_floating_point_infinity(_Is_negative, _Result);
         return errc::result_out_of_range; // Overflow example: "1e+1000"
     }
 
@@ -1178,8 +1178,8 @@ _NODISCARD errc _Assemble_floating_point_value(const uint64_t _Initial_mantissa,
         const int32_t _Denormal_mantissa_shift = _Initial_exponent - _Exponent;
 
         if (_Denormal_mantissa_shift < 0) {
-            _Mantissa =
-                _Right_shift_with_rounding(_Mantissa, static_cast<uint32_t>(-_Denormal_mantissa_shift), _Has_zero_tail);
+            _Mantissa = _STD _Right_shift_with_rounding(
+                _Mantissa, static_cast<uint32_t>(-_Denormal_mantissa_shift), _Has_zero_tail);
 
             // from_chars in MSVC STL and strto[f|d|ld] in UCRT reports underflow only when the result is zero after
             // rounding to the floating-point format. This behavior is different from IEEE 754 underflow exception.
@@ -1204,8 +1204,8 @@ _NODISCARD errc _Assemble_floating_point_value(const uint64_t _Initial_mantissa,
         }
     } else {
         if (_Normal_mantissa_shift < 0) {
-            _Mantissa =
-                _Right_shift_with_rounding(_Mantissa, static_cast<uint32_t>(-_Normal_mantissa_shift), _Has_zero_tail);
+            _Mantissa = _STD _Right_shift_with_rounding(
+                _Mantissa, static_cast<uint32_t>(-_Normal_mantissa_shift), _Has_zero_tail);
 
             // When we round the mantissa, it may produce a result that is too large. In this case,
             // we divide the mantissa by two and increment the exponent (this does not change the value).
@@ -1225,7 +1225,7 @@ _NODISCARD errc _Assemble_floating_point_value(const uint64_t _Initial_mantissa,
     // Assemble the floating-point value from the computed components:
     using _Uint_type = typename _Traits::_Uint_type;
 
-    _Assemble_floating_point_value_no_shift(_Is_negative, _Exponent, static_cast<_Uint_type>(_Mantissa), _Result);
+    _STD _Assemble_floating_point_value_no_shift(_Is_negative, _Exponent, static_cast<_Uint_type>(_Mantissa), _Result);
 
     return _Error_code;
 }
@@ -1251,7 +1251,7 @@ _NODISCARD errc _Assemble_floating_point_value_from_big_integer_flt(const _Big_i
         const uint32_t _Mantissa_high = _Integer_value._Myused > 1 ? _Integer_value._Mydata[1] : 0;
         const uint64_t _Mantissa      = _Mantissa_low + (static_cast<uint64_t>(_Mantissa_high) << 32);
 
-        return _Assemble_floating_point_value(
+        return _STD _Assemble_floating_point_value(
             _Mantissa, _Exponent, _Is_negative, !_Has_nonzero_fractional_part, _Result);
     }
 
@@ -1273,7 +1273,7 @@ _NODISCARD errc _Assemble_floating_point_value_from_big_integer_flt(const _Big_i
             _Has_zero_tail = _Integer_value._Mydata[_Ix] == 0;
         }
 
-        return _Assemble_floating_point_value(_Mantissa, _Exponent, _Is_negative, _Has_zero_tail, _Result);
+        return _STD _Assemble_floating_point_value(_Mantissa, _Exponent, _Is_negative, _Has_zero_tail, _Result);
     }
 
     // Not quite so fast case: The top 64 bits span three elements in the _Big_integer_flt. Assemble the three pieces:
@@ -1301,7 +1301,7 @@ _NODISCARD errc _Assemble_floating_point_value_from_big_integer_flt(const _Big_i
         _Has_zero_tail = _Integer_value._Mydata[_Ix] == 0;
     }
 
-    return _Assemble_floating_point_value(_Mantissa, _Exponent, _Is_negative, _Has_zero_tail, _Result);
+    return _STD _Assemble_floating_point_value(_Mantissa, _Exponent, _Is_negative, _Has_zero_tail, _Result);
 }
 
 // Accumulates the decimal digits in [_First_digit, _Last_digit) into the _Result high-precision integer.
@@ -1314,9 +1314,9 @@ inline void _Accumulate_decimal_digits_into_big_integer_flt(
     uint32_t _Accumulator_count = 0;
     for (const uint8_t* _It = _First_digit; _It != _Last_digit; ++_It) {
         if (_Accumulator_count == 9) {
-            [[maybe_unused]] const bool _Success1 = _Multiply(_Result, 1'000'000'000); // assumes no overflow
+            [[maybe_unused]] const bool _Success1 = _STD _Multiply(_Result, 1'000'000'000); // assumes no overflow
             _STL_INTERNAL_CHECK(_Success1);
-            [[maybe_unused]] const bool _Success2 = _Add(_Result, _Accumulator); // assumes no overflow
+            [[maybe_unused]] const bool _Success2 = _STD _Add(_Result, _Accumulator); // assumes no overflow
             _STL_INTERNAL_CHECK(_Success2);
 
             _Accumulator       = 0;
@@ -1330,9 +1330,9 @@ inline void _Accumulate_decimal_digits_into_big_integer_flt(
 
     if (_Accumulator_count != 0) {
         [[maybe_unused]] const bool _Success3 =
-            _Multiply_by_power_of_ten(_Result, _Accumulator_count); // assumes no overflow
+            _STD _Multiply_by_power_of_ten(_Result, _Accumulator_count); // assumes no overflow
         _STL_INTERNAL_CHECK(_Success3);
-        [[maybe_unused]] const bool _Success4 = _Add(_Result, _Accumulator); // assumes no overflow
+        [[maybe_unused]] const bool _Success4 = _STD _Add(_Result, _Accumulator); // assumes no overflow
         _STL_INTERNAL_CHECK(_Success4);
     }
 }
@@ -1367,11 +1367,11 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
 
     // First, we accumulate the integer part of the mantissa into a _Big_integer_flt:
     _Big_integer_flt _Integer_value{};
-    _Accumulate_decimal_digits_into_big_integer_flt(_Integer_first, _Integer_last, _Integer_value);
+    _STD _Accumulate_decimal_digits_into_big_integer_flt(_Integer_first, _Integer_last, _Integer_value);
 
     if (_Integer_digits_missing > 0) {
-        if (!_Multiply_by_power_of_ten(_Integer_value, _Integer_digits_missing)) {
-            _Assemble_floating_point_infinity(_Data._Myis_negative, _Result);
+        if (!_STD _Multiply_by_power_of_ten(_Integer_value, _Integer_digits_missing)) {
+            _STD _Assemble_floating_point_infinity(_Data._Myis_negative, _Result);
             return errc::result_out_of_range; // Overflow example: "1e+2000"
         }
     }
@@ -1379,12 +1379,12 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
     // At this point, the _Integer_value contains the value of the integer part of the mantissa. If either
     // [1] this number has more than the required number of bits of precision or
     // [2] the mantissa has no fractional part, then we can assemble the result immediately:
-    const uint32_t _Integer_bits_of_precision = _Bit_scan_reverse(_Integer_value);
+    const uint32_t _Integer_bits_of_precision = _STD _Bit_scan_reverse(_Integer_value);
     {
         const bool _Has_zero_fractional_part = _Fractional_digits_present == 0 && _Has_zero_tail;
 
         if (_Integer_bits_of_precision >= _Required_bits_of_precision || _Has_zero_fractional_part) {
-            return _Assemble_floating_point_value_from_big_integer_flt(
+            return _STD _Assemble_floating_point_value_from_big_integer_flt(
                 _Integer_value, _Integer_bits_of_precision, _Data._Myis_negative, !_Has_zero_fractional_part, _Result);
         }
     }
@@ -1395,17 +1395,17 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
     // fractional part, and the denominator M is computed as the power of 10 such that N/M is equal to the value
     // of the fractional part of the mantissa.
     _Big_integer_flt _Fractional_numerator{};
-    _Accumulate_decimal_digits_into_big_integer_flt(_Fractional_first, _Fractional_last, _Fractional_numerator);
+    _STD _Accumulate_decimal_digits_into_big_integer_flt(_Fractional_first, _Fractional_last, _Fractional_numerator);
 
     const uint32_t _Fractional_denominator_exponent =
         _Data._Myexponent < 0 ? _Fractional_digits_present + static_cast<uint32_t>(-_Data._Myexponent)
                               : _Fractional_digits_present;
 
-    _Big_integer_flt _Fractional_denominator = _Make_big_integer_flt_one();
-    if (!_Multiply_by_power_of_ten(_Fractional_denominator, _Fractional_denominator_exponent)) {
+    _Big_integer_flt _Fractional_denominator = _STD _Make_big_integer_flt_one();
+    if (!_STD _Multiply_by_power_of_ten(_Fractional_denominator, _Fractional_denominator_exponent)) {
         // If there were any digits in the integer part, it is impossible to underflow (because the exponent
         // cannot possibly be small enough), so if we underflow here it is a true underflow and we return zero.
-        _Assemble_floating_point_zero(_Data._Myis_negative, _Result);
+        _STD _Assemble_floating_point_zero(_Data._Myis_negative, _Result);
         return errc::result_out_of_range; // Underflow example: "1e-2000"
     }
 
@@ -1413,8 +1413,8 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
     // than the denominator. We normalize the fraction such that the most significant bit of the numerator is in the
     // same position as the most significant bit in the denominator. This ensures that when we later shift the
     // numerator N bits to the left, we will produce N bits of precision.
-    const uint32_t _Fractional_numerator_bits   = _Bit_scan_reverse(_Fractional_numerator);
-    const uint32_t _Fractional_denominator_bits = _Bit_scan_reverse(_Fractional_denominator);
+    const uint32_t _Fractional_numerator_bits   = _STD _Bit_scan_reverse(_Fractional_numerator);
+    const uint32_t _Fractional_denominator_bits = _STD _Bit_scan_reverse(_Fractional_denominator);
 
     const uint32_t _Fractional_shift = _Fractional_denominator_bits > _Fractional_numerator_bits
                                          ? _Fractional_denominator_bits - _Fractional_numerator_bits
@@ -1422,7 +1422,7 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
 
     if (_Fractional_shift > 0) {
         [[maybe_unused]] const bool _Shift_success1 =
-            _Shift_left(_Fractional_numerator, _Fractional_shift); // assumes no overflow
+            _STD _Shift_left(_Fractional_numerator, _Fractional_shift); // assumes no overflow
         _STL_INTERNAL_CHECK(_Shift_success1);
     }
 
@@ -1440,7 +1440,7 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
         // This is e.g. the case for large, odd integers with a fractional part greater than or equal to .5.
         // Thus, we need to do the division to correctly round the result.
         if (_Fractional_shift > _Remaining_bits_of_precision_required) {
-            return _Assemble_floating_point_value_from_big_integer_flt(_Integer_value, _Integer_bits_of_precision,
+            return _STD _Assemble_floating_point_value_from_big_integer_flt(_Integer_value, _Integer_bits_of_precision,
                 _Data._Myis_negative, _Fractional_digits_present != 0 || !_Has_zero_tail, _Result);
         }
 
@@ -1454,15 +1454,15 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
         _Fractional_numerator < _Fractional_denominator ? _Fractional_shift + 1 : _Fractional_shift;
 
     [[maybe_unused]] const bool _Shift_success2 =
-        _Shift_left(_Fractional_numerator, _Remaining_bits_of_precision_required); // assumes no overflow
+        _STD _Shift_left(_Fractional_numerator, _Remaining_bits_of_precision_required); // assumes no overflow
     _STL_INTERNAL_CHECK(_Shift_success2);
 
-    uint64_t _Fractional_mantissa = _Divide(_Fractional_numerator, _Fractional_denominator);
+    uint64_t _Fractional_mantissa = _STD _Divide(_Fractional_numerator, _Fractional_denominator);
 
     _Has_zero_tail = _Has_zero_tail && _Fractional_numerator._Myused == 0;
 
     // We may have produced more bits of precision than were required. Check, and remove any "extra" bits:
-    const uint32_t _Fractional_mantissa_bits = _Bit_scan_reverse(_Fractional_mantissa);
+    const uint32_t _Fractional_mantissa_bits = _STD _Bit_scan_reverse(_Fractional_mantissa);
     if (_Fractional_mantissa_bits > _Required_fractional_bits_of_precision) {
         const uint32_t _Shift = _Fractional_mantissa_bits - _Required_fractional_bits_of_precision;
         _Has_zero_tail        = _Has_zero_tail && (_Fractional_mantissa & ((1ULL << _Shift) - 1)) == 0;
@@ -1488,7 +1488,7 @@ _NODISCARD errc _Convert_decimal_string_to_floating_type(
                                       ? static_cast<int32_t>(_Integer_bits_of_precision - 2)
                                       : -static_cast<int32_t>(_Fractional_exponent) - 1;
 
-    return _Assemble_floating_point_value(
+    return _STD _Assemble_floating_point_value(
         _Complete_mantissa, _Final_exponent, _Data._Myis_negative, _Has_zero_tail, _Result);
 }
 
@@ -1513,7 +1513,7 @@ _NODISCARD errc _Convert_hexadecimal_string_to_floating_type(
         _Has_zero_tail = *_Mantissa_it++ == 0;
     }
 
-    return _Assemble_floating_point_value(_Mantissa, _Exponent, _Data._Myis_negative, _Has_zero_tail, _Result);
+    return _STD _Assemble_floating_point_value(_Mantissa, _Exponent, _Data._Myis_negative, _Has_zero_tail, _Result);
 }
 
 // ^^^^^^^^^^ DERIVED FROM corecrt_internal_strtox.h ^^^^^^^^^^
@@ -1596,7 +1596,7 @@ _NODISCARD from_chars_result _Ordinary_floating_from_chars(const char* const _Fi
 
     // Scan the integer part of the mantissa:
     for (; _Next != _Last; ++_Next) {
-        const unsigned char _Digit_value = _Digit_from_char(*_Next);
+        const unsigned char _Digit_value = _STD _Digit_from_char(*_Next);
 
         if (_Digit_value >= _Base) {
             break;
@@ -1636,7 +1636,7 @@ _NODISCARD from_chars_result _Ordinary_floating_from_chars(const char* const _Fi
 
     // Scan the fractional part of the mantissa:
     for (; _Next != _Last; ++_Next) {
-        const unsigned char _Digit_value = _Digit_from_char(*_Next);
+        const unsigned char _Digit_value = _STD _Digit_from_char(*_Next);
 
         if (_Digit_value >= _Base) {
             break;
@@ -1676,7 +1676,7 @@ _NODISCARD from_chars_result _Ordinary_floating_from_chars(const char* const _Fi
         }
 
         while (_Unread != _Last) {
-            const unsigned char _Digit_value = _Digit_from_char(*_Unread);
+            const unsigned char _Digit_value = _STD _Digit_from_char(*_Unread);
 
             if (_Digit_value >= 10) {
                 break;
@@ -1720,17 +1720,17 @@ _NODISCARD from_chars_result _Ordinary_floating_from_chars(const char* const _Fi
     // update _Next to point past the end of the exponent.
     if (_Mantissa_it == _Mantissa_first) {
         _STL_INTERNAL_CHECK(_Has_zero_tail);
-        _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
+        _STD _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
         return {_Next, errc{}};
     }
 
     // Handle exponent of an overly large absolute value.
     if (_Exp_abs_too_large) {
         if (_Exponent > 0) {
-            _Assemble_floating_point_infinity(_Fp_string._Myis_negative, _Value);
+            _STD _Assemble_floating_point_infinity(_Fp_string._Myis_negative, _Value);
             return {_Next, errc::result_out_of_range};
         } else {
-            _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
+            _STD _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
             return {_Next, errc::result_out_of_range};
         }
     }
@@ -1767,13 +1767,13 @@ _NODISCARD from_chars_result _Ordinary_floating_from_chars(const char* const _Fi
     // So we can detect out-of-range cases directly.
     if (_Exponent > _Maximum_temporary_decimal_exponent
         || _Exponent_adjustment > _Maximum_temporary_decimal_exponent / _Exponent_adjustment_multiplier) {
-        _Assemble_floating_point_infinity(_Fp_string._Myis_negative, _Value);
+        _STD _Assemble_floating_point_infinity(_Fp_string._Myis_negative, _Value);
         return {_Next, errc::result_out_of_range}; // Overflow example: "1e+9999"
     }
 
     if (_Exponent < _Minimum_temporary_decimal_exponent
         || _Exponent_adjustment < _Minimum_temporary_decimal_exponent / _Exponent_adjustment_multiplier) {
-        _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
+        _STD _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
         return {_Next, errc::result_out_of_range}; // Underflow example: "1e-9999"
     }
 
@@ -1782,12 +1782,12 @@ _NODISCARD from_chars_result _Ordinary_floating_from_chars(const char* const _Fi
     // Verify that after adjustment the exponent isn't wildly out of range (if it is, it isn't representable
     // in any supported floating-point format).
     if (_Exponent > _Maximum_temporary_decimal_exponent) {
-        _Assemble_floating_point_infinity(_Fp_string._Myis_negative, _Value);
+        _STD _Assemble_floating_point_infinity(_Fp_string._Myis_negative, _Value);
         return {_Next, errc::result_out_of_range}; // Overflow example: "10e+5199"
     }
 
     if (_Exponent < _Minimum_temporary_decimal_exponent) {
-        _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
+        _STD _Assemble_floating_point_zero(_Fp_string._Myis_negative, _Value);
         return {_Next, errc::result_out_of_range}; // Underflow example: "0.001e-5199"
     }
 
@@ -1795,10 +1795,10 @@ _NODISCARD from_chars_result _Ordinary_floating_from_chars(const char* const _Fi
     _Fp_string._Mymantissa_count = static_cast<uint32_t>(_Mantissa_it - _Mantissa_first);
 
     if (_Is_hexadecimal) {
-        const errc _Ec = _Convert_hexadecimal_string_to_floating_type(_Fp_string, _Value, _Has_zero_tail);
+        const errc _Ec = _STD _Convert_hexadecimal_string_to_floating_type(_Fp_string, _Value, _Has_zero_tail);
         return {_Next, _Ec};
     } else {
-        const errc _Ec = _Convert_decimal_string_to_floating_type(_Fp_string, _Value, _Has_zero_tail);
+        const errc _Ec = _STD _Convert_decimal_string_to_floating_type(_Fp_string, _Value, _Has_zero_tail);
         return {_Next, _Ec};
     }
 
@@ -1821,18 +1821,18 @@ template <class _Floating>
 _NODISCARD from_chars_result _Infinity_from_chars(const char* const _First, const char* const _Last, _Floating& _Value,
     const bool _Minus_sign, const char* _Next) noexcept {
     // pre: _Next points at 'i' (case-insensitively)
-    if (!_Starts_with_case_insensitive(_Next + 1, _Last, "nf")) { // definitely invalid
+    if (!_STD _Starts_with_case_insensitive(_Next + 1, _Last, "nf")) { // definitely invalid
         return {_First, errc::invalid_argument};
     }
 
     // definitely inf
     _Next += 3;
 
-    if (_Starts_with_case_insensitive(_Next, _Last, "inity")) { // definitely infinity
+    if (_STD _Starts_with_case_insensitive(_Next, _Last, "inity")) { // definitely infinity
         _Next += 5;
     }
 
-    _Assemble_floating_point_infinity(_Minus_sign, _Value);
+    _STD _Assemble_floating_point_infinity(_Minus_sign, _Value);
 
     return {_Next, errc{}};
 }
@@ -1841,7 +1841,7 @@ template <class _Floating>
 _NODISCARD from_chars_result _Nan_from_chars(const char* const _First, const char* const _Last, _Floating& _Value,
     bool _Minus_sign, const char* _Next) noexcept {
     // pre: _Next points at 'n' (case-insensitively)
-    if (!_Starts_with_case_insensitive(_Next + 1, _Last, "an")) { // definitely invalid
+    if (!_STD _Starts_with_case_insensitive(_Next + 1, _Last, "an")) { // definitely invalid
         return {_First, errc::invalid_argument};
     }
 
@@ -1858,12 +1858,12 @@ _NODISCARD from_chars_result _Nan_from_chars(const char* const _First, const cha
                 _Next = _Temp + 1;
 
                 if (_Temp - _Seq_begin == 3
-                    && _Starts_with_case_insensitive(_Seq_begin, _Temp, "ind")) { // definitely nan(ind)
+                    && _STD _Starts_with_case_insensitive(_Seq_begin, _Temp, "ind")) { // definitely nan(ind)
                     // The UCRT considers indeterminate NaN to be negative quiet NaN with no payload bits set.
                     // It parses "nan(ind)" and "-nan(ind)" identically.
                     _Minus_sign = true;
                 } else if (_Temp - _Seq_begin == 4
-                           && _Starts_with_case_insensitive(_Seq_begin, _Temp, "snan")) { // definitely nan(snan)
+                           && _STD _Starts_with_case_insensitive(_Seq_begin, _Temp, "snan")) { // definitely nan(snan)
                     _Quiet = false;
                 }
 
@@ -1896,7 +1896,7 @@ _NODISCARD from_chars_result _Nan_from_chars(const char* const _First, const cha
         _Uint_value |= 1;
     }
 
-    _Value = _Bit_cast<_Floating>(_Uint_value);
+    _Value = _STD _Bit_cast<_Floating>(_Uint_value);
 
     return {_Next, errc{}};
 }
@@ -1904,7 +1904,7 @@ _NODISCARD from_chars_result _Nan_from_chars(const char* const _First, const cha
 template <class _Floating>
 _NODISCARD from_chars_result _Floating_from_chars(
     const char* const _First, const char* const _Last, _Floating& _Value, const chars_format _Fmt) noexcept {
-    _Adl_verify_range(_First, _Last);
+    _STD _Adl_verify_range(_First, _Last);
 
     _STL_ASSERT(_Fmt == chars_format::general || _Fmt == chars_format::scientific || _Fmt == chars_format::fixed
                     || _Fmt == chars_format::hex,
@@ -1939,11 +1939,11 @@ _NODISCARD from_chars_result _Floating_from_chars(
     const unsigned char _Folded_start = static_cast<unsigned char>(static_cast<unsigned char>(*_Next) | 0x20);
 
     if (_Folded_start <= 'f') { // possibly an ordinary number
-        return _Ordinary_floating_from_chars(_First, _Last, _Value, _Fmt, _Minus_sign, _Next);
+        return _STD _Ordinary_floating_from_chars(_First, _Last, _Value, _Fmt, _Minus_sign, _Next);
     } else if (_Folded_start == 'i') { // possibly inf
-        return _Infinity_from_chars(_First, _Last, _Value, _Minus_sign, _Next);
+        return _STD _Infinity_from_chars(_First, _Last, _Value, _Minus_sign, _Next);
     } else if (_Folded_start == 'n') { // possibly nan
-        return _Nan_from_chars(_First, _Last, _Value, _Minus_sign, _Next);
+        return _STD _Nan_from_chars(_First, _Last, _Value, _Minus_sign, _Next);
     } else { // definitely invalid
         return {_First, errc::invalid_argument};
     }
@@ -1951,16 +1951,16 @@ _NODISCARD from_chars_result _Floating_from_chars(
 
 _EXPORT_STD inline from_chars_result from_chars(const char* const _First, const char* const _Last, float& _Value,
     const chars_format _Fmt = chars_format::general) noexcept /* strengthened */ {
-    return _Floating_from_chars(_First, _Last, _Value, _Fmt);
+    return _STD _Floating_from_chars(_First, _Last, _Value, _Fmt);
 }
 _EXPORT_STD inline from_chars_result from_chars(const char* const _First, const char* const _Last, double& _Value,
     const chars_format _Fmt = chars_format::general) noexcept /* strengthened */ {
-    return _Floating_from_chars(_First, _Last, _Value, _Fmt);
+    return _STD _Floating_from_chars(_First, _Last, _Value, _Fmt);
 }
 _EXPORT_STD inline from_chars_result from_chars(const char* const _First, const char* const _Last, long double& _Value,
     const chars_format _Fmt = chars_format::general) noexcept /* strengthened */ {
     double _Dbl; // intentionally default-init
-    const from_chars_result _Result = _Floating_from_chars(_First, _Last, _Dbl, _Fmt);
+    const from_chars_result _Result = _STD _Floating_from_chars(_First, _Last, _Dbl, _Fmt);
 
     if (_Result.ec == errc{}) {
         _Value = _Dbl;
@@ -1993,7 +1993,7 @@ _NODISCARD to_chars_result _Floating_to_chars_hex_precision(
     using _Traits    = _Floating_type_traits<_Floating>;
     using _Uint_type = typename _Traits::_Uint_type;
 
-    const _Uint_type _Uint_value    = _Bit_cast<_Uint_type>(_Value);
+    const _Uint_type _Uint_value    = _STD _Bit_cast<_Uint_type>(_Value);
     const _Uint_type _Ieee_mantissa = _Uint_value & _Traits::_Denormal_mantissa_mask;
     const int32_t _Ieee_exponent    = static_cast<int32_t>(_Uint_value >> _Traits::_Exponent_shift);
 
@@ -2211,7 +2211,7 @@ _NODISCARD to_chars_result _Floating_to_chars_hex_shortest(
     using _Traits    = _Floating_type_traits<_Floating>;
     using _Uint_type = typename _Traits::_Uint_type;
 
-    const _Uint_type _Uint_value = _Bit_cast<_Uint_type>(_Value);
+    const _Uint_type _Uint_value = _STD _Bit_cast<_Uint_type>(_Value);
 
     if (_Uint_value == 0) { // zero detected; write "0p+0" and return
         // C11 7.21.6.1 "The fprintf function"/8: "If the value is zero, the exponent is zero."
@@ -2331,7 +2331,7 @@ _NODISCARD inline to_chars_result _Floating_to_chars_general_precision(
     using _Traits    = _Floating_type_traits<_Floating>;
     using _Uint_type = typename _Traits::_Uint_type;
 
-    const _Uint_type _Uint_value = _Bit_cast<_Uint_type>(_Value);
+    const _Uint_type _Uint_value = _STD _Bit_cast<_Uint_type>(_Value);
 
     if (_Uint_value == 0) { // zero detected; write "0" and return; _Precision is irrelevant due to zero-trimming
         if (_First == _Last) {
@@ -2431,13 +2431,13 @@ _NODISCARD inline to_chars_result _Floating_to_chars_general_precision(
     if (_Use_fixed_notation) {
         _Effective_precision = (_STD min)(_Precision - (_Scientific_exponent_X + 1), _Max_fixed_precision);
         const to_chars_result _Buf_result =
-            _Floating_to_chars_fixed_precision(_Buffer, _STD end(_Buffer), _Value, _Effective_precision);
+            _STD _Floating_to_chars_fixed_precision(_Buffer, _STD end(_Buffer), _Value, _Effective_precision);
         _STL_INTERNAL_CHECK(_Buf_result.ec == errc{});
         _Significand_last = _Buf_result.ptr;
     } else {
         _Effective_precision = (_STD min)(_Precision - 1, _Max_scientific_precision);
         const to_chars_result _Buf_result =
-            _Floating_to_chars_scientific_precision(_Buffer, _STD end(_Buffer), _Value, _Effective_precision);
+            _STD _Floating_to_chars_scientific_precision(_Buffer, _STD end(_Buffer), _Value, _Effective_precision);
         _STL_INTERNAL_CHECK(_Buf_result.ec == errc{});
         _Significand_last = _STD find(_Buffer, _Buf_result.ptr, 'e');
         _Exponent_first   = _Significand_last;
@@ -2481,7 +2481,7 @@ enum class _Floating_to_chars_overload { _Plain, _Format_only, _Format_precision
 template <_Floating_to_chars_overload _Overload, class _Floating>
 _NODISCARD to_chars_result _Floating_to_chars(
     char* _First, char* const _Last, _Floating _Value, const chars_format _Fmt, const int _Precision) noexcept {
-    _Adl_verify_range(_First, _Last);
+    _STD _Adl_verify_range(_First, _Last);
 
     if constexpr (_Overload == _Floating_to_chars_overload::_Plain) {
         _STL_INTERNAL_CHECK(_Fmt == chars_format{}); // plain overload must pass chars_format{} internally
@@ -2494,7 +2494,7 @@ _NODISCARD to_chars_result _Floating_to_chars(
     using _Traits    = _Floating_type_traits<_Floating>;
     using _Uint_type = typename _Traits::_Uint_type;
 
-    _Uint_type _Uint_value = _Bit_cast<_Uint_type>(_Value);
+    _Uint_type _Uint_value = _STD _Bit_cast<_Uint_type>(_Value);
 
     const bool _Was_negative = (_Uint_value & _Traits::_Shifted_sign_mask) != 0;
 
@@ -2506,7 +2506,7 @@ _NODISCARD to_chars_result _Floating_to_chars(
         *_First++ = '-';
 
         _Uint_value &= ~_Traits::_Shifted_sign_mask;
-        _Value = _Bit_cast<_Floating>(_Uint_value);
+        _Value = _STD _Bit_cast<_Floating>(_Uint_value);
     }
 
     if ((_Uint_value & _Traits::_Shifted_exponent_mask) == _Traits::_Shifted_exponent_mask) {
@@ -2542,65 +2542,67 @@ _NODISCARD to_chars_result _Floating_to_chars(
     }
 
     if constexpr (_Overload == _Floating_to_chars_overload::_Plain) {
-        return _Floating_to_chars_ryu(_First, _Last, _Value, chars_format{});
+        return _STD _Floating_to_chars_ryu(_First, _Last, _Value, chars_format{});
     } else if constexpr (_Overload == _Floating_to_chars_overload::_Format_only) {
         if (_Fmt == chars_format::hex) {
-            return _Floating_to_chars_hex_shortest(_First, _Last, _Value);
+            return _STD _Floating_to_chars_hex_shortest(_First, _Last, _Value);
         }
 
-        return _Floating_to_chars_ryu(_First, _Last, _Value, _Fmt);
+        return _STD _Floating_to_chars_ryu(_First, _Last, _Value, _Fmt);
     } else if constexpr (_Overload == _Floating_to_chars_overload::_Format_precision) {
         switch (_Fmt) {
         case chars_format::scientific:
-            return _Floating_to_chars_scientific_precision(_First, _Last, _Value, _Precision);
+            return _STD _Floating_to_chars_scientific_precision(_First, _Last, _Value, _Precision);
         case chars_format::fixed:
-            return _Floating_to_chars_fixed_precision(_First, _Last, _Value, _Precision);
+            return _STD _Floating_to_chars_fixed_precision(_First, _Last, _Value, _Precision);
         case chars_format::general:
-            return _Floating_to_chars_general_precision(_First, _Last, _Value, _Precision);
+            return _STD _Floating_to_chars_general_precision(_First, _Last, _Value, _Precision);
         case chars_format::hex:
         default: // avoid warning C4715: not all control paths return a value
-            return _Floating_to_chars_hex_precision(_First, _Last, _Value, _Precision);
+            return _STD _Floating_to_chars_hex_precision(_First, _Last, _Value, _Precision);
         }
     }
 }
 
 _EXPORT_STD inline to_chars_result to_chars(char* const _First, char* const _Last, const float _Value) noexcept
 /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Plain>(_First, _Last, _Value, chars_format{}, 0);
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Plain>(_First, _Last, _Value, chars_format{}, 0);
 }
 _EXPORT_STD inline to_chars_result to_chars(char* const _First, char* const _Last, const double _Value) noexcept
 /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Plain>(_First, _Last, _Value, chars_format{}, 0);
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Plain>(_First, _Last, _Value, chars_format{}, 0);
 }
 _EXPORT_STD inline to_chars_result to_chars(char* const _First, char* const _Last, const long double _Value) noexcept
 /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Plain>(
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Plain>(
         _First, _Last, static_cast<double>(_Value), chars_format{}, 0);
 }
 _EXPORT_STD inline to_chars_result to_chars(
     char* const _First, char* const _Last, const float _Value, const chars_format _Fmt) noexcept /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Format_only>(_First, _Last, _Value, _Fmt, 0);
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Format_only>(_First, _Last, _Value, _Fmt, 0);
 }
 _EXPORT_STD inline to_chars_result to_chars(
     char* const _First, char* const _Last, const double _Value, const chars_format _Fmt) noexcept /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Format_only>(_First, _Last, _Value, _Fmt, 0);
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Format_only>(_First, _Last, _Value, _Fmt, 0);
 }
 _EXPORT_STD inline to_chars_result to_chars(char* const _First, char* const _Last, const long double _Value,
     const chars_format _Fmt) noexcept /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Format_only>(
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Format_only>(
         _First, _Last, static_cast<double>(_Value), _Fmt, 0);
 }
 _EXPORT_STD inline to_chars_result to_chars(char* const _First, char* const _Last, const float _Value,
     const chars_format _Fmt, const int _Precision) noexcept /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Format_precision>(_First, _Last, _Value, _Fmt, _Precision);
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Format_precision>(
+        _First, _Last, _Value, _Fmt, _Precision);
 }
 _EXPORT_STD inline to_chars_result to_chars(char* const _First, char* const _Last, const double _Value,
     const chars_format _Fmt, const int _Precision) noexcept /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Format_precision>(_First, _Last, _Value, _Fmt, _Precision);
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Format_precision>(
+        _First, _Last, _Value, _Fmt, _Precision);
 }
 _EXPORT_STD inline to_chars_result to_chars(char* const _First, char* const _Last, const long double _Value,
     const chars_format _Fmt, const int _Precision) noexcept /* strengthened */ {
-    return _Floating_to_chars<_Floating_to_chars_overload::_Format_precision>(
+    return _STD _Floating_to_chars<_Floating_to_chars_overload::_Format_precision>(
         _First, _Last, static_cast<double>(_Value), _Fmt, _Precision);
 }
 

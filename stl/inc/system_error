@@ -100,13 +100,13 @@ public:
 #ifdef _M_CEE_PURE
         return _Addr == _Right._Addr;
 #else // ^^^ defined(_M_CEE_PURE) / !defined(_M_CEE_PURE) vvv
-        return _Bit_cast<uintptr_t>(_Addr) == _Bit_cast<uintptr_t>(_Right._Addr);
+        return _STD _Bit_cast<uintptr_t>(_Addr) == _STD _Bit_cast<uintptr_t>(_Right._Addr);
 #endif // ^^^ !defined(_M_CEE_PURE) ^^^
     }
 
 #if _HAS_CXX20
     _NODISCARD strong_ordering operator<=>(const error_category& _Right) const noexcept {
-        return _Bit_cast<uintptr_t>(_Addr) <=> _Bit_cast<uintptr_t>(_Right._Addr);
+        return _STD _Bit_cast<uintptr_t>(_Addr) <=> _STD _Bit_cast<uintptr_t>(_Right._Addr);
     }
 #else // ^^^ _HAS_CXX20 / !_HAS_CXX20 vvv
     _NODISCARD bool operator!=(const error_category& _Right) const noexcept {
@@ -117,7 +117,7 @@ public:
 #ifdef _M_CEE_PURE
         return _Addr < _Right._Addr;
 #else // ^^^ defined(_M_CEE_PURE) / !defined(_M_CEE_PURE) vvv
-        return _Bit_cast<uintptr_t>(_Addr) < _Bit_cast<uintptr_t>(_Right._Addr);
+        return _STD _Bit_cast<uintptr_t>(_Addr) < _STD _Bit_cast<uintptr_t>(_Right._Addr);
 #endif // ^^^ !defined(_M_CEE_PURE) ^^^
     }
 #endif // ^^^ !_HAS_CXX20 ^^^
@@ -217,7 +217,7 @@ public:
     }
 
     _NODISCARD friend bool operator==(const error_code& _Left, const error_condition& _Right) noexcept {
-        return _System_error_equal(_Left, _Right);
+        return _STD _System_error_equal(_Left, _Right);
     }
 
 #if _HAS_CXX20
@@ -233,7 +233,7 @@ public:
             || (_Left.category() == _Right.category() && _Left.value() < _Right.value());
     }
     _NODISCARD friend bool operator==(const error_condition& _Left, const error_code& _Right) noexcept {
-        return _System_error_equal(_Right, _Left);
+        return _STD _System_error_equal(_Right, _Left);
     }
 
     _NODISCARD friend bool operator!=(const error_code& _Left, const error_code& _Right) noexcept {
@@ -241,11 +241,11 @@ public:
     }
 
     _NODISCARD friend bool operator!=(const error_code& _Left, const error_condition& _Right) noexcept {
-        return !_System_error_equal(_Left, _Right);
+        return !_STD _System_error_equal(_Left, _Right);
     }
 
     _NODISCARD friend bool operator!=(const error_condition& _Left, const error_code& _Right) noexcept {
-        return !_System_error_equal(_Right, _Left);
+        return !_STD _System_error_equal(_Right, _Left);
     }
 #endif // ^^^ !_HAS_CXX20 ^^^
 #endif // _STL_OPTIMIZE_SYSTEM_ERROR_OPERATORS
@@ -546,7 +546,7 @@ public:
     }
 
     _NODISCARD string message(int _Errcode) const override {
-        return _Syserror_map(_Errcode);
+        return _STD _Syserror_map(_Errcode);
     }
 };
 
@@ -564,7 +564,7 @@ public:
             constexpr size_t _Iostream_error_length = sizeof(_Iostream_error) - 1; // TRANSITION, DevCom-906503
             return string{_Iostream_error, _Iostream_error_length};
         } else {
-            return _Syserror_map(_Errcode);
+            return _STD _Syserror_map(_Errcode);
         }
     }
 };
@@ -596,7 +596,7 @@ public:
         }
 
         // make error_condition for error code (generic if possible)
-        const int _Posv = _Winerror_map(_Errval);
+        const int _Posv = _STD _Winerror_map(_Errval);
         if (_Posv == 0) {
             return error_condition(_Errval, _STD system_category());
         } else {
@@ -697,15 +697,15 @@ _NODISCARD const _Ty& _Immortalize_memcpy_image() noexcept {
 #endif // ^^^ defined(_M_CEE), TRANSITION, VSO-1153256 ^^^
 
 _EXPORT_STD _NODISCARD inline const error_category& generic_category() noexcept {
-    return _Immortalize_memcpy_image<_Generic_error_category>();
+    return _STD _Immortalize_memcpy_image<_Generic_error_category>();
 }
 
 _EXPORT_STD _NODISCARD inline const error_category& iostream_category() noexcept {
-    return _Immortalize_memcpy_image<_Iostream_error_category2>();
+    return _STD _Immortalize_memcpy_image<_Iostream_error_category2>();
 }
 
 _EXPORT_STD _NODISCARD inline const error_category& system_category() noexcept {
-    return _Immortalize_memcpy_image<_System_error_category>();
+    return _STD _Immortalize_memcpy_image<_System_error_category>();
 }
 _STD_END
 
@@ -727,7 +727,7 @@ _NODISCARD inline error_code _Make_ec(__std_win_error _Errno) noexcept { // make
 }
 
 [[noreturn]] inline void _Throw_system_error_from_std_win_error(const __std_win_error _Errno) {
-    _THROW(system_error{_Make_ec(_Errno)});
+    _THROW(system_error{_STD _Make_ec(_Errno)});
 }
 _STD_END
 #endif // _HAS_CXX17

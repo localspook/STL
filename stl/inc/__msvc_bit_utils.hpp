@@ -64,20 +64,20 @@ _NODISCARD int _Countl_zero_lzcnt(const _Ty _Val) noexcept {
     constexpr int _Digits = _Unsigned_integer_digits<_Ty>;
 
     if constexpr (_Digits <= 16) {
-        return static_cast<int>(__lzcnt16(_Val) - (16 - _Digits));
+        return static_cast<int>(::__lzcnt16(_Val) - (16 - _Digits));
     } else if constexpr (_Digits == 32) {
-        return static_cast<int>(__lzcnt(_Val));
+        return static_cast<int>(::__lzcnt(_Val));
     } else {
 #ifdef _M_IX86
         const unsigned int _High = _Val >> 32;
         const auto _Low          = static_cast<unsigned int>(_Val);
         if (_High == 0) {
-            return 32 + _Countl_zero_lzcnt(_Low);
+            return 32 + _STD _Countl_zero_lzcnt(_Low);
         } else {
-            return _Countl_zero_lzcnt(_High);
+            return _STD _Countl_zero_lzcnt(_High);
         }
 #else // ^^^ defined(_M_IX86) / !defined(_M_IX86) vvv
-        return static_cast<int>(__lzcnt64(_Val));
+        return static_cast<int>(::__lzcnt64(_Val));
 #endif // ^^^ !defined(_M_IX86) ^^^
     }
 }
@@ -88,22 +88,22 @@ _NODISCARD int _Countl_zero_bsr(const _Ty _Val) noexcept {
 
     unsigned long _Result;
     if constexpr (_Digits <= 32) {
-        if (!_BitScanReverse(&_Result, _Val)) {
+        if (!::_BitScanReverse(&_Result, _Val)) {
             return _Digits;
         }
     } else {
 #ifdef _M_IX86
         const unsigned int _High = _Val >> 32;
-        if (_BitScanReverse(&_Result, _High)) {
+        if (::_BitScanReverse(&_Result, _High)) {
             return static_cast<int>(31 - _Result);
         }
 
         const auto _Low = static_cast<unsigned int>(_Val);
-        if (!_BitScanReverse(&_Result, _Low)) {
+        if (!::_BitScanReverse(&_Result, _Low)) {
             return _Digits;
         }
 #else // ^^^ defined(_M_IX86) / !defined(_M_IX86) vvv
-        if (!_BitScanReverse64(&_Result, _Val)) {
+        if (!::_BitScanReverse64(&_Result, _Val)) {
             return _Digits;
         }
 #endif // ^^^ !defined(_M_IX86) ^^^
@@ -114,13 +114,13 @@ _NODISCARD int _Countl_zero_bsr(const _Ty _Val) noexcept {
 template <class _Ty>
 _NODISCARD int _Checked_x86_x64_countl_zero(const _Ty _Val) noexcept {
 #ifdef __AVX2__
-    return _Countl_zero_lzcnt(_Val);
+    return _STD _Countl_zero_lzcnt(_Val);
 #else // ^^^ defined(__AVX2__) / !defined(__AVX2__) vvv
     const bool _Definitely_have_lzcnt = __isa_available >= _Stl_isa_available_avx2;
     if (_Definitely_have_lzcnt) {
-        return _Countl_zero_lzcnt(_Val);
+        return _STD _Countl_zero_lzcnt(_Val);
     } else {
-        return _Countl_zero_bsr(_Val);
+        return _STD _Countl_zero_bsr(_Val);
     }
 #endif // ^^^ !defined(__AVX2__) ^^^
 }
@@ -149,7 +149,7 @@ _NODISCARD int _Checked_arm_arm64_countl_zero(const _Ty _Val) noexcept {
 template <class _Ty>
 _NODISCARD constexpr int _Countr_zero_fallback(const _Ty _Val) noexcept {
     constexpr int _Digits = _Unsigned_integer_digits<_Ty>;
-    return _Digits - _Countl_zero_fallback(static_cast<_Ty>(static_cast<_Ty>(~_Val) & static_cast<_Ty>(_Val - 1)));
+    return _Digits - _STD _Countl_zero_fallback(static_cast<_Ty>(static_cast<_Ty>(~_Val) & static_cast<_Ty>(_Val - 1)));
 }
 
 // Implementation of popcount without using specialized CPU instructions.
@@ -161,8 +161,8 @@ _NODISCARD constexpr int _Popcount_fallback(_Ty _Val) noexcept {
     if constexpr (_Digits == 64) {
         // 64-bit bit operations on architectures without 64-bit registers are less efficient,
         // hence we split the value so that it fits in 32-bit registers
-        return _Popcount_fallback(static_cast<unsigned long>(_Val))
-             + _Popcount_fallback(static_cast<unsigned long>(_Val >> 32));
+        return _STD _Popcount_fallback(static_cast<unsigned long>(_Val))
+             + _STD _Popcount_fallback(static_cast<unsigned long>(_Val >> 32));
     } else
 #endif // (defined(_M_IX86) && !defined(_M_HYBRID_X86_ARM64)) || defined(_M_ARM)
     {
@@ -232,24 +232,24 @@ _NODISCARD int _Countr_zero_bsf(const _Ty _Val) noexcept {
         // Intended widening to int. This operation means that a narrow 0 will widen
         // to 0xFFFF....FFFF0... instead of 0. We need this to avoid counting all the zeros
         // of the wider type.
-        if (!_BitScanForward(&_Result, static_cast<unsigned int>(~_Max | _Val))) {
+        if (!::_BitScanForward(&_Result, static_cast<unsigned int>(~_Max | _Val))) {
             return _Digits;
         }
     } else {
 #ifdef _M_IX86
         const auto _Low = static_cast<unsigned int>(_Val);
-        if (_BitScanForward(&_Result, _Low)) {
+        if (::_BitScanForward(&_Result, _Low)) {
             return static_cast<int>(_Result);
         }
 
         const unsigned int _High = _Val >> 32;
-        if (!_BitScanForward(&_Result, _High)) {
+        if (!::_BitScanForward(&_Result, _High)) {
             return _Digits;
         } else {
             return static_cast<int>(_Result + 32);
         }
 #else // ^^^ defined(_M_IX86) / !defined(_M_IX86) vvv
-        if (!_BitScanForward64(&_Result, _Val)) {
+        if (!::_BitScanForward64(&_Result, _Val)) {
             return _Digits;
         }
 #endif // ^^^ !defined(_M_IX86) ^^^
@@ -260,13 +260,13 @@ _NODISCARD int _Countr_zero_bsf(const _Ty _Val) noexcept {
 template <class _Ty>
 _NODISCARD int _Checked_x86_x64_countr_zero(const _Ty _Val) noexcept {
 #ifdef __AVX2__
-    return _Countr_zero_tzcnt(_Val);
+    return _STD _Countr_zero_tzcnt(_Val);
 #else // ^^^ defined(__AVX2__) / !defined(__AVX2__) vvv
     const bool _Definitely_have_tzcnt = __isa_available >= _Stl_isa_available_avx2;
     if (_Definitely_have_tzcnt) {
-        return _Countr_zero_tzcnt(_Val);
+        return _STD _Countr_zero_tzcnt(_Val);
     } else {
-        return _Countr_zero_bsf(_Val);
+        return _STD _Countr_zero_bsf(_Val);
     }
 #endif // ^^^ !defined(__AVX2__) ^^^
 }
@@ -290,14 +290,14 @@ template <class _Ty>
 _NODISCARD int _Unchecked_popcount(const _Ty _Val) noexcept {
     constexpr int _Digits = _Unsigned_integer_digits<_Ty>;
     if constexpr (_Digits <= 16) {
-        return static_cast<int>(__popcnt16(_Val));
+        return static_cast<int>(::__popcnt16(_Val));
     } else if constexpr (_Digits == 32) {
-        return static_cast<int>(__popcnt(_Val));
+        return static_cast<int>(::__popcnt(_Val));
     } else {
 #ifdef _M_IX86
-        return static_cast<int>(__popcnt(_Val >> 32) + __popcnt(static_cast<unsigned int>(_Val)));
+        return static_cast<int>(::__popcnt(_Val >> 32) + ::__popcnt(static_cast<unsigned int>(_Val)));
 #else // ^^^ defined(_M_IX86) / !defined(_M_IX86) vvv
-        return static_cast<int>(__popcnt64(_Val));
+        return static_cast<int>(::__popcnt64(_Val));
 #endif // ^^^ !defined(_M_IX86) ^^^
     }
 }
@@ -307,10 +307,10 @@ _NODISCARD int _Checked_popcount(const _Ty _Val) noexcept {
 #if !_POPCNT_INTRINSICS_ALWAYS_AVAILABLE
     const bool _Definitely_have_popcnt = __isa_available >= _Stl_isa_available_sse42;
     if (!_Definitely_have_popcnt) {
-        return _Popcount_fallback(_Val);
+        return _STD _Popcount_fallback(_Val);
     }
 #endif // ^^^ !_POPCNT_INTRINSICS_ALWAYS_AVAILABLE ^^^
-    return _Unchecked_popcount(_Val);
+    return _STD _Unchecked_popcount(_Val);
 }
 #endif // ^^^ _HAS_POPCNT_INTRINSICS ^^^
 
@@ -325,10 +325,10 @@ _NODISCARD _CONSTEXPR20 int _Countr_zero(const _Ty _Val) noexcept {
     if (!_STD is_constant_evaluated())
 #endif // _HAS_CXX20
     {
-        return _Checked_x86_x64_countr_zero(_Val);
+        return _STD _Checked_x86_x64_countr_zero(_Val);
     }
 #endif // _HAS_TZCNT_BSF_INTRINSICS
-    return _Countr_zero_fallback(_Val);
+    return _STD _Countr_zero_fallback(_Val);
 }
 
 template <class _Ty, class _Fn>
@@ -337,19 +337,19 @@ constexpr decltype(auto) _Select_countr_zero_impl(_Fn _Callback) {
 #if _HAS_TZCNT_BSF_INTRINSICS && _HAS_CXX20
     if (!_STD is_constant_evaluated()) {
 #ifdef __AVX2__
-        return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _Countr_zero_tzcnt(_Val); });
+        return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _STD _Countr_zero_tzcnt(_Val); });
 #else // ^^^ AVX2 / not AVX2 vvv
         const bool _Definitely_have_tzcnt = __isa_available >= _Stl_isa_available_avx2;
         if (_Definitely_have_tzcnt) {
-            return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _Countr_zero_tzcnt(_Val); });
+            return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _STD _Countr_zero_tzcnt(_Val); });
         } else {
-            return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _Countr_zero_bsf(_Val); });
+            return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _STD _Countr_zero_bsf(_Val); });
         }
 #endif // ^^^ not AVX2 ^^^
     }
 #endif // ^^^ _HAS_TZCNT_BSF_INTRINSICS && _HAS_CXX20 ^^^
     // C++17 constexpr gcd() calls this function, so it should be constexpr unless we detect runtime evaluation.
-    return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _Countr_zero_fallback(_Val); });
+    return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _STD _Countr_zero_fallback(_Val); });
 }
 
 template <class _Ty, enable_if_t<_Is_standard_unsigned_integer<_Ty>, int> = 0>
@@ -359,10 +359,10 @@ _NODISCARD _CONSTEXPR20 int _Popcount(const _Ty _Val) noexcept {
     if (!_STD is_constant_evaluated())
 #endif // _HAS_CXX20
     {
-        return _Checked_popcount(_Val);
+        return _STD _Checked_popcount(_Val);
     }
 #endif // ^^^ _HAS_POPCNT_INTRINSICS ^^^
-    return _Popcount_fallback(_Val);
+    return _STD _Popcount_fallback(_Val);
 }
 
 template <class _Ty, class _Fn>
@@ -376,13 +376,13 @@ _CONSTEXPR20 decltype(auto) _Select_popcount_impl(_Fn _Callback) {
 #if !_POPCNT_INTRINSICS_ALWAYS_AVAILABLE
         const bool _Definitely_have_popcnt = __isa_available >= _Stl_isa_available_sse42;
         if (!_Definitely_have_popcnt) {
-            return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _Popcount_fallback(_Val); });
+            return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _STD _Popcount_fallback(_Val); });
         }
 #endif // ^^^ !_POPCNT_INTRINSICS_ALWAYS_AVAILABLE ^^^
-        return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _Unchecked_popcount(_Val); });
+        return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _STD _Unchecked_popcount(_Val); });
     }
 #endif // ^^^ _HAS_POPCNT_INTRINSICS ^^^
-    return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _Popcount_fallback(_Val); });
+    return _Callback([](_Ty _Val) _STATIC_LAMBDA { return _STD _Popcount_fallback(_Val); });
 }
 
 #undef _HAS_TZCNT_BSF_INTRINSICS

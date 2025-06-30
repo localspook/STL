@@ -35,9 +35,9 @@ namespace pmr {
 
     _EXPORT_STD inline memory_resource* set_default_resource(memory_resource* const _Resource) noexcept {
 #ifdef __cpp_aligned_new
-        return _Aligned_set_default_resource(_Resource);
+        return ::std::pmr::_Aligned_set_default_resource(_Resource);
 #else // ^^^ defined(__cpp_aligned_new) / !defined(__cpp_aligned_new) vvv
-        return _Unaligned_set_default_resource(_Resource);
+        return ::std::pmr::_Unaligned_set_default_resource(_Resource);
 #endif // ^^^ !defined(__cpp_aligned_new) ^^^
     }
 
@@ -54,7 +54,7 @@ namespace pmr {
         : public _Identity_equal_resource { // implementation for new_delete_resource with /Zc:alignedNew-
         void* do_allocate(const size_t _Bytes, const size_t _Align) override {
             if (_Align > __STDCPP_DEFAULT_NEW_ALIGNMENT__) {
-                _Xbad_alloc();
+                _STD _Xbad_alloc();
             }
 
             return ::operator new(_Bytes);
@@ -91,7 +91,7 @@ namespace pmr {
     extern "C" _CRT_SATELLITE_1 _Aligned_new_delete_resource_impl* __cdecl _Aligned_new_delete_resource() noexcept;
 
     _EXPORT_STD _NODISCARD inline memory_resource* new_delete_resource() noexcept {
-        return _Aligned_new_delete_resource();
+        return ::std::pmr::_Aligned_new_delete_resource();
     }
 
 #else // ^^^ defined(__cpp_aligned_new) / !defined(__cpp_aligned_new) vvv
@@ -343,12 +343,12 @@ namespace pmr {
         void* _Allocate_oversized(size_t _Bytes, size_t _Align) {
             // allocate a block directly from the upstream resource
             if (!_Prepare_oversized(_Bytes, _Align)) { // no room for header + alignment padding
-                _Xbad_alloc();
+                _STD _Xbad_alloc();
             }
 
             memory_resource* const _Resource = upstream_resource();
             void* const _Ptr                 = _Resource->allocate(_Bytes, _Align);
-            _Check_alignment(_Ptr, _Align);
+            ::std::pmr::_Check_alignment(_Ptr, _Align);
 
             _Oversized_header* const _Hdr = reinterpret_cast<_Oversized_header*>(static_cast<char*>(_Ptr) + _Bytes) - 1;
 
@@ -514,7 +514,7 @@ namespace pmr {
                 const size_t _Size               = _Size_for_capacity(_Next_capacity);
                 memory_resource* const _Resource = _Pool_resource.upstream_resource();
                 void* const _Ptr                 = _Resource->allocate(_Size, _Block_size);
-                _Check_alignment(_Ptr, _Block_size);
+                ::std::pmr::_Check_alignment(_Ptr, _Block_size);
 
                 void* const _Tmp = static_cast<char*>(_Ptr) + _Size - sizeof(_Chunk);
                 _Unfull_chunk    = ::new (_Tmp) _Chunk{*this, _Ptr, _Next_capacity};
@@ -532,7 +532,7 @@ namespace pmr {
             constexpr auto _Max_blocks_per_chunk_limit = static_cast<size_t>(PTRDIFF_MAX);
             constexpr auto _Largest_required_pool_block_limit =
                 static_cast<size_t>((PTRDIFF_MAX >> 4) + 1); // somewhat arbitrary power of 2
-            static_assert(_Is_pow_2(_Largest_required_pool_block_limit));
+            static_assert(_STD _Is_pow_2(_Largest_required_pool_block_limit));
 
             if (_Options.max_blocks_per_chunk - 1 >= _Max_blocks_per_chunk_limit) {
                 _Options.max_blocks_per_chunk = _Max_blocks_per_chunk_limit;
@@ -544,7 +544,7 @@ namespace pmr {
                 _Options.largest_required_pool_block = _Largest_required_pool_block_limit;
             } else {
                 _Options.largest_required_pool_block = static_cast<size_t>(1)
-                                                    << _Ceiling_of_log_2(_Options.largest_required_pool_block);
+                                                    << _STD _Ceiling_of_log_2(_Options.largest_required_pool_block);
             }
         }
 
@@ -552,7 +552,7 @@ namespace pmr {
             const size_t _Bytes, const size_t _Align) noexcept {
             // find the pool from which to allocate a block with size _Bytes and alignment _Align
             const size_t _Size      = (_STD max)(_Bytes + sizeof(void*), _Align);
-            const auto _Log_of_size = static_cast<unsigned char>(_Ceiling_of_log_2(_Size));
+            const auto _Log_of_size = static_cast<unsigned char>(_STD _Ceiling_of_log_2(_Size));
             return {
                 _STD lower_bound(_Pools.begin(), _Pools.end(), _Log_of_size,
                     [](const _Pool& _Al, const unsigned char _Log) _STATIC_LAMBDA { return _Al._Log_of_size < _Log; }),
@@ -714,7 +714,7 @@ namespace pmr {
 
         void _Increase_capacity(const size_t _Bytes, const size_t _Align) { // obtain a new buffer from upstream
             if (_Bytes > _Max_allocation - sizeof(_Header)) {
-                _Xbad_alloc();
+                _STD _Xbad_alloc();
             }
 
             size_t _New_size = _Next_buffer_size;
@@ -725,7 +725,7 @@ namespace pmr {
             const size_t _New_align = (_STD max)(alignof(_Header), _Align);
 
             void* _New_buffer = _Resource->allocate(_New_size, _New_align);
-            _Check_alignment(_New_buffer, _New_align);
+            ::std::pmr::_Check_alignment(_New_buffer, _New_align);
 
             _Current_buffer  = _New_buffer;
             _Space_available = _New_size - sizeof(_Header);

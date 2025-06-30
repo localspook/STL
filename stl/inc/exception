@@ -225,15 +225,15 @@ _STD_BEGIN
 _EXPORT_STD class exception_ptr {
 public:
     exception_ptr() noexcept {
-        __ExceptionPtrCreate(this);
+        ::__ExceptionPtrCreate(this);
     }
 
     exception_ptr(nullptr_t) noexcept {
-        __ExceptionPtrCreate(this);
+        ::__ExceptionPtrCreate(this);
     }
 
     ~exception_ptr() noexcept {
-        __ExceptionPtrDestroy(this);
+        ::__ExceptionPtrDestroy(this);
 
 #if _MSVC_STL_DESTRUCTOR_TOMBSTONES
         const auto _Tombstone{reinterpret_cast<void*>(_MSVC_STL_UINTPTR_TOMBSTONE_VALUE)};
@@ -243,22 +243,22 @@ public:
     }
 
     exception_ptr(const exception_ptr& _Rhs) noexcept {
-        __ExceptionPtrCopy(this, &_Rhs);
+        ::__ExceptionPtrCopy(this, &_Rhs);
     }
 
     exception_ptr& operator=(const exception_ptr& _Rhs) noexcept {
-        __ExceptionPtrAssign(this, &_Rhs);
+        ::__ExceptionPtrAssign(this, &_Rhs);
         return *this;
     }
 
     exception_ptr& operator=(nullptr_t) noexcept {
         exception_ptr _Ptr;
-        __ExceptionPtrAssign(this, &_Ptr);
+        ::__ExceptionPtrAssign(this, &_Ptr);
         return *this;
     }
 
     explicit operator bool() const noexcept {
-        return __ExceptionPtrToBool(this);
+        return ::__ExceptionPtrToBool(this);
     }
 
     static exception_ptr _Copy_exception(_In_ void* _Except, _In_ const void* _Ptr) {
@@ -267,16 +267,16 @@ public:
             // unsupported exceptions
             return _Retval;
         }
-        __ExceptionPtrCopyException(&_Retval, _Except, _Ptr);
+        ::__ExceptionPtrCopyException(&_Retval, _Except, _Ptr);
         return _Retval;
     }
 
     friend void swap(exception_ptr& _Lhs, exception_ptr& _Rhs) noexcept {
-        __ExceptionPtrSwap(&_Lhs, &_Rhs);
+        ::__ExceptionPtrSwap(&_Lhs, &_Rhs);
     }
 
     _NODISCARD friend bool operator==(const exception_ptr& _Lhs, const exception_ptr& _Rhs) noexcept {
-        return __ExceptionPtrCompare(&_Lhs, &_Rhs);
+        return ::__ExceptionPtrCompare(&_Lhs, &_Rhs);
     }
 
     _NODISCARD friend bool operator==(const exception_ptr& _Lhs, nullptr_t) noexcept {
@@ -315,12 +315,12 @@ private:
 
 _EXPORT_STD _NODISCARD inline exception_ptr current_exception() noexcept {
     exception_ptr _Retval;
-    __ExceptionPtrCurrentException(&_Retval);
+    ::__ExceptionPtrCurrentException(&_Retval);
     return _Retval;
 }
 
 _EXPORT_STD [[noreturn]] inline void rethrow_exception(_In_ exception_ptr _Ptr) {
-    __ExceptionPtrRethrow(&_Ptr);
+    ::__ExceptionPtrRethrow(&_Ptr);
 }
 
 template <class _Ex>
@@ -328,7 +328,7 @@ void* __GetExceptionInfo(_Ex);
 
 _EXPORT_STD template <class _Ex>
 _NODISCARD_SMART_PTR_ALLOC exception_ptr make_exception_ptr(_Ex _Except) noexcept {
-    return exception_ptr::_Copy_exception(_STD addressof(_Except), __GetExceptionInfo(_Except));
+    return exception_ptr::_Copy_exception(_STD addressof(_Except), _STD __GetExceptionInfo(_Except));
 }
 
 _EXPORT_STD class nested_exception { // wrap an exception_ptr

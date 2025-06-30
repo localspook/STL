@@ -83,7 +83,7 @@ struct _Init_once_completer {
     unsigned long _DwFlags;
     ~_Init_once_completer() {
         if (!_RENAME_WINDOWS_API(__std_init_once_complete)(&_Once._Opaque, _DwFlags, nullptr)) {
-            __std_init_once_link_alternate_names_and_abort();
+            _STD __std_init_once_link_alternate_names_and_abort();
         }
     }
 };

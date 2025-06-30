@@ -84,7 +84,7 @@ private:
             _Alty_traits::destroy(_Al, _STD addressof(_Ptr->_Myval));
             _Alnode _Node_alloc{_Al};
             _Node::_Freenode0(_Node_alloc, _Ptr);
-            _Destroy_in_place(_Al);
+            _STD _Destroy_in_place(_Al);
             _Ptr = nullptr;
         }
     }
@@ -93,7 +93,7 @@ private:
         : _Ptr{_Ptr_} { // Initialize a _Node_handle that holds the specified node
                         // pre: _Alloc can release _Ptr
         _STL_INTERNAL_CHECK(_Ptr_ != nullptr);
-        _Construct_in_place(_Getal(), _Al);
+        _STD _Construct_in_place(_Getal(), _Al);
     }
 
 public:
@@ -107,8 +107,8 @@ public:
         if (_Ptr != nullptr) {
             _That._Ptr       = nullptr;
             _Alloc& _That_al = _That._Getal();
-            _Construct_in_place(_Getal(), _STD move(_That_al));
-            _Destroy_in_place(_That_al);
+            _STD _Construct_in_place(_Getal(), _STD move(_That_al));
+            _STD _Destroy_in_place(_That_al);
         }
     }
 
@@ -117,8 +117,8 @@ public:
         if (_Ptr == nullptr) {
             if (_That._Ptr != nullptr) {
                 _Alloc& _That_al = _That._Getal();
-                _Construct_in_place(_Getal(), _STD move(_That_al));
-                _Destroy_in_place(_That_al);
+                _STD _Construct_in_place(_Getal(), _STD move(_That_al));
+                _STD _Destroy_in_place(_That_al);
                 _Ptr = _STD exchange(_That._Ptr, nullptr);
             }
 
@@ -136,8 +136,8 @@ public:
         _Alnode_traits::deallocate(_Node_alloc, _Ptr, 1);
 
         _Alloc& _That_al = _That._Getal();
-        _Pocma(_Al, _That_al);
-        _Destroy_in_place(_That_al);
+        _STD _Pocma(_Al, _That_al);
+        _STD _Destroy_in_place(_That_al);
 
         _Ptr = _STD exchange(_That._Ptr, nullptr);
         return *this;
@@ -170,7 +170,7 @@ public:
 
     _Nodeptr _Release() noexcept { // extract the node from *this
         _STL_INTERNAL_CHECK(!empty());
-        _Destroy_in_place(_Getal());
+        _STD _Destroy_in_place(_Getal());
         return _STD exchange(_Ptr, nullptr);
     }
 
@@ -178,11 +178,11 @@ public:
         using _STD swap;
         if (_Ptr != nullptr) {
             if (_That._Ptr != nullptr) {
-                _Pocs(_Getal(), _That._Getal());
+                _STD _Pocs(_Getal(), _That._Getal());
             } else {
                 _Alloc& _Al = _Getal();
-                _Construct_in_place(_That._Getal(), _STD move(_Al));
-                _Destroy_in_place(_Al);
+                _STD _Construct_in_place(_That._Getal(), _STD move(_Al));
+                _STD _Destroy_in_place(_Al);
             }
         } else {
             if (_That._Ptr == nullptr) {
@@ -190,8 +190,8 @@ public:
             }
 
             _Alloc& _That_al = _That._Getal();
-            _Construct_in_place(_Getal(), _STD move(_That_al));
-            _Destroy_in_place(_That_al);
+            _STD _Construct_in_place(_Getal(), _STD move(_That_al));
+            _STD _Destroy_in_place(_That_al);
         }
         swap(_Ptr, _That._Ptr); // intentional ADL
     }

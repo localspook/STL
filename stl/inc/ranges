@@ -1018,11 +1018,12 @@ namespace ranges {
                   || (_Integer_like<_Wi> && _Integer_like<_Bo>) || sized_sentinel_for<_Bo, _Wi>
         {
             if constexpr (_Integer_like<_Wi> && _Integer_like<_Bo>) {
-                return (_Value < 0) ? ((_Bound < 0) ? (_To_unsigned_like(-_Value) - _To_unsigned_like(-_Bound))
-                                                    : (_To_unsigned_like(_Bound) + _To_unsigned_like(-_Value)))
-                                    : (_To_unsigned_like(_Bound) - _To_unsigned_like(_Value));
+                return (_Value < 0)
+                         ? ((_Bound < 0) ? (_STD _To_unsigned_like(-_Value) - _STD _To_unsigned_like(-_Bound))
+                                         : (_STD _To_unsigned_like(_Bound) + _STD _To_unsigned_like(-_Value)))
+                         : (_STD _To_unsigned_like(_Bound) - _STD _To_unsigned_like(_Value));
             } else {
-                return _To_unsigned_like(_Bound - _Value);
+                return _STD _To_unsigned_like(_Bound - _Value);
             }
         }
 #pragma warning(pop)
@@ -1920,12 +1921,12 @@ namespace ranges {
             constexpr void _Seek_to(const _Sentinel<_Const, false>& _That)
                 requires _Wrapped
             {
-                _Seek_wrapped(_Last, _That._Last);
+                _STD _Seek_wrapped(_Last, _That._Last);
             }
             constexpr void _Seek_to(_Sentinel<_Const, false>&& _That)
                 requires _Wrapped
             {
-                _Seek_wrapped(_Last, _STD move(_That._Last));
+                _STD _Seek_wrapped(_Last, _STD move(_That._Last));
             }
         };
 
@@ -2217,12 +2218,12 @@ namespace ranges {
             constexpr void _Seek_to(const _Sentinel<_Const, false>& _That)
                 requires _Wrapped
             {
-                _Seek_wrapped(_Last, _That._Last);
+                _STD _Seek_wrapped(_Last, _That._Last);
             }
             constexpr void _Seek_to(_Sentinel<_Const, false>&& _That)
                 requires _Wrapped
             {
-                _Seek_wrapped(_Last, _STD move(_That._Last));
+                _STD _Seek_wrapped(_Last, _STD move(_That._Last));
             }
         };
 
@@ -3034,7 +3035,7 @@ namespace ranges {
         using _Size_type =
             common_type_t<decltype(_Compile_time_max_size<_Rng>), decltype(_Compile_time_max_size<_Inner>)>;
         _Size_type _Result{};
-        const bool _Overflow = _Mul_overflow(static_cast<_Size_type>(_Compile_time_max_size<_Rng>),
+        const bool _Overflow = _STD _Mul_overflow(static_cast<_Size_type>(_Compile_time_max_size<_Rng>),
             static_cast<_Size_type>(_Compile_time_max_size<_Inner>), _Result);
         if (_Overflow) {
             return (numeric_limits<_Size_type>::max)();
@@ -3044,10 +3045,11 @@ namespace ranges {
     }
 
     template <class _Rng>
-    constexpr auto _Compile_time_max_size<join_view<_Rng>> = _Join_view_compile_time_max_size<_Rng>();
+    constexpr auto _Compile_time_max_size<join_view<_Rng>> = _RANGES _Join_view_compile_time_max_size<_Rng>();
 
     template <class _Rng>
-    constexpr auto _Compile_time_max_size<const join_view<_Rng>> = _Join_view_compile_time_max_size<const _Rng>();
+    constexpr auto _Compile_time_max_size<const join_view<_Rng>> =
+        _RANGES _Join_view_compile_time_max_size<const _Rng>();
 #endif // _HAS_CXX23
 
     namespace views {
@@ -3587,11 +3589,11 @@ namespace ranges {
         _Size_type _Pattern_max_size{};
         _Size_type _Result{};
         const bool _Overflow =
-            _Mul_overflow(static_cast<_Size_type>(_Compile_time_max_size<_Rng>),
+            _STD _Mul_overflow(static_cast<_Size_type>(_Compile_time_max_size<_Rng>),
                 static_cast<_Size_type>(_Compile_time_max_size<_Inner>), _Joined_max_size)
-            || _Mul_overflow((_STD max)(static_cast<_Size_type>(_Compile_time_max_size<_Rng>), _Size_type{1}) - 1,
+            || _STD _Mul_overflow((_STD max)(static_cast<_Size_type>(_Compile_time_max_size<_Rng>), _Size_type{1}) - 1,
                 static_cast<_Size_type>(_Compile_time_max_size<_Pat>), _Pattern_max_size)
-            || _Add_overflow(_Joined_max_size, _Pattern_max_size, _Result);
+            || _STD _Add_overflow(_Joined_max_size, _Pattern_max_size, _Result);
         if (_Overflow) {
             return (numeric_limits<_Size_type>::max)();
         } else {
@@ -3601,11 +3603,11 @@ namespace ranges {
 
     template <class _Rng, class _Pat>
     constexpr auto _Compile_time_max_size<join_with_view<_Rng, _Pat>> =
-        _Join_with_view_compile_time_max_size<_Rng, _Pat>();
+        _RANGES _Join_with_view_compile_time_max_size<_Rng, _Pat>();
 
     template <class _Rng, class _Pat>
     constexpr auto _Compile_time_max_size<const join_with_view<_Rng, _Pat>> =
-        _Join_with_view_compile_time_max_size<const _Rng, const _Pat>();
+        _RANGES _Join_with_view_compile_time_max_size<const _Rng, const _Pat>();
 
     namespace views {
         struct _Join_with_fn {
@@ -5608,7 +5610,7 @@ namespace ranges {
                 if (_Size < _Parent->_Remainder) {
                     return _Size == 0 ? 0 : 1;
                 }
-                return _Div_ceil(_Size - _Parent->_Remainder, _Parent->_Count) + 1;
+                return _RANGES _Div_ceil(_Size - _Parent->_Remainder, _Parent->_Count) + 1;
             }
 
         public:
@@ -5635,7 +5637,7 @@ namespace ranges {
                     noexcept(noexcept(_RANGES end(_Parent->_Range) - *_Parent->_Current)) /* strengthened */
                     requires sized_sentinel_for<sentinel_t<_Vw>, iterator_t<_Vw>>
                 {
-                    return _To_unsigned_like(
+                    return _STD _To_unsigned_like(
                         (_STD min)(_Parent->_Remainder, _RANGES end(_Parent->_Range) - *_Parent->_Current));
                 }
             };
@@ -5720,13 +5722,13 @@ namespace ranges {
         _NODISCARD constexpr auto size() noexcept(noexcept(_RANGES distance(_Range))) /* strengthened */
             requires sized_range<_Vw>
         {
-            return _To_unsigned_like(_Div_ceil(_RANGES distance(_Range), _Count));
+            return _STD _To_unsigned_like(_RANGES _Div_ceil(_RANGES distance(_Range), _Count));
         }
 
         _NODISCARD constexpr auto size() const noexcept(noexcept(_RANGES distance(_Range))) /* strengthened */
             requires sized_range<const _Vw>
         {
-            return _To_unsigned_like(_Div_ceil(_RANGES distance(_Range), _Count));
+            return _STD _To_unsigned_like(_RANGES _Div_ceil(_RANGES distance(_Range), _Count));
         }
     };
 
@@ -5949,14 +5951,14 @@ namespace ranges {
                 noexcept(noexcept(_Right._End - _Right._Current)) /* strengthened */
                 requires sized_sentinel_for<_Base_sentinel, _Base_iterator>
             {
-                return _Div_ceil(_Right._End - _Right._Current, _Right._Count);
+                return _RANGES _Div_ceil(_Right._End - _Right._Current, _Right._Count);
             }
 
             _NODISCARD friend constexpr difference_type operator-(const _Iterator& _Left, default_sentinel_t)
                 noexcept(noexcept(_Left._End - _Left._Current)) /* strengthened */
                 requires sized_sentinel_for<_Base_sentinel, _Base_iterator>
             {
-                return -_Div_ceil(_Left._End - _Left._Current, _Left._Count);
+                return -_RANGES _Div_ceil(_Left._End - _Left._Current, _Left._Count);
             }
         };
 
@@ -6032,13 +6034,13 @@ namespace ranges {
         _NODISCARD constexpr auto size() noexcept(noexcept(_RANGES distance(_Range))) /* strengthened */
             requires sized_range<_Vw>
         {
-            return _To_unsigned_like(_Div_ceil(_RANGES distance(_Range), _Count));
+            return _STD _To_unsigned_like(_RANGES _Div_ceil(_RANGES distance(_Range), _Count));
         }
 
         _NODISCARD constexpr auto size() const noexcept(noexcept(_RANGES distance(_Range))) /* strengthened */
             requires sized_range<const _Vw>
         {
-            return _To_unsigned_like(_Div_ceil(_RANGES distance(_Range), _Count));
+            return _STD _To_unsigned_like(_RANGES _Div_ceil(_RANGES distance(_Range), _Count));
         }
     };
 
@@ -6427,7 +6429,7 @@ namespace ranges {
                 _Size = 0;
             }
 
-            return _To_unsigned_like(_Size);
+            return _STD _To_unsigned_like(_Size);
         }
 
         _NODISCARD constexpr auto size() const noexcept(noexcept(_RANGES distance(_Range))) /* strengthened */
@@ -6437,7 +6439,7 @@ namespace ranges {
             if (_Size < 0) {
                 _Size = 0;
             }
-            return _To_unsigned_like(_Size);
+            return _STD _To_unsigned_like(_Size);
         }
     };
 
@@ -6911,9 +6913,9 @@ namespace ranges {
                     return (_Diff + _Left._Missing - _Right._Missing) / _Left._Stride;
                 } else {
                     if (_Diff < 0) {
-                        return -_Div_ceil(-_Diff, _Left._Stride);
+                        return -_RANGES _Div_ceil(-_Diff, _Left._Stride);
                     } else {
-                        return _Div_ceil(_Diff, _Left._Stride);
+                        return _RANGES _Div_ceil(_Diff, _Left._Stride);
                     }
                 }
             }
@@ -6922,14 +6924,14 @@ namespace ranges {
                 noexcept(noexcept(_It._End - _It._Current)) // strengthened
                 requires sized_sentinel_for<_Base_sentinel, _Base_iterator>
             {
-                return _Div_ceil(_It._End - _It._Current, _It._Stride);
+                return _RANGES _Div_ceil(_It._End - _It._Current, _It._Stride);
             }
 
             _NODISCARD friend constexpr difference_type operator-(const _Iterator& _It, default_sentinel_t)
                 noexcept(noexcept(_It._End - _It._Current)) // strengthened
                 requires sized_sentinel_for<_Base_sentinel, _Base_iterator>
             {
-                return -_Div_ceil(_It._End - _It._Current, _It._Stride);
+                return -_RANGES _Div_ceil(_It._End - _It._Current, _It._Stride);
             }
 
             _NODISCARD friend constexpr range_rvalue_reference_t<_Base> iter_move(const _Iterator& _It)
@@ -7024,13 +7026,13 @@ namespace ranges {
         _NODISCARD constexpr auto size() noexcept(noexcept(_RANGES distance(_Range))) // strengthened
             requires sized_range<_Vw>
         {
-            return _To_unsigned_like(_Div_ceil(_RANGES distance(_Range), _Stride));
+            return _STD _To_unsigned_like(_RANGES _Div_ceil(_RANGES distance(_Range), _Stride));
         }
 
         _NODISCARD constexpr auto size() const noexcept(noexcept(_RANGES distance(_Range))) // strengthened
             requires sized_range<const _Vw>
         {
-            return _To_unsigned_like(_Div_ceil(_RANGES distance(_Range), _Stride));
+            return _STD _To_unsigned_like(_RANGES _Div_ceil(_RANGES distance(_Range), _Stride));
         }
     };
 
@@ -7086,7 +7088,7 @@ namespace ranges {
     template <class _CallbackType, class _TupleType>
     constexpr auto _Tuple_transform(_CallbackType&& _Callback, _TupleType&& _Tuple) noexcept(noexcept(
         _STD apply(_Tuple_transform_closure(_Callback), _STD forward<_TupleType>(_Tuple)))) /* strengthened */ {
-        return _STD apply(_Tuple_transform_closure(_Callback), _STD forward<_TupleType>(_Tuple));
+        return _STD apply(_RANGES _Tuple_transform_closure(_Callback), _STD forward<_TupleType>(_Tuple));
     }
 
     template <class _CallbackType>
@@ -7100,7 +7102,7 @@ namespace ranges {
     template <class _CallbackType, class _TupleType>
     constexpr void _Tuple_for_each(_CallbackType&& _Callback, _TupleType&& _Tuple) noexcept(
         noexcept(_STD apply(_Tuple_for_each_closure(_Callback), _STD forward<_TupleType>(_Tuple)))) /* strengthened */ {
-        _STD apply(_Tuple_for_each_closure(_Callback), _STD forward<_TupleType>(_Tuple));
+        _STD apply(_RANGES _Tuple_for_each_closure(_Callback), _STD forward<_TupleType>(_Tuple));
     }
 
     template <bool _IsConst, class... _Views>
@@ -7210,14 +7212,14 @@ namespace ranges {
             _NODISCARD constexpr auto operator*() const
                 noexcept((noexcept(*(_STD declval<iterator_t<_Maybe_const<_IsConst, _ViewTypes>>&>()))
                           && ...)) /* strengthened */ {
-                return _Tuple_transform(
+                return _RANGES _Tuple_transform(
                     [](auto& _Itr) _STATIC_LAMBDA noexcept(noexcept(*_Itr)) -> decltype(auto) { return *_Itr; },
                     _Current);
             }
 
             constexpr _Iterator& operator++() noexcept(noexcept(_Tuple_for_each(
                 [](auto& _Itr) _STATIC_LAMBDA noexcept(noexcept(++_Itr)) { ++_Itr; }, _Current))) /* strengthened */ {
-                _Tuple_for_each([](auto& _Itr) _STATIC_LAMBDA noexcept(noexcept(++_Itr)) { ++_Itr; }, _Current);
+                _RANGES _Tuple_for_each([](auto& _Itr) _STATIC_LAMBDA noexcept(noexcept(++_Itr)) { ++_Itr; }, _Current);
                 return *this;
             }
 
@@ -7239,7 +7241,7 @@ namespace ranges {
                 [](auto& _Itr) _STATIC_LAMBDA noexcept(noexcept(--_Itr)) { --_Itr; }, _Current))) // strengthened
                 requires _All_bidirectional<_IsConst, _ViewTypes...>
             {
-                _Tuple_for_each([](auto& _Itr) _STATIC_LAMBDA noexcept(noexcept(--_Itr)) { --_Itr; }, _Current);
+                _RANGES _Tuple_for_each([](auto& _Itr) _STATIC_LAMBDA noexcept(noexcept(--_Itr)) { --_Itr; }, _Current);
                 return *this;
             }
 
@@ -7259,7 +7261,7 @@ namespace ranges {
                           && ...)) // strengthened
                 requires _All_random_access<_IsConst, _ViewTypes...>
             {
-                _Tuple_for_each(
+                _RANGES _Tuple_for_each(
                     [&_Off]<class _IteratorType>(_IteratorType& _Itr) noexcept(
                         noexcept(_Itr += static_cast<iter_difference_t<_IteratorType>>(_Off))) {
                         _Itr += static_cast<iter_difference_t<_IteratorType>>(_Off);
@@ -7275,7 +7277,7 @@ namespace ranges {
                           && ...)) // strengthened
                 requires _All_random_access<_IsConst, _ViewTypes...>
             {
-                _Tuple_for_each(
+                _RANGES _Tuple_for_each(
                     [&_Off]<class _IteratorType>(_IteratorType& _Itr) noexcept(
                         noexcept(_Itr -= static_cast<iter_difference_t<_IteratorType>>(_Off))) {
                         _Itr -= static_cast<iter_difference_t<_IteratorType>>(_Off);
@@ -7291,7 +7293,7 @@ namespace ranges {
                     && ...)) // strengthened
                 requires _All_random_access<_IsConst, _ViewTypes...>
             {
-                return _Tuple_transform(
+                return _RANGES _Tuple_transform(
                     [&_Where]<class _IteratorType>(_IteratorType& _Itr) noexcept(
                         noexcept(_Itr[static_cast<iter_difference_t<_IteratorType>>(_Where)])) -> decltype(auto) {
                         return _Itr[static_cast<iter_difference_t<_IteratorType>>(_Where)];
@@ -7307,7 +7309,7 @@ namespace ranges {
                               || _All_random_access<_IsConst, _ViewTypes...> || sizeof...(_ViewTypes) == 1) {
                     return _STD get<0>(_Lhs._Current) == _STD get<0>(_Rhs._Current);
                 } else {
-                    return _Zip_iterator_sentinel_equal(_Lhs._Current, _Rhs._Current);
+                    return _RANGES _Zip_iterator_sentinel_equal(_Lhs._Current, _Rhs._Current);
                 }
             }
 
@@ -7353,7 +7355,7 @@ namespace ranges {
                               iterator_t<_Maybe_const<_IsConst, _ViewTypes>>>
                           && ...)
             {
-                return _Zip_get_smallest_distance<difference_type>(_Lhs._Current, _Rhs._Current);
+                return _RANGES _Zip_get_smallest_distance<difference_type>(_Lhs._Current, _Rhs._Current);
             }
 
             _NODISCARD friend constexpr auto iter_move(const _Iterator& _Itr) noexcept(
@@ -7361,7 +7363,7 @@ namespace ranges {
                     && ...)
                 && (is_nothrow_move_constructible_v<range_rvalue_reference_t<_Maybe_const<_IsConst, _ViewTypes>>>
                     && ...)) {
-                return _Tuple_transform(_RANGES iter_move, _Itr._Current);
+                return _RANGES _Tuple_transform(_RANGES iter_move, _Itr._Current);
             }
 
             friend constexpr void iter_swap(const _Iterator& _Lhs, const _Iterator& _Rhs)
@@ -7418,7 +7420,7 @@ namespace ranges {
             _NODISCARD friend constexpr bool operator==(const _Iterator<_IteratorConst>& _Lhs, const _Sentinel& _Rhs)
                 noexcept(
                     noexcept(_Zip_iterator_sentinel_equal(_Get_iterator_tuple(_Lhs), _Rhs._End))) /* strengthened */ {
-                return _Zip_iterator_sentinel_equal(_Get_iterator_tuple(_Lhs), _Rhs._End);
+                return _RANGES _Zip_iterator_sentinel_equal(_Get_iterator_tuple(_Lhs), _Rhs._End);
             }
 
             template <bool _IteratorConst>
@@ -7431,7 +7433,7 @@ namespace ranges {
                         common_type_t<range_difference_t<_Maybe_const<_IteratorConst, _ViewTypes>>...>>(
                         _Get_iterator_tuple(_Lhs), _Rhs._End))) /* strengthened */ {
                 using _Difference_type = common_type_t<range_difference_t<_Maybe_const<_IteratorConst, _ViewTypes>>...>;
-                return _Zip_get_smallest_distance<_Difference_type>(_Get_iterator_tuple(_Lhs), _Rhs._End);
+                return _RANGES _Zip_get_smallest_distance<_Difference_type>(_Get_iterator_tuple(_Lhs), _Rhs._End);
             }
 
             template <bool _IteratorConst>
@@ -7448,15 +7450,15 @@ namespace ranges {
         template <bool _IsConst>
         _NODISCARD static consteval bool _Is_end_noexcept() noexcept {
             if constexpr (!_Zip_is_common<_Maybe_const<_IsConst, _ViewTypes>...>) {
-                return noexcept(_Sentinel<_IsConst>{
-                    _Tuple_transform(_RANGES end, _STD declval<_Maybe_const<_IsConst, tuple<_ViewTypes...>>&>())});
+                return noexcept(_Sentinel<_IsConst>{_RANGES _Tuple_transform(
+                    _RANGES end, _STD declval<_Maybe_const<_IsConst, tuple<_ViewTypes...>>&>())});
             } else if constexpr ((random_access_range<_Maybe_const<_IsConst, _ViewTypes>> && ...)) {
                 // Operations on iter_difference_t values must be noexcept, so we only
                 // need to check the noexcept of begin().
                 return noexcept(_STD declval<_Maybe_const<_IsConst, zip_view>&>().begin());
             } else {
-                return noexcept(_Iterator<_IsConst>{
-                    _Tuple_transform(_RANGES end, _STD declval<_Maybe_const<_IsConst, tuple<_ViewTypes...>>&>())});
+                return noexcept(_Iterator<_IsConst>{_RANGES _Tuple_transform(
+                    _RANGES end, _STD declval<_Maybe_const<_IsConst, tuple<_ViewTypes...>>&>())});
             }
         }
 
@@ -7476,25 +7478,25 @@ namespace ranges {
             noexcept(noexcept(_Iterator<false>{_Tuple_transform(_RANGES begin, _Views)})) // strengthened
             requires (!(_Simple_view<_ViewTypes> && ...))
         {
-            return _Iterator<false>{_Tuple_transform(_RANGES begin, _Views)};
+            return _Iterator<false>{_RANGES _Tuple_transform(_RANGES begin, _Views)};
         }
 
         _NODISCARD constexpr auto begin() const
             noexcept(noexcept(_Iterator<true>{_Tuple_transform(_RANGES begin, _Views)})) // strengthened
             requires (range<const _ViewTypes> && ...)
         {
-            return _Iterator<true>{_Tuple_transform(_RANGES begin, _Views)};
+            return _Iterator<true>{_RANGES _Tuple_transform(_RANGES begin, _Views)};
         }
 
         _NODISCARD constexpr auto end() noexcept(_Is_end_noexcept<false>()) // strengthened
             requires (!(_Simple_view<_ViewTypes> && ...))
         {
             if constexpr (!_Zip_is_common<_ViewTypes...>) {
-                return _Sentinel<false>{_Tuple_transform(_RANGES end, _Views)};
+                return _Sentinel<false>{_RANGES _Tuple_transform(_RANGES end, _Views)};
             } else if constexpr ((random_access_range<_ViewTypes> && ...)) {
                 return begin() + static_cast<iter_difference_t<_Iterator<false>>>(size());
             } else {
-                return _Iterator<false>{_Tuple_transform(_RANGES end, _Views)};
+                return _Iterator<false>{_RANGES _Tuple_transform(_RANGES end, _Views)};
             }
         }
 
@@ -7502,11 +7504,11 @@ namespace ranges {
             requires (range<const _ViewTypes> && ...)
         {
             if constexpr (!_Zip_is_common<const _ViewTypes...>) {
-                return _Sentinel<true>{_Tuple_transform(_RANGES end, _Views)};
+                return _Sentinel<true>{_RANGES _Tuple_transform(_RANGES end, _Views)};
             } else if constexpr ((random_access_range<const _ViewTypes> && ...)) {
                 return begin() + static_cast<iter_difference_t<_Iterator<true>>>(size());
             } else {
-                return _Iterator<true>{_Tuple_transform(_RANGES end, _Views)};
+                return _Iterator<true>{_RANGES _Tuple_transform(_RANGES end, _Views)};
             }
         }
 
@@ -7514,14 +7516,14 @@ namespace ranges {
             noexcept(noexcept(_STD apply(_Size_closure, _Tuple_transform(_RANGES size, _Views)))) // strengthened
             requires (sized_range<_ViewTypes> && ...)
         {
-            return _STD apply(_Size_closure, _Tuple_transform(_RANGES size, _Views));
+            return _STD apply(_Size_closure, _RANGES _Tuple_transform(_RANGES size, _Views));
         }
 
         _NODISCARD constexpr auto size() const
             noexcept(noexcept(_STD apply(_Size_closure, _Tuple_transform(_RANGES size, _Views)))) // strengthened
             requires (sized_range<const _ViewTypes> && ...)
         {
-            return _STD apply(_Size_closure, _Tuple_transform(_RANGES size, _Views));
+            return _STD apply(_Size_closure, _RANGES _Tuple_transform(_RANGES size, _Views));
         }
     };
 
@@ -7538,10 +7540,11 @@ namespace ranges {
     }
 
     template <class... _Rngs>
-    constexpr auto _Compile_time_max_size<zip_view<_Rngs...>> = _Zip_view_compile_time_max_size<_Rngs...>();
+    constexpr auto _Compile_time_max_size<zip_view<_Rngs...>> = _RANGES _Zip_view_compile_time_max_size<_Rngs...>();
 
     template <class... _Rngs>
-    constexpr auto _Compile_time_max_size<const zip_view<_Rngs...>> = _Zip_view_compile_time_max_size<const _Rngs...>();
+    constexpr auto _Compile_time_max_size<const zip_view<_Rngs...>> =
+        _RANGES _Zip_view_compile_time_max_size<const _Rngs...>();
 
     namespace views {
         struct _Zip_fn {
@@ -8348,11 +8351,12 @@ namespace ranges {
     }
 
     template <class _Rng, size_t _Nx>
-    constexpr auto _Compile_time_max_size<adjacent_view<_Rng, _Nx>> = _Adjacent_view_compile_time_max_size<_Rng, _Nx>();
+    constexpr auto _Compile_time_max_size<adjacent_view<_Rng, _Nx>> =
+        _RANGES _Adjacent_view_compile_time_max_size<_Rng, _Nx>();
 
     template <class _Rng, size_t _Nx>
     constexpr auto _Compile_time_max_size<const adjacent_view<_Rng, _Nx>> =
-        _Adjacent_view_compile_time_max_size<const _Rng, _Nx>();
+        _RANGES _Adjacent_view_compile_time_max_size<const _Rng, _Nx>();
 
     namespace views {
         template <size_t _Nx>
@@ -8784,7 +8788,7 @@ namespace ranges {
     template <class... _Rngs>
         requires (sizeof...(_Rngs) > 0)
     _NODISCARD consteval auto _Cartesian_product_optimal_size_type() noexcept {
-        constexpr int _Optimal_size_type_bit_width = (_Cartesian_product_max_size_bit_width<_Rngs>() + ...);
+        constexpr int _Optimal_size_type_bit_width = (_RANGES _Cartesian_product_max_size_bit_width<_Rngs>() + ...);
         if constexpr (_Optimal_size_type_bit_width <= 8) {
             return uint8_t{};
         } else if constexpr (_Optimal_size_type_bit_width <= 16) {
@@ -8803,8 +8807,8 @@ namespace ranges {
     class cartesian_product_view : public view_interface<cartesian_product_view<_First, _Rest...>> {
     private:
         template <bool _Const>
-        using _Optimal_size_type = decltype(_Cartesian_product_optimal_size_type<_Maybe_const<_Const, _First>,
-            _Maybe_const<_Const, _Rest>...>());
+        using _Optimal_size_type = decltype(_RANGES
+                _Cartesian_product_optimal_size_type<_Maybe_const<_Const, _First>, _Maybe_const<_Const, _Rest>...>());
 
         template <bool _Const>
         using _Difference_type = common_type_t<_Make_signed_like_t<_Optimal_size_type<_Const>>,
@@ -8844,7 +8848,7 @@ namespace ranges {
                 if constexpr (_Index > 0) {
                     auto& _Range = _STD get<_Index>(_Parent->_Bases);
                     if (_It == _RANGES begin(_Range)) {
-                        _It = _Cartesian_common_arg_end(_Range);
+                        _It = _RANGES _Cartesian_common_arg_end(_Range);
                         _Prev<_Index - 1>();
                     }
                 }
@@ -8920,8 +8924,8 @@ namespace ranges {
                     const auto _Size =
                         static_cast<_Difference_type<_Const>>(_RANGES size(_STD get<_Index>(_Parent->_Bases)));
                     [[maybe_unused]] const bool _Overflow =
-                        _Mul_overflow(_Size, _Distance_from<_Index - 1>(_Tpl), _Result)
-                        || _Add_overflow(_Result, _Diff, _Result);
+                        _STD _Mul_overflow(_Size, _Distance_from<_Index - 1>(_Tpl), _Result)
+                        || _STD _Add_overflow(_Result, _Diff, _Result);
 #if _ITERATOR_DEBUG_LEVEL != 0
                     _STL_VERIFY(!_Overflow, "Scaled-sum cannot be represented by difference_type (N4950 "
                                             "[range.cartesian.iterator]/8).");
@@ -9104,7 +9108,7 @@ namespace ranges {
         _NODISCARD constexpr auto _Begin_or_first_end([[maybe_unused]] const bool _Is_empty) {
             if constexpr (_Index == 0) {
                 return _Is_empty ? _RANGES begin(_STD get<_Index>(_Bases))
-                                 : _Cartesian_common_arg_end(_STD get<_Index>(_Bases));
+                                 : _RANGES _Cartesian_common_arg_end(_STD get<_Index>(_Bases));
             } else {
                 return _RANGES begin(_STD get<_Index>(_Bases));
             }
@@ -9114,7 +9118,7 @@ namespace ranges {
         _NODISCARD constexpr auto _Begin_or_first_end([[maybe_unused]] const bool _Is_empty) const {
             if constexpr (_Index == 0) {
                 return _Is_empty ? _RANGES begin(_STD get<_Index>(_Bases))
-                                 : _Cartesian_common_arg_end(_STD get<_Index>(_Bases));
+                                 : _RANGES _Cartesian_common_arg_end(_STD get<_Index>(_Bases));
             } else {
                 return _RANGES begin(_STD get<_Index>(_Bases));
             }
@@ -9182,7 +9186,7 @@ namespace ranges {
                 }
 
                 _Size_type<false> _Product{1};
-                const bool _Overflow = (_Mul_overflow(_Product, _Sizes[_Indices], _Product) || ...);
+                const bool _Overflow = (_STD _Mul_overflow(_Product, _Sizes[_Indices], _Product) || ...);
                 _STL_VERIFY(!_Overflow, "Size of cartesian product cannot be represented by size type (N4950 "
                                         "[range.cartesian.view]/10).");
                 return _Product;
@@ -9204,7 +9208,7 @@ namespace ranges {
                 }
 
                 _Size_type<true> _Product{1};
-                const bool _Overflow = (_Mul_overflow(_Product, _Sizes[_Indices], _Product) || ...);
+                const bool _Overflow = (_STD _Mul_overflow(_Product, _Sizes[_Indices], _Product) || ...);
                 _STL_VERIFY(!_Overflow, "Size of cartesian product cannot be represented by size type (N4950 "
                                         "[range.cartesian.view]/10).");
                 return _Product;
@@ -9220,11 +9224,11 @@ namespace ranges {
 
     template <class... _Rngs>
     _NODISCARD consteval auto _Cartesian_product_view_compile_time_max_size() {
-        using _Size_type = common_type_t<decltype(_Cartesian_product_optimal_size_type<_Rngs...>()),
+        using _Size_type = common_type_t<decltype(_RANGES _Cartesian_product_optimal_size_type<_Rngs...>()),
             decltype(_Compile_time_max_size<_Rngs>)...>;
         _Size_type _Result{1};
         const bool _Overflow =
-            (_Mul_overflow(static_cast<_Size_type>(_Compile_time_max_size<_Rngs>), _Result, _Result) || ...);
+            (_STD _Mul_overflow(static_cast<_Size_type>(_Compile_time_max_size<_Rngs>), _Result, _Result) || ...);
         if (_Overflow) {
             return (numeric_limits<_Size_type>::max)();
         } else {
@@ -9234,11 +9238,11 @@ namespace ranges {
 
     template <class... _Rngs>
     constexpr auto _Compile_time_max_size<cartesian_product_view<_Rngs...>> =
-        _Cartesian_product_view_compile_time_max_size<_Rngs...>();
+        _RANGES _Cartesian_product_view_compile_time_max_size<_Rngs...>();
 
     template <class... _Rngs>
     constexpr auto _Compile_time_max_size<const cartesian_product_view<_Rngs...>> =
-        _Cartesian_product_view_compile_time_max_size<const _Rngs...>();
+        _RANGES _Cartesian_product_view_compile_time_max_size<const _Rngs...>();
 
     namespace views {
         class _Cartesian_product_fn {

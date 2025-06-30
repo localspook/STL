@@ -845,19 +845,19 @@ basic_istream<_Elem, _Traits>& _Istream_extract_into_buffer(
 _EXPORT_STD template <class _Elem, class _Traits, size_t _Size>
 basic_istream<_Elem, _Traits>& operator>>(
     basic_istream<_Elem, _Traits>& _Istr, _Out_writes_z_(_Size) _Elem (&_Str)[_Size]) {
-    return _Istream_extract_into_buffer(_Istr, _Size, _Str);
+    return _STD _Istream_extract_into_buffer(_Istr, _Size, _Str);
 }
 
 _EXPORT_STD template <class _Traits, size_t _Size>
 basic_istream<char, _Traits>& operator>>(
     basic_istream<char, _Traits>& _Istr, _Out_writes_z_(_Size) signed char (&_Str)[_Size]) {
-    return _Istream_extract_into_buffer(_Istr, _Size, reinterpret_cast<char*>(_Str));
+    return _STD _Istream_extract_into_buffer(_Istr, _Size, reinterpret_cast<char*>(_Str));
 }
 
 _EXPORT_STD template <class _Traits, size_t _Size>
 basic_istream<char, _Traits>& operator>>(
     basic_istream<char, _Traits>& _Istr, _Out_writes_z_(_Size) unsigned char (&_Str)[_Size]) {
-    return _Istream_extract_into_buffer(_Istr, _Size, reinterpret_cast<char*>(_Str));
+    return _STD _Istream_extract_into_buffer(_Istr, _Size, reinterpret_cast<char*>(_Str));
 }
 #pragma warning(pop)
 #else // ^^^ _HAS_CXX20 / !_HAS_CXX20 vvv

@@ -773,7 +773,7 @@ public:
     ~deque() noexcept {
         _Tidy();
         _Alproxy_ty _Proxy_allocator(_Getal());
-        _Delete_plain_internal(_Proxy_allocator, _STD exchange(_Get_data()._Myproxy, nullptr));
+        _STD _Delete_plain_internal(_Proxy_allocator, _STD exchange(_Get_data()._Myproxy, nullptr));
     }
 
     deque& operator=(const deque& _Right) {
@@ -790,7 +790,7 @@ public:
             }
         }
 
-        _Pocca(_Al, _Right_al);
+        _STD _Pocca(_Al, _Right_al);
         assign(_Right._Unchecked_begin(), _Right._Unchecked_end());
 
         return *this;
@@ -810,7 +810,7 @@ public:
                 _Alproxy_ty _Right_alproxy(_Right_al);
                 _Container_proxy_ptr12<_Alproxy_ty> _Proxy(_Right_alproxy, _Leave_proxy_unbound{});
                 _Tidy();
-                _Pocma(_Al, _Right_al);
+                _STD _Pocma(_Al, _Right_al);
                 _Proxy._Bind(_Alproxy, _STD addressof(_Get_data()));
                 _Take_contents(_Right);
                 return *this;
@@ -824,7 +824,7 @@ public:
         }
 
         _Tidy();
-        _Pocma(_Al, _Right_al);
+        _STD _Pocma(_Al, _Right_al);
         _Take_contents(_Right);
 
         return *this;
@@ -1516,7 +1516,7 @@ public:
     }
 
     iterator erase(const_iterator _Where) noexcept(is_nothrow_move_assignable_v<value_type>) /* strengthened */ {
-        return erase(_Where, _Next_iter(_Where));
+        return erase(_Where, _STD _Next_iter(_Where));
     }
 
     iterator erase(const_iterator _First_arg, const_iterator _Last_arg)
@@ -1579,7 +1579,7 @@ public:
     void swap(deque& _Right) noexcept /* strengthened */ {
         using _STD swap;
         if (this != _STD addressof(_Right)) {
-            _Pocs(_Getal(), _Right._Getal());
+            _STD _Pocs(_Getal(), _Right._Getal());
             auto& _My_data    = _Get_data();
             auto& _Right_data = _Right._Get_data();
             _My_data._Swap_proxy_and_iterators(_Right_data);
@@ -1592,11 +1592,11 @@ public:
 
 private:
     [[noreturn]] static void _Xlen() {
-        _Xlength_error("deque<T> too long");
+        _STD _Xlength_error("deque<T> too long");
     }
 
     [[noreturn]] static void _Xran() {
-        _Xout_of_range("invalid deque<T> subscript");
+        _STD _Xout_of_range("invalid deque<T> subscript");
     }
 
     void _Growmap(size_type _Count) { // grow map by at least _Count pointers, _Mapsize() a power of 2
@@ -1617,7 +1617,7 @@ private:
 
         const auto _Myboff  = static_cast<size_type>(_Myoff() / _Block_size);
         const auto _Map_off = static_cast<_Map_difference_type>(_Myboff);
-        _Mapptr _Newmap     = _Allocate_at_least_helper(_Almap, _Allocsize);
+        _Mapptr _Newmap     = _STD _Allocate_at_least_helper(_Almap, _Allocsize);
         _Mapptr _Myptr      = _Newmap + _Map_off;
         _STL_ASSERT(_Allocsize >= _Newsize, "_Allocsize >= _Newsize");
         while (_Newsize <= _Allocsize / 2) {
@@ -1631,16 +1631,16 @@ private:
         _Myptr = _STD uninitialized_copy(_Map() + _Map_off, _Map() + _Map_distance(), _Myptr); // copy initial to end
         if (_Myboff <= _Count) { // increment greater than offset of initial block
             _Myptr = _STD uninitialized_copy(_Map(), _Map() + _Map_off, _Myptr); // copy rest of old
-            _Uninitialized_value_construct_n_unchecked1(_Myptr, _Count - _Myboff); // clear suffix of new
-            _Uninitialized_value_construct_n_unchecked1(_Newmap, _Myboff); // clear prefix of new
+            _STD _Uninitialized_value_construct_n_unchecked1(_Myptr, _Count - _Myboff); // clear suffix of new
+            _STD _Uninitialized_value_construct_n_unchecked1(_Newmap, _Myboff); // clear prefix of new
         } else { // increment not greater than offset of initial block
             _STD uninitialized_copy(_Map(), _Map() + _Map_count, _Myptr); // copy more old
             _Myptr = _STD uninitialized_copy(_Map() + _Map_count, _Map() + _Map_off, _Newmap); // copy rest of old
-            _Uninitialized_value_construct_n_unchecked1(_Myptr, _Count); // clear rest to initial block
+            _STD _Uninitialized_value_construct_n_unchecked1(_Myptr, _Count); // clear rest to initial block
         }
 
         if (_Map() != nullptr) {
-            _Destroy_range(_Map(), _Map() + _Map_distance());
+            _STD _Destroy_range(_Map(), _Map() + _Map_distance());
             _Almap.deallocate(_Map(), _Mapsize()); // free storage for old
         }
 

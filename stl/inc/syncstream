@@ -88,9 +88,9 @@ public:
         : _Wrapped(_Strbuf), _Mypair{_One_then_variadic_args_t{}, _Al_, nullptr} {
         if (_Wrapped) {
             auto& _Mutex = _Get_mutex();
-            _Mutex       = __std_acquire_shared_mutex_for_instance(_Wrapped);
+            _Mutex       = ::__std_acquire_shared_mutex_for_instance(_Wrapped);
             if (!_Mutex) {
-                _Xbad_alloc();
+                _STD _Xbad_alloc();
             }
         }
         _Init();
@@ -122,7 +122,7 @@ public:
                 _Size_type _Right_buf_size        = _Right._Get_buffer_size();
                 const _Size_type _Right_data_size = _Right._Get_data_size();
 
-                _Elem* const _New_ptr = _Unfancy(_Allocate_at_least_helper(_Al, _Right_buf_size));
+                _Elem* const _New_ptr = _STD _Unfancy(_STD _Allocate_at_least_helper(_Al, _Right_buf_size));
                 _Traits::copy(_New_ptr, _Right.pbase(), _Right_data_size);
 
                 streambuf_type::setp(_New_ptr, _New_ptr + _Right_data_size, _New_ptr + _Right_buf_size);
@@ -139,14 +139,14 @@ public:
         }
 
         _Tidy();
-        _Pocma(_Al, _Right_al);
+        _STD _Pocma(_Al, _Right_al);
         _Swap_except_al(_Right);
         return *this;
     }
 
     void swap(basic_syncbuf& _Right) noexcept /* strengthened */ {
         if (this != _STD addressof(_Right)) {
-            _Pocs(_Getal(), _Right._Getal());
+            _STD _Pocs(_Getal(), _Right._Getal());
             _Swap_except_al(_Right);
         }
     }
@@ -220,10 +220,10 @@ protected:
         _Elem* const _Old_ptr           = streambuf_type::pbase();
         const _Size_type _Old_data_size = _Get_data_size();
 
-        _Elem* const _New_ptr = _Unfancy(_Allocate_at_least_helper(_Al, _New_capacity));
+        _Elem* const _New_ptr = _STD _Unfancy(_STD _Allocate_at_least_helper(_Al, _New_capacity));
         _Traits::copy(_New_ptr, _Old_ptr, _Old_data_size);
         if (0 < _Buf_size) {
-            _Al.deallocate(_Refancy<_Pointer>(_Old_ptr), _Buf_size);
+            _Al.deallocate(_STD _Refancy<_Pointer>(_Old_ptr), _Buf_size);
         }
 
         streambuf_type::setp(_New_ptr, _New_ptr + _Old_data_size, _New_ptr + _New_capacity);
@@ -237,19 +237,19 @@ private:
 
     void _Init() {
         _Size_type _New_capacity = _Min_size;
-        _Elem* const _New_ptr    = _Unfancy(_Allocate_at_least_helper(_Getal(), _New_capacity));
+        _Elem* const _New_ptr    = _STD _Unfancy(_STD _Allocate_at_least_helper(_Getal(), _New_capacity));
         streambuf_type::setp(_New_ptr, _New_ptr + _New_capacity);
     }
 
     void _Tidy() noexcept {
         const _Size_type _Buf_size = _Get_buffer_size();
         if (0 < _Buf_size) {
-            _Getal().deallocate(_Refancy<_Pointer>(streambuf_type::pbase()), _Buf_size);
+            _Getal().deallocate(_STD _Refancy<_Pointer>(streambuf_type::pbase()), _Buf_size);
         }
 
         streambuf_type::setp(nullptr, nullptr, nullptr);
         if (_Wrapped) {
-            __std_release_shared_mutex_for_instance(_Wrapped);
+            ::__std_release_shared_mutex_for_instance(_Wrapped);
             _Wrapped     = nullptr;
             _Get_mutex() = nullptr;
         }

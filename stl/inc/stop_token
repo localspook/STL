@@ -89,7 +89,7 @@ struct _Stop_state {
             return false;
         }
 
-        _Stopping_thread = _Thrd_id();
+        _Stopping_thread = ::_Thrd_id();
         for (;;) {
             auto _Head = _Callbacks._Lock_and_load();
             _Current_callback.store(_Head, memory_order_relaxed);
@@ -341,7 +341,7 @@ inline void _Stop_callback_base::_Detach() noexcept {
     // call the callback
     _STL_INTERNAL_CHECK((_Token._State->_Stop_sources.load() & uint32_t{1}) != 0);
     if (_Token._State->_Current_callback.load(memory_order_acquire) != this
-        || _Token._State->_Stopping_thread == _Thrd_id()) {
+        || _Token._State->_Stopping_thread == ::_Thrd_id()) {
         // the callback is done or the dtor is being recursively reentered, do not block
         _Token._State->_Callbacks._Store_and_unlock(_Head);
         return;

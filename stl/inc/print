@@ -62,7 +62,7 @@ inline void _Print_noformat_nonunicode_nonlocking(FILE* const _Stream, const str
     const bool _Was_write_successful = _CSTD _fwrite_nolock(_Str.data(), 1, _Str.size(), _Stream) == _Str.size();
 
     if (!_Was_write_successful) {
-        _Throw_system_error(static_cast<errc>(errno));
+        _STD _Throw_system_error(static_cast<errc>(errno));
     }
 }
 
@@ -98,7 +98,7 @@ private:
 inline void _Print_noformat_unicode_to_console_nonlocking(
     const __std_unicode_console_handle _Console_handle, const string_view _Str) {
     const __std_win_error _Console_print_result =
-        __std_print_to_unicode_console(_Console_handle, _Str.data(), _Str.size());
+        ::__std_print_to_unicode_console(_Console_handle, _Str.data(), _Str.size());
     if (_Console_print_result != __std_win_error::_Success) {
         _STD _Throw_system_error_from_std_win_error(_Console_print_result);
     }
@@ -135,7 +135,7 @@ inline void _Vprint_nonunicode_impl(
     const _Stream_lock_guard _Guard{_Stream};
     _STD vformat_to(_Print_to_stream_it{_Stream}, _Fmt_str, _Fmt_args);
     if (_Add_nl == _Add_newline::_Yes) {
-        _Print_noformat_nonunicode_nonlocking(_Stream, "\n");
+        _STD _Print_noformat_nonunicode_nonlocking(_Stream, "\n");
     }
 }
 
@@ -143,7 +143,7 @@ template <class _UnicodeConsoleFn, class _FallbackFn>
 void _Do_on_maybe_unicode_console(
     FILE* const _Stream, _UnicodeConsoleFn _Unicode_console_func, _FallbackFn _Fallback_func) {
     const __std_unicode_console_retrieval_result _Unicode_console_retrieval_result{
-        __std_get_unicode_console_handle_from_file_stream(_Stream)};
+        ::__std_get_unicode_console_handle_from_file_stream(_Stream)};
 
     // See the documentation for __std_unicode_console_retrieval_result to understand why we do this.
     bool _Is_unicode_console;
@@ -181,7 +181,7 @@ inline void _Vprint_unicode_noformat_impl(FILE* const _Stream, const string_view
 
         const bool _Was_flush_successful = _CSTD _fflush_nolock(_Stream) == 0;
         if (!_Was_flush_successful) {
-            _Throw_system_error(static_cast<errc>(errno));
+            _STD _Throw_system_error(static_cast<errc>(errno));
         }
 
         _STD _Print_noformat_unicode_to_console_nonlocking(_Console_handle, _Output_str);
@@ -196,7 +196,7 @@ inline void _Fputc_newline(FILE* const _Stream) {
     const bool _Was_write_successful = _CSTD fputc('\n', _Stream) == '\n';
 
     if (!_Was_write_successful) {
-        _Throw_system_error(static_cast<errc>(errno));
+        _STD _Throw_system_error(static_cast<errc>(errno));
     }
 }
 
@@ -204,10 +204,10 @@ inline void _Print_newline_only_unicode(FILE* const _Stream) {
     const auto _Unicode_console = [&](const __std_unicode_console_handle _Console_handle) {
         const bool _Was_flush_successful = _CSTD fflush(_Stream) == 0;
         if (!_Was_flush_successful) {
-            _Throw_system_error(static_cast<errc>(errno));
+            _STD _Throw_system_error(static_cast<errc>(errno));
         }
 
-        const __std_win_error _Console_print_result = __std_print_newline_only_to_unicode_console(_Console_handle);
+        const __std_win_error _Console_print_result = ::__std_print_newline_only_to_unicode_console(_Console_handle);
         if (_Console_print_result != __std_win_error::_Success) {
             _STD _Throw_system_error_from_std_win_error(_Console_print_result);
         }
@@ -235,12 +235,12 @@ inline void _Vprint_unicode_impl(
 
         const bool _Was_flush_successful = _CSTD _fflush_nolock(_Stream) == 0;
         if (!_Was_flush_successful) {
-            _Throw_system_error(static_cast<errc>(errno));
+            _STD _Throw_system_error(static_cast<errc>(errno));
         }
 
         _STD vformat_to(_Print_to_unicode_console_it{_Console_handle}, _Fmt_str, _Fmt_args);
         if (_Add_nl == _Add_newline::_Yes) {
-            _Print_noformat_unicode_to_console_nonlocking(_Console_handle, "\n");
+            _STD _Print_noformat_unicode_to_console_nonlocking(_Console_handle, "\n");
         }
     };
 
@@ -270,7 +270,7 @@ void _Print_impl(
             }
         }
     } else {
-        const string _Unescaped_str{_Unescape_braces(_Add_nl, _Fmt.get())};
+        const string _Unescaped_str{_STD _Unescape_braces(_Add_nl, _Fmt.get())};
 
         if constexpr (_STD _Is_ordinary_literal_encoding_utf8()) {
             _STD _Vprint_unicode_noformat_impl(_Stream, _Unescaped_str);

@@ -750,8 +750,8 @@ template <class _Ty>
 void _Implicitly_default_construct(const _Ty&);
 
 template <class _Ty>
-struct _Is_implicitly_default_constructible<_Ty, void_t<decltype(_Implicitly_default_construct<_Ty>({}))>> : true_type {
-};
+struct _Is_implicitly_default_constructible<_Ty, void_t<decltype(_STD _Implicitly_default_construct<_Ty>({}))>>
+    : true_type {};
 
 _EXPORT_STD template <class _Ty>
 struct is_move_constructible : bool_constant<__is_constructible(_Ty, _Ty)> {
@@ -1381,7 +1381,7 @@ struct _Add_qualifiers<_Ty1&&> {
 
 template <class _Ty1, class _Ty2>
 using _Cond_res = // N4950 [meta.trans.other]/2.4
-    decltype(false ? _Returns_exactly<_Ty1>() : _Returns_exactly<_Ty2>());
+    decltype(false ? _STD _Returns_exactly<_Ty1>() : _STD _Returns_exactly<_Ty2>());
 
 _EXPORT_STD template <class...>
 struct common_reference;
@@ -2278,26 +2278,26 @@ _NODISCARD size_t _Fnv1a_append_range(const size_t _Val, const _Ty* const _First
     static_assert(is_trivially_copyable_v<_Ty>, "Only trivially copyable types can be directly hashed.");
     const auto _Firstb = reinterpret_cast<const unsigned char*>(_First);
     const auto _Lastb  = reinterpret_cast<const unsigned char*>(_Last);
-    return _Fnv1a_append_bytes(_Val, _Firstb, static_cast<size_t>(_Lastb - _Firstb));
+    return _STD _Fnv1a_append_bytes(_Val, _Firstb, static_cast<size_t>(_Lastb - _Firstb));
 }
 
 template <class _Kty>
 _NODISCARD size_t _Fnv1a_append_value(
     const size_t _Val, const _Kty& _Keyval) noexcept { // accumulate _Keyval into partial FNV-1a hash _Val
     static_assert(is_trivially_copyable_v<_Kty>, "Only trivially copyable types can be directly hashed.");
-    return _Fnv1a_append_bytes(_Val, &reinterpret_cast<const unsigned char&>(_Keyval), sizeof(_Kty));
+    return _STD _Fnv1a_append_bytes(_Val, &reinterpret_cast<const unsigned char&>(_Keyval), sizeof(_Kty));
 }
 
 template <class _Kty>
 _NODISCARD size_t _Hash_representation(const _Kty& _Keyval) noexcept { // bitwise hashes the representation of a key
-    return _Fnv1a_append_value(_FNV_offset_basis, _Keyval);
+    return _STD _Fnv1a_append_value(_FNV_offset_basis, _Keyval);
 }
 
 template <class _Kty>
 _NODISCARD size_t _Hash_array_representation(
     const _Kty* const _First, const size_t _Count) noexcept { // bitwise hashes the representation of an array
     static_assert(is_trivially_copyable_v<_Kty>, "Only trivially copyable types can be directly hashed.");
-    return _Fnv1a_append_bytes(
+    return _STD _Fnv1a_append_bytes(
         _FNV_offset_basis, reinterpret_cast<const unsigned char*>(_First), _Count * sizeof(_Kty));
 }
 
@@ -2329,7 +2329,7 @@ struct hash : _Conditionally_enabled_hash<_Kty, !is_const_v<_Kty> && !is_volatil
                                                     && (is_enum_v<_Kty> || is_integral_v<_Kty> || is_pointer_v<_Kty>)> {
     // hash functor primary template (handles enums, integrals, and pointers)
     static size_t _Do_hash(const _Kty& _Keyval) noexcept {
-        return _Hash_representation(_Keyval);
+        return _STD _Hash_representation(_Keyval);
     }
 };
 
@@ -2338,7 +2338,7 @@ struct hash<float> {
     using _ARGUMENT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS = float;
     using _RESULT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS   = size_t;
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(const float _Keyval) _CONST_CALL_OPERATOR noexcept {
-        return _Hash_representation(_Keyval == 0.0F ? 0.0F : _Keyval); // map -0 to 0
+        return _STD _Hash_representation(_Keyval == 0.0F ? 0.0F : _Keyval); // map -0 to 0
     }
 };
 
@@ -2347,7 +2347,7 @@ struct hash<double> {
     using _ARGUMENT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS = double;
     using _RESULT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS   = size_t;
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(const double _Keyval) _CONST_CALL_OPERATOR noexcept {
-        return _Hash_representation(_Keyval == 0.0 ? 0.0 : _Keyval); // map -0 to 0
+        return _STD _Hash_representation(_Keyval == 0.0 ? 0.0 : _Keyval); // map -0 to 0
     }
 };
 
@@ -2356,7 +2356,7 @@ struct hash<long double> {
     using _ARGUMENT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS = long double;
     using _RESULT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS   = size_t;
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(const long double _Keyval) _CONST_CALL_OPERATOR noexcept {
-        return _Hash_representation(_Keyval == 0.0L ? 0.0L : _Keyval); // map -0 to 0
+        return _STD _Hash_representation(_Keyval == 0.0L ? 0.0L : _Keyval); // map -0 to 0
     }
 };
 
@@ -2366,7 +2366,7 @@ struct hash<nullptr_t> {
     using _RESULT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS   = size_t;
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(nullptr_t) _CONST_CALL_OPERATOR noexcept {
         void* _Null{};
-        return _Hash_representation(_Null);
+        return _STD _Hash_representation(_Null);
     }
 };
 
@@ -2469,25 +2469,25 @@ template <class _Ty, enable_if_t<is_floating_point_v<_Ty>, int> = 0>
 _NODISCARD constexpr auto _Float_abs_bits(const _Ty& _Xx) noexcept {
     using _Traits    = _Floating_type_traits<_Ty>;
     using _Uint_type = typename _Traits::_Uint_type;
-    const auto _Bits = _Bit_cast<_Uint_type>(_Xx);
+    const auto _Bits = _STD _Bit_cast<_Uint_type>(_Xx);
     return _Bits & ~_Traits::_Shifted_sign_mask;
 }
 
 template <class _Ty, enable_if_t<is_floating_point_v<_Ty>, int> = 0>
 _NODISCARD constexpr _Ty _Float_abs(const _Ty _Xx) noexcept { // constexpr floating-point abs()
-    return _Bit_cast<_Ty>(_Float_abs_bits(_Xx));
+    return _STD _Bit_cast<_Ty>(_STD _Float_abs_bits(_Xx));
 }
 
 template <class _Ty, enable_if_t<is_floating_point_v<_Ty>, int> = 0>
 _NODISCARD constexpr bool _Is_nan(const _Ty _Xx) noexcept { // constexpr isnan()
     using _Traits = _Floating_type_traits<_Ty>;
-    return _Float_abs_bits(_Xx) > _Traits::_Shifted_exponent_mask;
+    return _STD _Float_abs_bits(_Xx) > _Traits::_Shifted_exponent_mask;
 }
 
 template <class _Ty, enable_if_t<is_floating_point_v<_Ty>, int> = 0>
 _NODISCARD constexpr bool _Is_finite(const _Ty _Xx) noexcept { // constexpr isfinite()
     using _Traits = _Floating_type_traits<_Ty>;
-    return _Float_abs_bits(_Xx) < _Traits::_Shifted_exponent_mask;
+    return _STD _Float_abs_bits(_Xx) < _Traits::_Shifted_exponent_mask;
 }
 
 template <bool _IsConst, class _Ty>

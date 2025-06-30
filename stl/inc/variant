@@ -1106,7 +1106,7 @@ public:
                         constexpr size_t _Idx = decltype(_Ref)::_Idx;
                         if constexpr (_Idx != variant_npos) {
                             using _STD swap;
-                            swap(_Variant_raw_get<_Idx>(this->_Storage()), _Ref._Val); // intentional ADL
+                            swap(_STD _Variant_raw_get<_Idx>(this->_Storage()), _Ref._Val); // intentional ADL
                         }
                     });
             } else {

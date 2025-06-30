@@ -58,7 +58,7 @@ private:
         const unique_ptr<_Tuple> _FnVals(static_cast<_Tuple*>(_RawVals));
         _Tuple& _Tup = *_FnVals.get(); // avoid ADL, handle incomplete types
         _STD invoke(_STD move(_STD get<_Indices>(_Tup))...);
-        _Cnd_do_broadcast_at_thread_exit(); // TRANSITION, ABI
+        ::_Cnd_do_broadcast_at_thread_exit(); // TRANSITION, ABI
         return 0;
     }
 
@@ -82,7 +82,7 @@ private:
             (void) _Decay_copied.release();
         } else { // failed to start thread
             _Thr._Id = 0;
-            _Throw_Cpp_error(_RESOURCE_UNAVAILABLE_TRY_AGAIN);
+            _STD _Throw_Cpp_error(_RESOURCE_UNAVAILABLE_TRY_AGAIN);
         }
     }
 #pragma warning(pop)
@@ -123,15 +123,15 @@ public:
 
     void join() {
         if (!joinable()) {
-            _Throw_Cpp_error(_INVALID_ARGUMENT);
+            _STD _Throw_Cpp_error(_INVALID_ARGUMENT);
         }
 
-        if (_Thr._Id == _Thrd_id()) {
-            _Throw_Cpp_error(_RESOURCE_DEADLOCK_WOULD_OCCUR);
+        if (_Thr._Id == ::_Thrd_id()) {
+            _STD _Throw_Cpp_error(_RESOURCE_DEADLOCK_WOULD_OCCUR);
         }
 
-        if (_Thrd_join(_Thr, nullptr) != _Thrd_result::_Success) {
-            _Throw_Cpp_error(_NO_SUCH_PROCESS);
+        if (::_Thrd_join(_Thr, nullptr) != _Thrd_result::_Success) {
+            _STD _Throw_Cpp_error(_NO_SUCH_PROCESS);
         }
 
         _Thr = {};
@@ -139,11 +139,11 @@ public:
 
     void detach() {
         if (!joinable()) {
-            _Throw_Cpp_error(_INVALID_ARGUMENT);
+            _STD _Throw_Cpp_error(_INVALID_ARGUMENT);
         }
 
-        if (_Thrd_detach(_Thr) != _Thrd_result::_Success) {
-            _Throw_Cpp_error(_INVALID_ARGUMENT);
+        if (::_Thrd_detach(_Thr) != _Thrd_result::_Success) {
+            _STD _Throw_Cpp_error(_INVALID_ARGUMENT);
         }
 
         _Thr = {};
@@ -156,7 +156,7 @@ public:
     }
 
     _NODISCARD static unsigned int hardware_concurrency() noexcept {
-        return _Thrd_hardware_concurrency();
+        return ::_Thrd_hardware_concurrency();
     }
 
 private:
@@ -201,7 +201,7 @@ namespace this_thread {
     _EXPORT_STD _NODISCARD thread::id get_id() noexcept;
 
     _EXPORT_STD inline void yield() noexcept {
-        _Thrd_yield();
+        ::_Thrd_yield();
     }
 
     _EXPORT_STD template <class _Clock, class _Duration>
@@ -213,14 +213,14 @@ namespace this_thread {
                 return;
             }
 
-            const unsigned long _Rel_ms_count = _Clamped_rel_time_ms_count(_Abs_time - _Now)._Count;
-            _Thrd_sleep_for(_Rel_ms_count);
+            const unsigned long _Rel_ms_count = _STD _Clamped_rel_time_ms_count(_Abs_time - _Now)._Count;
+            ::_Thrd_sleep_for(_Rel_ms_count);
         }
     }
 
     _EXPORT_STD template <class _Rep, class _Period>
     void sleep_for(const chrono::duration<_Rep, _Period>& _Rel_time) {
-        sleep_until(_To_absolute_time(_Rel_time));
+        sleep_until(_STD _To_absolute_time(_Rel_time));
     }
 } // namespace this_thread
 
@@ -257,7 +257,7 @@ _NODISCARD inline thread::id thread::get_id() const noexcept {
 }
 
 _EXPORT_STD _NODISCARD inline thread::id this_thread::get_id() noexcept {
-    return thread::id{_Thrd_id()};
+    return thread::id{::_Thrd_id()};
 }
 
 _EXPORT_STD inline void swap(thread& _Left, thread& _Right) noexcept {
@@ -338,7 +338,7 @@ struct hash<thread::id> {
     using _RESULT_TYPE_NAME _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS   = size_t;
 
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(const thread::id _Keyval) _CONST_CALL_OPERATOR noexcept {
-        return _Hash_representation(_Keyval._Id);
+        return _STD _Hash_representation(_Keyval._Id);
     }
 };
 

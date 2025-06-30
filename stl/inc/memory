@@ -61,7 +61,7 @@ namespace ranges {
             _It _First1, _Se _Last1, _Out _First2, _OSe _Last2) _CONST_CALL_OPERATOR {
             _STD _Adl_verify_range(_First1, _Last1);
             _STD _Adl_verify_range(_First2, _Last2);
-            auto _UResult = _Uninitialized_copy_unchecked(_RANGES _Unwrap_iter<_Se>(_STD move(_First1)),
+            auto _UResult = _STD _Uninitialized_copy_unchecked(_RANGES _Unwrap_iter<_Se>(_STD move(_First1)),
                 _RANGES _Unwrap_sent<_It>(_STD move(_Last1)), _RANGES _Unwrap_iter<_OSe>(_STD move(_First2)),
                 _RANGES _Unwrap_sent<_Out>(_STD move(_Last2)));
 
@@ -75,7 +75,7 @@ namespace ranges {
         _STATIC_CALL_OPERATOR uninitialized_copy_result<borrowed_iterator_t<_Rng1>, borrowed_iterator_t<_Rng2>>
             operator()(_Rng1&& _Range1, _Rng2&& _Range2) _CONST_CALL_OPERATOR {
             auto _First1  = _RANGES begin(_Range1);
-            auto _UResult = _Uninitialized_copy_unchecked(_RANGES _Unwrap_range_iter<_Rng1>(_STD move(_First1)),
+            auto _UResult = _STD _Uninitialized_copy_unchecked(_RANGES _Unwrap_range_iter<_Rng1>(_STD move(_First1)),
                 _Uend(_Range1), _Ubegin(_Range2), _Uend(_Range2));
 
             _STD _Seek_wrapped(_First1, _STD move(_UResult.in));
@@ -1154,9 +1154,9 @@ public:
     bool _Incref_nz() noexcept { // increment use count if not zero, return true if successful
         auto& _Volatile_uses = reinterpret_cast<volatile long&>(_Uses);
 #ifdef _M_CEE_PURE
-        long _Count = *_Atomic_address_as<const long>(&_Volatile_uses);
+        long _Count = *_STD _Atomic_address_as<const long>(&_Volatile_uses);
 #else
-        long _Count = __iso_volatile_load32(reinterpret_cast<volatile int*>(&_Volatile_uses));
+        long _Count = ::__iso_volatile_load32(reinterpret_cast<volatile int*>(&_Volatile_uses));
 #endif
         while (_Count != 0) {
             const long _Old_value = _INTRIN_RELAXED(_InterlockedCompareExchange)(&_Volatile_uses, _Count + 1, _Count);
@@ -1676,7 +1676,7 @@ public:
     template <class _Ty2, enable_if_t<_SP_pointer_compatible<_Ty2, _Ty>::value, int> = 0>
     explicit shared_ptr(const weak_ptr<_Ty2>& _Other) { // construct shared_ptr object that owns resource *_Other
         if (!this->_Construct_from_weak(_Other)) {
-            _Throw_bad_weak_ptr();
+            _STD _Throw_bad_weak_ptr();
         }
     }
 
@@ -2166,10 +2166,10 @@ _NODISCARD size_t _Calculate_bytes_for_flexible_array(const size_t _Count) noexc
         size_t _Extra_bytes;
 
         if constexpr (_Check == _Check_overflow::_Yes) {
-            _Extra_bytes = _Get_size_of_n<_Element_size>(_Count - 1); // check multiplication overflow
+            _Extra_bytes = _STD _Get_size_of_n<_Element_size>(_Count - 1); // check multiplication overflow
 
             if (_Extra_bytes > static_cast<size_t>(-1) - _Bytes - (_Align - 1)) { // assume worst case adjustment
-                _Throw_bad_array_new_length(); // addition overflow
+                _STD _Throw_bad_array_new_length(); // addition overflow
             }
         } else {
             _Extra_bytes = _Element_size * (_Count - 1);
@@ -2190,7 +2190,7 @@ _NODISCARD size_t _Calculate_bytes_for_flexible_array(const size_t _Count) noexc
 
 template <class _Refc>
 _NODISCARD _Refc* _Allocate_flexible_array(const size_t _Count) {
-    const size_t _Bytes = _Calculate_bytes_for_flexible_array<_Refc, _Check_overflow::_Yes>(_Count);
+    const size_t _Bytes = _STD _Calculate_bytes_for_flexible_array<_Refc, _Check_overflow::_Yes>(_Count);
 #ifdef __cpp_aligned_new
     constexpr size_t _Align = alignof(_Refc);
     if constexpr (_Align > __STDCPP_DEFAULT_NEW_ALIGNMENT__) {
@@ -2763,7 +2763,7 @@ private:
 
         _Rebound_alloc _Al(this->_Get_val());
         const size_t _Bytes =
-            _Calculate_bytes_for_flexible_array<_Ref_count_unbounded_array_alloc, _Check_overflow::_Nope>(_Size);
+            _STD _Calculate_bytes_for_flexible_array<_Ref_count_unbounded_array_alloc, _Check_overflow::_Nope>(_Size);
         const size_t _Storage_units = _Bytes / sizeof(_Storage);
 
         this->~_Ref_count_unbounded_array_alloc();
@@ -2821,7 +2821,7 @@ private:
         using _Rebound_alloc    = _Rebind_alloc_t<_Alloc, _Storage>;
 
         _Rebound_alloc _Al(this->_Get_val());
-        const size_t _Bytes         = _Calculate_bytes_for_flexible_array< //
+        const size_t _Bytes         = _STD _Calculate_bytes_for_flexible_array< //
             _Ref_count_unbounded_array_alloc_for_overwrite, _Check_overflow::_Nope>(_Size);
         const size_t _Storage_units = _Bytes / sizeof(_Storage);
 
@@ -2959,7 +2959,7 @@ _NODISCARD shared_ptr<_Ty> _Make_shared_unbounded_array(const size_t _Count, con
     // make a shared_ptr to an unbounded array
     static_assert(is_unbounded_array_v<_Ty>);
     using _Refc    = _Ref_count_unbounded_array<_Ty>;
-    const auto _Rx = _Allocate_flexible_array<_Refc>(_Count);
+    const auto _Rx = _STD _Allocate_flexible_array<_Refc>(_Count);
     _Global_delete_guard<_Refc> _Guard{_Rx};
     ::new (static_cast<void*>(_Rx)) _Refc(_Count, _Args...);
     _Guard._Target = nullptr;
@@ -3044,7 +3044,7 @@ struct _Allocate_n_ptr {
     size_t _Nx;
 
     _Allocate_n_ptr(_Alloc& _Al_, const size_t _Nx_)
-        : _Al(_Al_), _Ptr(_Al_.allocate(_Convert_size<_Alloc_size_t<_Alloc>>(_Nx_))), _Nx(_Nx_) {}
+        : _Al(_Al_), _Ptr(_Al_.allocate(_STD _Convert_size<_Alloc_size_t<_Alloc>>(_Nx_))), _Nx(_Nx_) {}
 
     ~_Allocate_n_ptr() {
         if (_Ptr) {
@@ -3067,7 +3067,7 @@ _NODISCARD shared_ptr<_Ty> _Allocate_shared_unbounded_array(
     constexpr size_t _Align = alignof(_Refc);
     using _Storage          = _Alignas_storage_unit<_Align>;
     _Rebind_alloc_t<_Alloc, _Storage> _Rebound(_Al);
-    const size_t _Bytes         = _Calculate_bytes_for_flexible_array<_Refc, _Check_overflow::_Yes>(_Count);
+    const size_t _Bytes         = _STD _Calculate_bytes_for_flexible_array<_Refc, _Check_overflow::_Yes>(_Count);
     const size_t _Storage_units = _Bytes / sizeof(_Storage);
     _Allocate_n_ptr _Guard{_Rebound, _Storage_units};
     const auto _Rx = reinterpret_cast<_Refc*>(_STD _Unfancy(_Guard._Ptr));
@@ -3927,7 +3927,7 @@ _NODISCARD_ASSUME_ALIGNED constexpr _Ty* assume_aligned(_Ty* const _Ptr) noexcep
         return _Ptr;
     } else {
         // this enforces the requirement that _Nx be a power of two
-        return static_cast<_Ty*>(__builtin_assume_aligned(_Ptr, _Nx));
+        return static_cast<_Ty*>(::__builtin_assume_aligned(_Ptr, _Nx));
     }
 }
 #endif // _HAS_CXX20
@@ -3939,11 +3939,11 @@ _CRTIMP2_PURE void __cdecl _Unlock_shared_ptr_spin_lock() noexcept;
 
 struct _Shared_ptr_spin_lock { // class to manage a spin lock for shared_ptr atomic operations
     _Shared_ptr_spin_lock() { // lock the spin lock
-        _Lock_shared_ptr_spin_lock();
+        _STD _Lock_shared_ptr_spin_lock();
     }
 
     ~_Shared_ptr_spin_lock() noexcept { // unlock the spin lock
-        _Unlock_shared_ptr_spin_lock();
+        _STD _Unlock_shared_ptr_spin_lock();
     }
 };
 
@@ -4089,7 +4089,7 @@ public:
     }
 
     void store(shared_ptr<_Ty> _Value, const memory_order _Order = memory_order_seq_cst) noexcept {
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
         const auto _Rep                  = this->_Repptr._Lock_and_load();
         remove_extent_t<_Ty>* const _Tmp = _Value._Ptr;
         _Value._Ptr                      = this->_Ptr.load(memory_order_relaxed);
@@ -4099,7 +4099,7 @@ public:
     }
 
     _NODISCARD shared_ptr<_Ty> load(const memory_order _Order = memory_order_seq_cst) const noexcept {
-        _Check_load_memory_order(_Order);
+        _STD _Check_load_memory_order(_Order);
         shared_ptr<_Ty> _Result;
         const auto _Rep = this->_Repptr._Lock_and_load();
         _Result._Ptr    = this->_Ptr.load(memory_order_relaxed);
@@ -4114,7 +4114,7 @@ public:
     }
 
     shared_ptr<_Ty> exchange(shared_ptr<_Ty> _Value, const memory_order _Order = memory_order_seq_cst) noexcept {
-        _Check_memory_order(static_cast<unsigned int>(_Order));
+        ::_Check_memory_order(static_cast<unsigned int>(_Order));
         shared_ptr<_Ty> _Result;
         _Result._Rep = this->_Repptr._Lock_and_load();
         _Result._Ptr = this->_Ptr.load(memory_order_relaxed);
@@ -4127,12 +4127,14 @@ public:
 
     bool compare_exchange_weak(shared_ptr<_Ty>& _Expected, shared_ptr<_Ty> _Desired, const memory_order _Success,
         const memory_order _Failure) noexcept {
-        return compare_exchange_strong(_Expected, _STD move(_Desired), _Combine_cas_memory_orders(_Success, _Failure));
+        return compare_exchange_strong(
+            _Expected, _STD move(_Desired), _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_strong(shared_ptr<_Ty>& _Expected, shared_ptr<_Ty> _Desired, const memory_order _Success,
         const memory_order _Failure) noexcept {
-        return compare_exchange_strong(_Expected, _STD move(_Desired), _Combine_cas_memory_orders(_Success, _Failure));
+        return compare_exchange_strong(
+            _Expected, _STD move(_Desired), _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_weak(shared_ptr<_Ty>& _Expected, shared_ptr<_Ty> _Desired,
@@ -4142,7 +4144,7 @@ public:
 
     bool compare_exchange_strong(shared_ptr<_Ty>& _Expected, shared_ptr<_Ty> _Desired,
         const memory_order _Order = memory_order_seq_cst) noexcept {
-        _Check_memory_order(static_cast<unsigned int>(_Order));
+        ::_Check_memory_order(static_cast<unsigned int>(_Order));
         auto _Rep = this->_Repptr._Lock_and_load();
         if (this->_Ptr.load(memory_order_relaxed) == _Expected._Ptr && _Rep == _Expected._Rep) {
             remove_extent_t<_Ty>* const _Tmp = _Desired._Ptr;
@@ -4212,7 +4214,7 @@ public:
     }
 
     void store(weak_ptr<_Ty> _Value, const memory_order _Order = memory_order_seq_cst) noexcept {
-        _Check_store_memory_order(_Order);
+        _STD _Check_store_memory_order(_Order);
         const auto _Rep                  = this->_Repptr._Lock_and_load();
         remove_extent_t<_Ty>* const _Tmp = _Value._Ptr;
         _Value._Ptr                      = this->_Ptr.load(memory_order_relaxed);
@@ -4222,7 +4224,7 @@ public:
     }
 
     _NODISCARD weak_ptr<_Ty> load(const memory_order _Order = memory_order_seq_cst) const noexcept {
-        _Check_load_memory_order(_Order);
+        _STD _Check_load_memory_order(_Order);
         weak_ptr<_Ty> _Result;
         const auto _Rep = this->_Repptr._Lock_and_load();
         _Result._Ptr    = this->_Ptr.load(memory_order_relaxed);
@@ -4237,7 +4239,7 @@ public:
     }
 
     weak_ptr<_Ty> exchange(weak_ptr<_Ty> _Value, const memory_order _Order = memory_order_seq_cst) noexcept {
-        _Check_memory_order(static_cast<unsigned int>(_Order));
+        ::_Check_memory_order(static_cast<unsigned int>(_Order));
         weak_ptr<_Ty> _Result;
         _Result._Rep = this->_Repptr._Lock_and_load();
         _Result._Ptr = this->_Ptr.load(memory_order_relaxed);
@@ -4250,12 +4252,14 @@ public:
 
     bool compare_exchange_weak(weak_ptr<_Ty>& _Expected, weak_ptr<_Ty> _Desired, const memory_order _Success,
         const memory_order _Failure) noexcept {
-        return compare_exchange_strong(_Expected, _STD move(_Desired), _Combine_cas_memory_orders(_Success, _Failure));
+        return compare_exchange_strong(
+            _Expected, _STD move(_Desired), _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_strong(weak_ptr<_Ty>& _Expected, weak_ptr<_Ty> _Desired, const memory_order _Success,
         const memory_order _Failure) noexcept {
-        return compare_exchange_strong(_Expected, _STD move(_Desired), _Combine_cas_memory_orders(_Success, _Failure));
+        return compare_exchange_strong(
+            _Expected, _STD move(_Desired), _STD _Combine_cas_memory_orders(_Success, _Failure));
     }
 
     bool compare_exchange_weak(
@@ -4265,7 +4269,7 @@ public:
 
     bool compare_exchange_strong(
         weak_ptr<_Ty>& _Expected, weak_ptr<_Ty> _Desired, const memory_order _Order = memory_order_seq_cst) noexcept {
-        _Check_memory_order(static_cast<unsigned int>(_Order));
+        ::_Check_memory_order(static_cast<unsigned int>(_Order));
         auto _Rep = this->_Repptr._Lock_and_load();
         if (this->_Ptr.load(memory_order_relaxed) == _Expected._Ptr && _Rep == _Expected._Rep) {
             remove_extent_t<_Ty>* const _Tmp = _Desired._Ptr;

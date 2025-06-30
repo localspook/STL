@@ -289,7 +289,7 @@ struct _List_node { // list node
     _Nodeptr _Next; // successor node, or first element if head
     _Nodeptr _Prev; // predecessor node, or last element if head
     _Value_type _Myval = // the stored value, unused if head
-        _Returns_exactly<_Value_type>(); // fake a viable constructor to workaround GH-2749
+        _STD _Returns_exactly<_Value_type>(); // fake a viable constructor to workaround GH-2749
 
     _List_node()                             = default;
     _List_node(const _List_node&)            = delete;
@@ -298,8 +298,8 @@ struct _List_node { // list node
     template <class _Alnode>
     static _Nodeptr _Buyheadnode(_Alnode& _Al) {
         const auto _Result = _Al.allocate(1);
-        _Construct_in_place(_Result->_Next, _Result);
-        _Construct_in_place(_Result->_Prev, _Result);
+        _STD _Construct_in_place(_Result->_Next, _Result);
+        _STD _Construct_in_place(_Result->_Prev, _Result);
         return _Result;
     }
 
@@ -307,8 +307,8 @@ struct _List_node { // list node
     static void _Freenode0(_Alnode& _Al, _Nodeptr _Ptr) noexcept {
         // destroy pointer members in _Ptr and deallocate with _Al
         static_assert(is_same_v<typename _Alnode::value_type, _List_node>, "Bad _Freenode0 call");
-        _Destroy_in_place(_Ptr->_Next);
-        _Destroy_in_place(_Ptr->_Prev);
+        _STD _Destroy_in_place(_Ptr->_Next);
+        _STD _Destroy_in_place(_Ptr->_Prev);
         allocator_traits<_Alnode>::deallocate(_Al, _Ptr, 1);
     }
 
@@ -606,8 +606,8 @@ struct _List_node_emplace_op2 : _Alloc_construct_ptr<_Alnode> {
 
     pointer _Transfer_before(const pointer _Insert_before) noexcept {
         const pointer _Insert_after = _Insert_before->_Prev;
-        _Construct_in_place(this->_Ptr->_Next, _Insert_before);
-        _Construct_in_place(this->_Ptr->_Prev, _Insert_after);
+        _STD _Construct_in_place(this->_Ptr->_Next, _Insert_before);
+        _STD _Construct_in_place(this->_Ptr->_Prev, _Insert_after);
         const auto _Result    = this->_Ptr;
         this->_Ptr            = pointer{};
         _Insert_before->_Prev = _Result;
@@ -649,8 +649,8 @@ struct _List_node_insert_op2 {
         for (; 0 < _Count; --_Count) {
             _Newnode._Allocate(); // throws
             _Alnode_traits::construct(_Al, _STD addressof(_Newnode._Ptr->_Myval), _Carg...); // throws
-            _Construct_in_place(_Tail->_Next, _Newnode._Ptr);
-            _Construct_in_place(_Newnode._Ptr->_Prev, _Tail);
+            _STD _Construct_in_place(_Tail->_Next, _Newnode._Ptr);
+            _STD _Construct_in_place(_Newnode._Ptr->_Prev, _Tail);
             _Tail = _Newnode._Ptr;
             ++_Added;
         }
@@ -679,8 +679,8 @@ struct _List_node_insert_op2 {
         while (_First != _Last) { // throws
             _Newnode._Allocate(); // throws
             _Alnode_traits::construct(_Al, _STD addressof(_Newnode._Ptr->_Myval), *_First); // throws
-            _Construct_in_place(_Tail->_Next, _Newnode._Ptr);
-            _Construct_in_place(_Newnode._Ptr->_Prev, _Tail);
+            _STD _Construct_in_place(_Tail->_Next, _Newnode._Ptr);
+            _STD _Construct_in_place(_Newnode._Ptr->_Prev, _Tail);
             _Tail = _STD exchange(_Newnode._Ptr, pointer{});
             ++_Added;
             ++_First; // throws
@@ -702,9 +702,9 @@ struct _List_node_insert_op2 {
         const auto _Local_tail   = _Tail;
         const auto _Insert_after = _Insert_before->_Prev;
 
-        _Construct_in_place(_Local_head->_Prev, _Insert_after);
+        _STD _Construct_in_place(_Local_head->_Prev, _Insert_after);
         _Insert_after->_Next = _Local_head;
-        _Construct_in_place(_Local_tail->_Next, _Insert_before);
+        _STD _Construct_in_place(_Local_tail->_Next, _Insert_before);
         _Insert_before->_Prev = _Local_tail;
 
         _List_data._Mysize += _Local_added;
@@ -723,15 +723,15 @@ struct _List_node_insert_op2 {
         _Newnode._Allocate(); // throws
         const auto _Local_added = _STD exchange(_Added, size_type{0});
         if (_Local_added == 0) {
-            _Construct_in_place(_Newnode._Ptr->_Next, _Newnode._Ptr);
-            _Construct_in_place(_Newnode._Ptr->_Prev, _Newnode._Ptr);
+            _STD _Construct_in_place(_Newnode._Ptr->_Next, _Newnode._Ptr);
+            _STD _Construct_in_place(_Newnode._Ptr->_Prev, _Newnode._Ptr);
         } else {
             const auto _Local_head = _Head;
             const auto _Local_tail = _Tail;
-            _Construct_in_place(_Newnode._Ptr->_Next, _Local_head);
-            _Construct_in_place(_Newnode._Ptr->_Prev, _Local_tail);
-            _Construct_in_place(_Local_head->_Prev, _Newnode._Ptr);
-            _Construct_in_place(_Local_tail->_Next, _Newnode._Ptr);
+            _STD _Construct_in_place(_Newnode._Ptr->_Next, _Local_head);
+            _STD _Construct_in_place(_Newnode._Ptr->_Prev, _Local_tail);
+            _STD _Construct_in_place(_Local_head->_Prev, _Newnode._Ptr);
+            _STD _Construct_in_place(_Local_tail->_Next, _Newnode._Ptr);
         }
 
         _List_data._Mysize = _Local_added;
@@ -743,8 +743,8 @@ struct _List_node_insert_op2 {
             return;
         }
 
-        _Construct_in_place(_Head->_Prev, pointer{});
-        _Construct_in_place(_Tail->_Next, pointer{});
+        _STD _Construct_in_place(_Head->_Prev, pointer{});
+        _STD _Construct_in_place(_Tail->_Next, pointer{});
         pointer _Subject = _Head;
         while (_Subject) {
             value_type::_Freenode(_Al, _STD exchange(_Subject, _Subject->_Next));
@@ -948,7 +948,7 @@ public:
                 const auto _Newhead = _STD exchange(_Right_data._Myhead, _Node::_Buyheadnode(_Right_al));
                 const auto _Newsize = _STD exchange(_Right_data._Mysize, size_type{0});
                 _Tidy();
-                _Pocma(_Al, _Right_al);
+                _STD _Pocma(_Al, _Right_al);
                 _My_data._Myhead = _Newhead;
                 _My_data._Mysize = _Newsize;
                 _Proxy._Bind(_Alproxy, _STD addressof(_My_data));
@@ -964,7 +964,7 @@ public:
         }
 
         clear();
-        _Pocma(_Al, _Right_al);
+        _STD _Pocma(_Al, _Right_al);
         _Swap_val(_Right);
 
         return *this;
@@ -1028,7 +1028,7 @@ public:
     _Nodeptr _Emplace(const _Nodeptr _Where, _Valty&&... _Val) { // insert element at _Where
         size_type& _Mysize = _Mypair._Myval2._Mysize;
         if (_Mysize == max_size()) {
-            _Xlength_error("list too long");
+            _STD _Xlength_error("list too long");
         }
 
         _List_node_emplace_op2<_Alnode> _Op{_Getal(), _STD forward<_Valty>(_Val)...};
@@ -1061,7 +1061,7 @@ public:
         _Tidy();
 #if _ITERATOR_DEBUG_LEVEL != 0 // TRANSITION, ABI
         auto _Alproxy = _STD _Get_proxy_allocator(_Getal());
-        _Delete_plain_internal(_Alproxy, _Mypair._Myval2._Myproxy);
+        _STD _Delete_plain_internal(_Alproxy, _Mypair._Myval2._Myproxy);
 #endif // _ITERATOR_DEBUG_LEVEL != 0
     }
 
@@ -1075,7 +1075,7 @@ private:
         auto _Right_al_non_const = _Right_al;
         auto _Newhead            = _Node::_Buyheadnode(_Right_al_non_const);
         _Tidy();
-        _Pocca(_Al, _Right_al);
+        _STD _Pocca(_Al, _Right_al);
         _Mypair._Myval2._Myhead = _Newhead;
         _Mypair._Myval2._Mysize = 0;
         _Proxy._Bind(_Alproxy, _STD addressof(_Mypair._Myval2));
@@ -1094,7 +1094,7 @@ public:
                 _Reload_sentinel_and_proxy(_Right);
             }
         } else {
-            _Pocca(_Al, _Right_al);
+            _STD _Pocca(_Al, _Right_al);
         }
 
         assign(_Right._Unchecked_begin(), _Right._Unchecked_end());
@@ -1522,7 +1522,7 @@ private:
 public:
     void swap(list& _Right) noexcept /* strengthened */ {
         if (this != _STD addressof(_Right)) {
-            _Pocs(_Getal(), _Right._Getal());
+            _STD _Pocs(_Getal(), _Right._Getal());
             _Swap_val(_Right);
         }
     }
@@ -1822,7 +1822,7 @@ private:
 
             auto& _My_data = _Mypair._Myval2;
             if (max_size() - _My_data._Mysize < _Count) {
-                _Xlength_error("list too long");
+                _STD _Xlength_error("list too long");
             }
 
             auto& _Right_data = _Right._Mypair._Myval2;
@@ -1849,8 +1849,8 @@ private:
         _Container_proxy_ptr<_Alty> _Proxy(_Alproxy, _Mypair._Myval2);
         auto& _Al     = _Getal();
         auto _Newhead = _Al.allocate(1);
-        _Construct_in_place(_Newhead->_Next, _Newhead);
-        _Construct_in_place(_Newhead->_Prev, _Newhead);
+        _STD _Construct_in_place(_Newhead->_Next, _Newhead);
+        _STD _Construct_in_place(_Newhead->_Prev, _Newhead);
         _Mypair._Myval2._Myhead = _Newhead;
         _Proxy._Release();
     }

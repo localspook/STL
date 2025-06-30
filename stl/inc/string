@@ -93,11 +93,11 @@ _EXPORT_STD _NODISCARD inline int stoi(const string& _Str, size_t* _Idx = nullpt
     const long _Ans = _CSTD strtol(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoi argument");
+        _STD _Xinvalid_argument("invalid stoi argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoi argument out of range");
+        _STD _Xout_of_range("stoi argument out of range");
     }
 
     if (_Idx) {
@@ -115,11 +115,11 @@ _EXPORT_STD _NODISCARD inline long stol(const string& _Str, size_t* _Idx = nullp
     const long _Ans = _CSTD strtol(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stol argument");
+        _STD _Xinvalid_argument("invalid stol argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stol argument out of range");
+        _STD _Xout_of_range("stol argument out of range");
     }
 
     if (_Idx) {
@@ -137,11 +137,11 @@ _EXPORT_STD _NODISCARD inline unsigned long stoul(const string& _Str, size_t* _I
     const unsigned long _Ans = _CSTD strtoul(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoul argument");
+        _STD _Xinvalid_argument("invalid stoul argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoul argument out of range");
+        _STD _Xout_of_range("stoul argument out of range");
     }
 
     if (_Idx) {
@@ -159,11 +159,11 @@ _EXPORT_STD _NODISCARD inline long long stoll(const string& _Str, size_t* _Idx =
     const long long _Ans = _CSTD strtoll(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoll argument");
+        _STD _Xinvalid_argument("invalid stoll argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoll argument out of range");
+        _STD _Xout_of_range("stoll argument out of range");
     }
 
     if (_Idx) {
@@ -181,11 +181,11 @@ _EXPORT_STD _NODISCARD inline unsigned long long stoull(const string& _Str, size
     const unsigned long long _Ans = _CSTD strtoull(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoull argument");
+        _STD _Xinvalid_argument("invalid stoull argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoull argument out of range");
+        _STD _Xout_of_range("stoull argument out of range");
     }
 
     if (_Idx) {
@@ -203,11 +203,11 @@ _EXPORT_STD _NODISCARD inline float stof(const string& _Str, size_t* _Idx = null
     const float _Ans = _CSTD strtof(_Ptr, &_Eptr);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stof argument");
+        _STD _Xinvalid_argument("invalid stof argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stof argument out of range");
+        _STD _Xout_of_range("stof argument out of range");
     }
 
     if (_Idx) {
@@ -225,11 +225,11 @@ _EXPORT_STD _NODISCARD inline double stod(const string& _Str, size_t* _Idx = nul
     const double _Ans = _CSTD strtod(_Ptr, &_Eptr);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stod argument");
+        _STD _Xinvalid_argument("invalid stod argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stod argument out of range");
+        _STD _Xout_of_range("stod argument out of range");
     }
 
     if (_Idx) {
@@ -247,11 +247,11 @@ _EXPORT_STD _NODISCARD inline long double stold(const string& _Str, size_t* _Idx
     const long double _Ans = _CSTD strtold(_Ptr, &_Eptr);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stold argument");
+        _STD _Xinvalid_argument("invalid stold argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stold argument out of range");
+        _STD _Xout_of_range("stold argument out of range");
     }
 
     if (_Idx) {
@@ -269,11 +269,11 @@ _EXPORT_STD _NODISCARD inline int stoi(const wstring& _Str, size_t* _Idx = nullp
     const long _Ans = _CSTD wcstol(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoi argument");
+        _STD _Xinvalid_argument("invalid stoi argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoi argument out of range");
+        _STD _Xout_of_range("stoi argument out of range");
     }
 
     if (_Idx) {
@@ -291,11 +291,11 @@ _EXPORT_STD _NODISCARD inline long stol(const wstring& _Str, size_t* _Idx = null
     const long _Ans = _CSTD wcstol(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stol argument");
+        _STD _Xinvalid_argument("invalid stol argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stol argument out of range");
+        _STD _Xout_of_range("stol argument out of range");
     }
 
     if (_Idx) {
@@ -313,11 +313,11 @@ _EXPORT_STD _NODISCARD inline unsigned long stoul(const wstring& _Str, size_t* _
     const unsigned long _Ans = _CSTD wcstoul(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoul argument");
+        _STD _Xinvalid_argument("invalid stoul argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoul argument out of range");
+        _STD _Xout_of_range("stoul argument out of range");
     }
 
     if (_Idx) {
@@ -335,11 +335,11 @@ _EXPORT_STD _NODISCARD inline long long stoll(const wstring& _Str, size_t* _Idx 
     const long long _Ans = _CSTD wcstoll(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoll argument");
+        _STD _Xinvalid_argument("invalid stoll argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoll argument out of range");
+        _STD _Xout_of_range("stoll argument out of range");
     }
 
     if (_Idx) {
@@ -357,11 +357,11 @@ _EXPORT_STD _NODISCARD inline unsigned long long stoull(const wstring& _Str, siz
     const unsigned long long _Ans = _CSTD wcstoull(_Ptr, &_Eptr, _Base);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stoull argument");
+        _STD _Xinvalid_argument("invalid stoull argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stoull argument out of range");
+        _STD _Xout_of_range("stoull argument out of range");
     }
 
     if (_Idx) {
@@ -379,11 +379,11 @@ _EXPORT_STD _NODISCARD inline float stof(const wstring& _Str, size_t* _Idx = nul
     const float _Ans = _CSTD wcstof(_Ptr, &_Eptr);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stof argument");
+        _STD _Xinvalid_argument("invalid stof argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stof argument out of range");
+        _STD _Xout_of_range("stof argument out of range");
     }
 
     if (_Idx) {
@@ -401,11 +401,11 @@ _EXPORT_STD _NODISCARD inline double stod(const wstring& _Str, size_t* _Idx = nu
     const double _Ans = _CSTD wcstod(_Ptr, &_Eptr);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stod argument");
+        _STD _Xinvalid_argument("invalid stod argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stod argument out of range");
+        _STD _Xout_of_range("stod argument out of range");
     }
 
     if (_Idx) {
@@ -423,11 +423,11 @@ _EXPORT_STD _NODISCARD inline long double stold(const wstring& _Str, size_t* _Id
     const long double _Ans = _CSTD wcstold(_Ptr, &_Eptr);
 
     if (_Ptr == _Eptr) {
-        _Xinvalid_argument("invalid stold argument");
+        _STD _Xinvalid_argument("invalid stold argument");
     }
 
     if (_Errno_ref == ERANGE) {
-        _Xout_of_range("stold argument out of range");
+        _STD _Xout_of_range("stold argument out of range");
     }
 
     if (_Idx) {
@@ -448,40 +448,40 @@ _NODISCARD basic_string<_Elem> _Integral_to_string(const _Ty _Val) {
     if constexpr (is_signed_v<_Ty>) {
         const auto _UVal = static_cast<make_unsigned_t<_Ty>>(_Val);
         if (_Val < 0) {
-            _RNext    = _UIntegral_to_buff(_RNext, 0 - _UVal);
+            _RNext    = _STD _UIntegral_to_buff(_RNext, 0 - _UVal);
             *--_RNext = '-';
         } else {
-            _RNext = _UIntegral_to_buff(_RNext, _UVal);
+            _RNext = _STD _UIntegral_to_buff(_RNext, _UVal);
         }
     } else {
-        _RNext = _UIntegral_to_buff(_RNext, _Val);
+        _RNext = _STD _UIntegral_to_buff(_RNext, _Val);
     }
 
     return basic_string<_Elem>(_RNext, _Buff_end);
 }
 
 _EXPORT_STD _NODISCARD inline string to_string(int _Val) {
-    return _Integral_to_string<char>(_Val);
+    return _STD _Integral_to_string<char>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline string to_string(unsigned int _Val) {
-    return _Integral_to_string<char>(_Val);
+    return _STD _Integral_to_string<char>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline string to_string(long _Val) {
-    return _Integral_to_string<char>(_Val);
+    return _STD _Integral_to_string<char>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline string to_string(unsigned long _Val) {
-    return _Integral_to_string<char>(_Val);
+    return _STD _Integral_to_string<char>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline string to_string(long long _Val) {
-    return _Integral_to_string<char>(_Val);
+    return _STD _Integral_to_string<char>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline string to_string(unsigned long long _Val) {
-    return _Integral_to_string<char>(_Val);
+    return _STD _Integral_to_string<char>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline string to_string(double _Val) {
@@ -500,27 +500,27 @@ _EXPORT_STD _NODISCARD inline string to_string(long double _Val) {
 }
 
 _EXPORT_STD _NODISCARD inline wstring to_wstring(int _Val) {
-    return _Integral_to_string<wchar_t>(_Val);
+    return _STD _Integral_to_string<wchar_t>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline wstring to_wstring(unsigned int _Val) {
-    return _Integral_to_string<wchar_t>(_Val);
+    return _STD _Integral_to_string<wchar_t>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline wstring to_wstring(long _Val) {
-    return _Integral_to_string<wchar_t>(_Val);
+    return _STD _Integral_to_string<wchar_t>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline wstring to_wstring(unsigned long _Val) {
-    return _Integral_to_string<wchar_t>(_Val);
+    return _STD _Integral_to_string<wchar_t>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline wstring to_wstring(long long _Val) {
-    return _Integral_to_string<wchar_t>(_Val);
+    return _STD _Integral_to_string<wchar_t>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline wstring to_wstring(unsigned long long _Val) {
-    return _Integral_to_string<wchar_t>(_Val);
+    return _STD _Integral_to_string<wchar_t>(_Val);
 }
 
 _EXPORT_STD _NODISCARD inline wstring to_wstring(double _Val) {

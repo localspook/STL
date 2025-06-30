@@ -188,7 +188,7 @@ template <class _CoroPromise>
 struct hash<coroutine_handle<_CoroPromise>> {
     _NODISCARD _STATIC_CALL_OPERATOR size_t operator()(
         const coroutine_handle<_CoroPromise>& _Coro) _CONST_CALL_OPERATOR noexcept {
-        return _Hash_representation(_Coro.address());
+        return _STD _Hash_representation(_Coro.address());
     }
 };
 

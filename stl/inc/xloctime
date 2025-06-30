@@ -152,7 +152,7 @@ public:
 
     _InIt __CLR_OR_THIS_CALL get(_InIt _First, _InIt _Last, ios_base& _Iosbase, ios_base::iostate& _State, tm* _Pt,
         const _Elem* _Fmtfirst, const _Elem* _Fmtlast) const { // get formatted time for format string
-        _Adl_verify_range(_Fmtfirst, _Fmtlast);
+        _STD _Adl_verify_range(_Fmtfirst, _Fmtlast);
         const _Ctype& _Ctype_fac = _STD use_facet<_Ctype>(_Iosbase.getloc());
 
         _State = ios_base::goodbit;
@@ -239,14 +239,15 @@ protected:
         _Cvt = _Lobj._Getcvt();
 
         if constexpr (is_same_v<_Elem2, wchar_t>) {
-            _Days = reinterpret_cast<const _Elem*>(_Maklocwcs(reinterpret_cast<const wchar_t*>(_Lobj._W_Getdays())));
+            _Days =
+                reinterpret_cast<const _Elem*>(_STD _Maklocwcs(reinterpret_cast<const wchar_t*>(_Lobj._W_Getdays())));
             _Months =
-                reinterpret_cast<const _Elem*>(_Maklocwcs(reinterpret_cast<const wchar_t*>(_Lobj._W_Getmonths())));
-            _Ampm = reinterpret_cast<const _Elem*>(_Maklocwcs(L":AM:am:PM:pm"));
+                reinterpret_cast<const _Elem*>(_STD _Maklocwcs(reinterpret_cast<const wchar_t*>(_Lobj._W_Getmonths())));
+            _Ampm = reinterpret_cast<const _Elem*>(_STD _Maklocwcs(L":AM:am:PM:pm"));
         } else {
-            _Days   = _Maklocstr(_Lobj._Getdays(), static_cast<_Elem*>(nullptr), _Cvt);
-            _Months = _Maklocstr(_Lobj._Getmonths(), static_cast<_Elem*>(nullptr), _Cvt);
-            _Ampm   = _Maklocstr(":AM:am:PM:pm", static_cast<_Elem*>(nullptr), _Cvt);
+            _Days   = _STD _Maklocstr(_Lobj._Getdays(), static_cast<_Elem*>(nullptr), _Cvt);
+            _Months = _STD _Maklocstr(_Lobj._Getmonths(), static_cast<_Elem*>(nullptr), _Cvt);
+            _Ampm   = _STD _Maklocstr(":AM:am:PM:pm", static_cast<_Elem*>(nullptr), _Cvt);
         }
     }
 
@@ -383,7 +384,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get_weekday(_InIt _First, _InIt _Last, ios_base&, ios_base::iostate& _State,
         tm* _Pt) const { // get weekday from [_First, _Last) into _Pt
-        int _Num = _Getloctxt(_First, _Last, 0, _Days, _Case_sensitive::_Nope);
+        int _Num = _STD _Getloctxt(_First, _Last, 0, _Days, _Case_sensitive::_Nope);
         if (_Num < 0) {
             _State |= ios_base::failbit;
         } else {
@@ -395,7 +396,7 @@ protected:
 
     virtual _InIt __CLR_OR_THIS_CALL do_get_monthname(_InIt _First, _InIt _Last, ios_base&, ios_base::iostate& _State,
         tm* _Pt) const { // get month from [_First, _Last) into _Pt
-        int _Num = _Getloctxt(_First, _Last, 0, _Months, _Case_sensitive::_Nope);
+        int _Num = _STD _Getloctxt(_First, _Last, 0, _Months, _Case_sensitive::_Nope);
 
         if (_Num < 0) {
             _State |= ios_base::failbit;
@@ -412,7 +413,7 @@ protected:
 
         int _Ans = 0;
         int _Digits_read;
-        ios_base::iostate _Res = _Getint_v2(_First, _Last, 0, 9999, _Ans, _Digits_read, _Ctype_fac);
+        ios_base::iostate _Res = _STD _Getint_v2(_First, _Last, 0, 9999, _Ans, _Digits_read, _Ctype_fac);
 
         _State |= _Res; // pass on eofbit and failbit
         if (!(_Res & ios_base::failbit)) {
@@ -504,7 +505,7 @@ protected:
             break;
 
         case 'p':
-            _Ans = _Getloctxt(_First, _Last, 0, ":AM:am:PM:pm", _Case_sensitive::_Nope);
+            _Ans = _STD _Getloctxt(_First, _Last, 0, ":AM:am:PM:pm", _Case_sensitive::_Nope);
             if (_Ans < 0) {
                 _State |= ios_base::failbit;
             } else if (1 < _Ans) {
@@ -608,7 +609,7 @@ private:
         const _Ctype& _Ctype_fac) const { // get integer in range [_Lo, _Hi] from [_First, _Last)
         // TRANSITION, ABI
         int _Digits_read;
-        return _Getint_v2(_First, _Last, _Lo, _Hi, _Val, _Digits_read, _Ctype_fac);
+        return _STD _Getint_v2(_First, _Last, _Lo, _Hi, _Val, _Digits_read, _Ctype_fac);
     }
 
     void __CLR_OR_THIS_CALL _Tidy() noexcept { // free all storage
@@ -713,52 +714,56 @@ _NODISCARD constexpr bool _Is_valid_strftime_tm_data(const char _Specifier, cons
 
     switch (_Specifier) {
     case 'S':
-        return _Is_valid_strftime_tm_sec(_Pt);
+        return _STD _Is_valid_strftime_tm_sec(_Pt);
     case 'M':
-        return _Is_valid_strftime_tm_min(_Pt);
+        return _STD _Is_valid_strftime_tm_min(_Pt);
     case 'H':
     case 'I':
     case 'p':
-        return _Is_valid_strftime_tm_hour(_Pt);
+        return _STD _Is_valid_strftime_tm_hour(_Pt);
     case 'd':
     case 'e':
-        return _Is_valid_strftime_tm_mday(_Pt);
+        return _STD _Is_valid_strftime_tm_mday(_Pt);
     case 'b':
     case 'B':
     case 'm':
     case 'h':
-        return _Is_valid_strftime_tm_mon(_Pt);
+        return _STD _Is_valid_strftime_tm_mon(_Pt);
     case 'C':
     case 'y':
     case 'Y':
-        return _Is_valid_strftime_tm_year(_Pt);
+        return _STD _Is_valid_strftime_tm_year(_Pt);
     case 'j':
-        return _Is_valid_strftime_tm_yday(_Pt);
+        return _STD _Is_valid_strftime_tm_yday(_Pt);
     case 'a':
     case 'A':
     case 'u':
     case 'w':
-        return _Is_valid_strftime_tm_wday(_Pt);
+        return _STD _Is_valid_strftime_tm_wday(_Pt);
     case 'U': // C23 7.29.3.5 "The strftime function"/3 says that %U and %W depend on tm_year,
     case 'W': // but the UCRT neither uses nor validates it.
-        return _Is_valid_strftime_tm_wday(_Pt) && _Is_valid_strftime_tm_yday(_Pt);
+        return _STD _Is_valid_strftime_tm_wday(_Pt) && _STD _Is_valid_strftime_tm_yday(_Pt);
     case 'R':
-        return _Is_valid_strftime_tm_hour(_Pt) && _Is_valid_strftime_tm_min(_Pt);
+        return _STD _Is_valid_strftime_tm_hour(_Pt) && _STD _Is_valid_strftime_tm_min(_Pt);
     case 'D':
     case 'x':
     case 'F':
-        return _Is_valid_strftime_tm_year(_Pt) && _Is_valid_strftime_tm_mon(_Pt) && _Is_valid_strftime_tm_mday(_Pt);
+        return _STD _Is_valid_strftime_tm_year(_Pt) && _STD _Is_valid_strftime_tm_mon(_Pt)
+            && _STD _Is_valid_strftime_tm_mday(_Pt);
     case 'g':
     case 'G':
-        return _Is_valid_strftime_tm_year(_Pt) && _Is_valid_strftime_tm_wday(_Pt) && _Is_valid_strftime_tm_yday(_Pt);
+        return _STD _Is_valid_strftime_tm_year(_Pt) && _STD _Is_valid_strftime_tm_wday(_Pt)
+            && _STD _Is_valid_strftime_tm_yday(_Pt);
     case 'r':
     case 'X':
     case 'T':
-        return _Is_valid_strftime_tm_hour(_Pt) && _Is_valid_strftime_tm_min(_Pt) && _Is_valid_strftime_tm_sec(_Pt);
+        return _STD _Is_valid_strftime_tm_hour(_Pt) && _STD _Is_valid_strftime_tm_min(_Pt)
+            && _STD _Is_valid_strftime_tm_sec(_Pt);
     case 'c':
-        return _Is_valid_strftime_tm_wday(_Pt) && _Is_valid_strftime_tm_mon(_Pt) && _Is_valid_strftime_tm_mday(_Pt)
-            && _Is_valid_strftime_tm_hour(_Pt) && _Is_valid_strftime_tm_min(_Pt) && _Is_valid_strftime_tm_sec(_Pt)
-            && _Is_valid_strftime_tm_year(_Pt);
+        return _STD _Is_valid_strftime_tm_wday(_Pt) && _STD _Is_valid_strftime_tm_mon(_Pt)
+            && _STD _Is_valid_strftime_tm_mday(_Pt) && _STD _Is_valid_strftime_tm_hour(_Pt)
+            && _STD _Is_valid_strftime_tm_min(_Pt) && _STD _Is_valid_strftime_tm_sec(_Pt)
+            && _STD _Is_valid_strftime_tm_year(_Pt);
     case 'V': // C23 7.29.3.5 "The strftime function"/3 says that %V depends on tm_year, tm_wday, and tm_yday.
               // The UCRT uses them without validating them.
         return true;
@@ -814,7 +819,7 @@ public:
                 if (_Specifier == '%' && _Modifier == '\0') {
                     // if the specifier is percent and no modifier is set, just append it
                     *_Dest++ = _Percent;
-                } else if (!_Is_valid_strftime_specifier(_Specifier)) {
+                } else if (!_STD _Is_valid_strftime_specifier(_Specifier)) {
                     // no valid specifier, directly copy as literal elements
                     *_Dest++ = _Percent;
                     if (_Modifier != '\0') {
@@ -822,7 +827,7 @@ public:
                     }
                     *_Dest++ = _Specifier;
                 } else {
-                    if (_Is_valid_strftime_tm_data(_Specifier, _Pt)) {
+                    if (_STD _Is_valid_strftime_tm_data(_Specifier, _Pt)) {
                         _Dest = do_put(_Dest, _Iosbase, _Fill, _Pt, _Specifier, _Modifier); // convert a single field
                     } else {
                         *_Dest++ = _Elem('?');
@@ -886,7 +891,7 @@ protected:
 
         for (_Num = 16;; _Num *= 2) { // convert into ever larger string buffer until success
             _Str.append(_Num, '\0');
-            _Count = _Strftime(&_Str[0], _Str.size(), _Fmt, _Pt, _Tnames._Getptr());
+            _Count = ::_Strftime(&_Str[0], _Str.size(), _Fmt, _Pt, _Tnames._Getptr());
             if (0 < _Count) {
                 break;
             } else if (_Errno_ref == EINVAL) {
@@ -954,7 +959,7 @@ public:
                 if (_Specifier == '%' && _Modifier == '\0') {
                     // if the specifier is percent and no modifier is set, just append it
                     *_Dest++ = _Percent;
-                } else if (!_Is_valid_strftime_specifier(_Specifier)) {
+                } else if (!_STD _Is_valid_strftime_specifier(_Specifier)) {
                     // no valid specifier, directly copy as literal elements
                     *_Dest++ = _Percent;
                     if (_Modifier != '\0') {
@@ -962,7 +967,7 @@ public:
                     }
                     *_Dest++ = *_Fmtfirst;
                 } else {
-                    if (_Is_valid_strftime_tm_data(_Specifier, _Pt)) {
+                    if (_STD _Is_valid_strftime_tm_data(_Specifier, _Pt)) {
                         _Dest = do_put(_Dest, _Iosbase, _Fill, _Pt, _Specifier, _Modifier); // convert a single field
                     } else {
                         *_Dest++ = _Elem('?');
@@ -1032,7 +1037,7 @@ protected:
 
         for (_Num = 16;; _Num *= 2) { // convert into ever larger string buffer until success
             _Str.append(_Num, '\0');
-            _Count = _Wcsftime(&_Str[0], _Str.size(), _Fmt, _Pt, _Tnames._Getptr());
+            _Count = ::_Wcsftime(&_Str[0], _Str.size(), _Fmt, _Pt, _Tnames._Getptr());
             if (0 < _Count) {
                 break;
             } else if (_Errno_ref == EINVAL) {

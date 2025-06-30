@@ -54,7 +54,7 @@ public:
     template <class _Alloc2>
     basic_stringbuf(const basic_string<_Elem, _Traits, _Alloc2>& _Str, ios_base::openmode _Mode, const _Alloc& _Al_)
         : _Al(_Al_) {
-        _Init(_Str.c_str(), _Convert_size<_Mysize_type>(_Str.size()), _Getstate(_Mode));
+        _Init(_Str.c_str(), _STD _Convert_size<_Mysize_type>(_Str.size()), _Getstate(_Mode));
     }
 
     template <class _Alloc2>
@@ -146,7 +146,7 @@ public:
                 _Copy_into_self_and_tidy(_STD move(_Right));
             }
         } else {
-            _Pocma(_Al, _Right._Al);
+            _STD _Pocma(_Al, _Right._Al);
             _Take_contents(_STD move(_Right));
         }
     }
@@ -162,7 +162,7 @@ public:
             _STD swap(_Seekhigh, _Right._Seekhigh);
             _STD swap(_Mystate, _Right._Mystate);
             // The same as basic_string::swap
-            _Pocs(_Al, _Right._Al);
+            _STD _Pocs(_Al, _Right._Al);
         }
     }
 
@@ -280,7 +280,7 @@ public:
         }
 
         _Tidy();
-        _Pocma(_Al, _Newstr_al);
+        _STD _Pocma(_Al, _Newstr_al);
         _Init_string_inplace(_STD move(_Newstr), _Mystate);
     }
 
@@ -325,7 +325,7 @@ protected:
             return _Traits::eof();
         }
 
-        const auto _Newptr = _Unfancy(_Allocate_at_least_helper(_Al, _Newsize));
+        const auto _Newptr = _STD _Unfancy(_STD _Allocate_at_least_helper(_Al, _Newsize));
         _Traits::copy(_Newptr, _Oldptr, _Oldsize);
 
         const auto _New_pnext = _Newptr + _Oldsize;
@@ -499,13 +499,13 @@ protected:
         _State &= ~_From_rvalue;
 
         if (_Count > INT_MAX) { // TRANSITION, VSO-485517
-            _Xbad_alloc();
+            _STD _Xbad_alloc();
         }
 
         if (_Count != 0 && (_State & (_Noread | _Constant)) != (_Noread | _Constant)) {
             // finite buffer that can be read or written, set it up
             _Mysize_type _Newsize = _Count;
-            const auto _Pnew      = _Unfancy(_Allocate_at_least_helper(_Al, _Newsize));
+            const auto _Pnew      = _STD _Unfancy(_STD _Allocate_at_least_helper(_Al, _Newsize));
             _Traits::copy(_Pnew, _Ptr, _Count);
             _Seekhigh = _Pnew + _Newsize;
 
@@ -539,7 +539,7 @@ protected:
 
         // finite buffer that can be read or written, set it up
         auto [_Ptr, _Size, _Actual_allocation_size] = _Str._Release_to_buffer(_Al);
-        _Elem* const _Pnew                          = _Unfancy(_Ptr);
+        _Elem* const _Pnew                          = _STD _Unfancy(_Ptr);
         _Seekhigh                                   = _Pnew + _Size;
         auto _Next                                  = (_State & (_Atend | _Append)) ? _Seekhigh : _Pnew;
         auto _End_buffer                            = _Pnew + _Actual_allocation_size;

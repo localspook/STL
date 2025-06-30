@@ -288,7 +288,7 @@ struct _Hash_vec {
             // nothrow hereafter
             const auto _Oldcapacity = capacity();
             if (_Oldcapacity != 0) {
-                _Destroy_range(_Mypair._Myval2._Myfirst, _Mypair._Myval2._Mylast);
+                _STD _Destroy_range(_Mypair._Myval2._Myfirst, _Mypair._Myval2._Mylast);
                 _Alvec.deallocate(_Mypair._Myval2._Myfirst, _Oldcapacity);
             }
 
@@ -304,7 +304,7 @@ struct _Hash_vec {
 
     void _Tidy() noexcept {
         if (_Mypair._Myval2._Myfirst != nullptr) {
-            _Destroy_range(_Mypair._Myval2._Myfirst, _Mypair._Myval2._Mylast);
+            _STD _Destroy_range(_Mypair._Myval2._Myfirst, _Mypair._Myval2._Mylast);
             _Mypair._Get_first().deallocate(_Mypair._Myval2._Myfirst, capacity());
             _Mypair._Myval2._Myfirst = nullptr;
             _Mypair._Myval2._Mylast  = nullptr;
@@ -316,7 +316,7 @@ struct _Hash_vec {
         _Tidy();
 #if _ITERATOR_DEBUG_LEVEL != 0
         auto _Alproxy = _STD _Get_proxy_allocator(_Mypair._Get_first());
-        _Delete_plain_internal(_Alproxy, _STD exchange(_Mypair._Myval2._Myproxy, nullptr));
+        _STD _Delete_plain_internal(_Alproxy, _STD exchange(_Mypair._Myval2._Myproxy, nullptr));
 #endif // _ITERATOR_DEBUG_LEVEL != 0
     }
 
@@ -471,8 +471,8 @@ private:
     };
 
     void _Pocma_both(_Hash& _Right) {
-        _Pocma(_List._Getal(), _Right._List._Getal());
-        _Pocma(_Vec._Mypair._Get_first(), _Right._Vec._Mypair._Get_first());
+        _STD _Pocma(_List._Getal(), _Right._List._Getal());
+        _STD _Pocma(_Vec._Mypair._Get_first(), _Right._Vec._Mypair._Get_first());
     }
 
     struct _NODISCARD _Clear_guard {
@@ -738,8 +738,8 @@ protected:
 
 private:
     void _Pocca_both(const _Hash& _Right) {
-        _Pocca(_List._Getal(), _Right._List._Getal());
-        _Pocca(_Vec._Mypair._Get_first(), _Right._Vec._Mypair._Get_first());
+        _STD _Pocca(_List._Getal(), _Right._List._Getal());
+        _STD _Pocca(_Vec._Mypair._Get_first(), _Right._Vec._Mypair._Get_first());
     }
 
 public:
@@ -1369,8 +1369,8 @@ public:
     void swap(_Hash& _Right) noexcept(noexcept(_Traitsobj.swap(_Right._Traitsobj))) /* strengthened */ {
         if (this != _STD addressof(_Right)) {
             _Traitsobj.swap(_Right._Traitsobj);
-            _Pocs(_List._Getal(), _Right._List._Getal());
-            _Pocs(_Vec._Mypair._Get_first(), _Right._Vec._Mypair._Get_first());
+            _STD _Pocs(_List._Getal(), _Right._List._Getal());
+            _STD _Pocs(_Vec._Mypair._Get_first(), _Right._Vec._Mypair._Get_first());
             _Swap_val(_Right);
         }
     }
@@ -1435,8 +1435,8 @@ public:
         }
 
         const auto _Released = _Handle._Release();
-        _Destroy_in_place(_Released->_Next); // TRANSITION, ABI
-        _Destroy_in_place(_Released->_Prev);
+        _STD _Destroy_in_place(_Released->_Next); // TRANSITION, ABI
+        _STD _Destroy_in_place(_Released->_Prev);
         return _List._Make_iter(_Insert_new_node_before(_Hashval, _Target._Insert_before, _Released));
     }
 
@@ -1489,8 +1489,8 @@ public:
             _Candidate->_Prev->_Next = _Candidate->_Next;
             _Candidate->_Next->_Prev = _Candidate->_Prev;
             --_That._List._Mypair._Myval2._Mysize;
-            _Destroy_in_place(_Candidate->_Next); // TRANSITION, ABI
-            _Destroy_in_place(_Candidate->_Prev);
+            _STD _Destroy_in_place(_Candidate->_Next); // TRANSITION, ABI
+            _STD _Destroy_in_place(_Candidate->_Prev);
 #if _ITERATOR_DEBUG_LEVEL == 2
             _List._Mypair._Myval2._Adopt_unique(_That._List._Mypair._Myval2, _Candidate);
 #endif // _ITERATOR_DEBUG_LEVEL == 2
@@ -1567,8 +1567,8 @@ public:
         }
 
         const auto _Released = _Handle._Release();
-        _Destroy_in_place(_Released->_Next); // TRANSITION, ABI
-        _Destroy_in_place(_Released->_Prev);
+        _STD _Destroy_in_place(_Released->_Next); // TRANSITION, ABI
+        _STD _Destroy_in_place(_Released->_Prev);
         const auto _Newnode = _Insert_new_node_before(_Hashval, _Target._Insert_before, _Released);
         if constexpr (_Traits::_Multi) {
             return _List._Make_iter(_Newnode);
@@ -1632,8 +1632,8 @@ protected:
         const size_t _Hashval, const _Nodeptr _Insert_before, const _Nodeptr _Newnode) noexcept {
         const _Nodeptr _Insert_after = _Insert_before->_Prev;
         ++_List._Mypair._Myval2._Mysize;
-        _Construct_in_place(_Newnode->_Next, _Insert_before);
-        _Construct_in_place(_Newnode->_Prev, _Insert_after);
+        _STD _Construct_in_place(_Newnode->_Next, _Insert_before);
+        _STD _Construct_in_place(_Newnode->_Prev, _Insert_after);
         _Insert_after->_Next  = _Newnode;
         _Insert_before->_Prev = _Newnode;
 
@@ -1663,7 +1663,7 @@ protected:
     void _Check_max_size() const {
         const size_type _Oldsize = _List._Mypair._Myval2._Mysize;
         if (_Oldsize == _List.max_size()) {
-            _Xlength_error("unordered_map/set too long");
+            _STD _Xlength_error("unordered_map/set too long");
         }
     }
 
@@ -1730,17 +1730,17 @@ protected:
 
         // Don't violate power of 2, fits in half the bucket vector invariant:
         // (we assume because vector must use single allocations; as a result, its max_size fits in a size_t)
-        const unsigned long _Max_storage_buckets_log2 = _Floor_of_log_2(static_cast<size_t>(_Vec.max_size() >> 1));
+        const unsigned long _Max_storage_buckets_log2 = _STD _Floor_of_log_2(static_cast<size_t>(_Vec.max_size() >> 1));
         const auto _Max_storage_buckets               = static_cast<size_type>(1) << _Max_storage_buckets_log2;
         if (_Buckets > _Max_storage_buckets) {
-            _Xlength_error("invalid hash bucket count");
+            _STD _Xlength_error("invalid hash bucket count");
         }
 
         // The above test also means that we won't perform a forbidden full shift when restoring the power of
         // 2 invariant
         // this round up to power of 2 in addition to the _Buckets > _Maxidx above means
         // we'll at least double in size (the next power of 2 above _Maxidx)
-        _Buckets                       = static_cast<size_type>(1) << _Ceiling_of_log_2(static_cast<size_t>(_Buckets));
+        _Buckets = static_cast<size_type>(1) << _STD _Ceiling_of_log_2(static_cast<size_t>(_Buckets));
         const _Unchecked_iterator _End = _Unchecked_end();
 
         _Vec._Assign_grow(_Buckets << 1, _End);
@@ -1913,7 +1913,7 @@ protected:
 
             if (_Left_range_end && _Right_range_end) {
                 // equal_ranges had the same length, check for permutation
-                return {_Check_match_counts(_First1, _Last1, _First2, _Last2, equal_to<>{}), _Last1};
+                return {_STD _Check_match_counts(_First1, _Last1, _First2, _Last2, equal_to<>{}), _Last1};
             }
 
             if (_Left_range_end || _Right_range_end) {

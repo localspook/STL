@@ -150,7 +150,7 @@ inline constexpr int __DOUBLE_POW5_BITCOUNT = 121;
 
 _NODISCARD inline uint64_t __ryu_umul128(const uint64_t __a, const uint64_t __b, uint64_t* const __productHi) {
 #if defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
-  *__productHi = __umulh(__a, __b);
+  *__productHi = ::__umulh(__a, __b);
   return __a * __b;
 #else // ^^^ not native X64 / native X64 vvv
   return _umul128(__a, __b, __productHi);
@@ -198,7 +198,7 @@ _NODISCARD inline uint64_t __ryu_shiftright128(const uint64_t __lo, const uint64
   _STL_INTERNAL_CHECK(__dist < 64);
 
 #if defined(_M_X64) && !defined(_M_ARM64EC)
-  return __shiftright128(__lo, __hi, static_cast<unsigned char>(__dist));
+  return ::__shiftright128(__lo, __hi, static_cast<unsigned char>(__dist));
 #else // ^^^ __shiftright128 intrinsic available / __shiftright128 intrinsic unavailable vvv
   if (__dist == 0) {
     return __lo;
@@ -291,7 +291,7 @@ _NODISCARD inline uint64_t __div1e9(const uint64_t __x) {
 }
 
 _NODISCARD inline uint32_t __mod1e9(const uint64_t __x) {
-  return static_cast<uint32_t>(__x - 1000000000 * __div1e9(__x));
+  return static_cast<uint32_t>(__x - 1000000000 * _STD __div1e9(__x));
 }
 
 #endif // ^^^ 64-bit ^^^
@@ -300,7 +300,7 @@ _NODISCARD inline uint32_t __pow5Factor(uint64_t __value) {
   uint32_t __count = 0;
   for (;;) {
     _STL_INTERNAL_CHECK(__value != 0);
-    const uint64_t __q = __div5(__value);
+    const uint64_t __q = _STD __div5(__value);
     const uint32_t __r = static_cast<uint32_t>(__value) - 5 * static_cast<uint32_t>(__q);
     if (__r != 0) {
       break;
@@ -314,7 +314,7 @@ _NODISCARD inline uint32_t __pow5Factor(uint64_t __value) {
 // Returns true if __value is divisible by 5^__p.
 _NODISCARD inline bool __multipleOfPowerOf5(const uint64_t __value, const uint32_t __p) {
   // I tried a case distinction on __p, but there was no performance difference.
-  return __pow5Factor(__value) >= __p;
+  return _STD __pow5Factor(__value) >= __p;
 }
 
 // Returns true if __value is divisible by 2^__p.
@@ -336,13 +336,13 @@ inline constexpr int __POW10_ADDITIONAL_BITS = 120;
 _NODISCARD inline uint64_t __umul256_hi128_lo64(
   const uint64_t __aHi, const uint64_t __aLo, const uint64_t __bHi, const uint64_t __bLo) {
   uint64_t __b00Hi;
-  const uint64_t __b00Lo = __ryu_umul128(__aLo, __bLo, &__b00Hi);
+  const uint64_t __b00Lo = _STD __ryu_umul128(__aLo, __bLo, &__b00Hi);
   uint64_t __b01Hi;
-  const uint64_t __b01Lo = __ryu_umul128(__aLo, __bHi, &__b01Hi);
+  const uint64_t __b01Lo = _STD __ryu_umul128(__aLo, __bHi, &__b01Hi);
   uint64_t __b10Hi;
-  const uint64_t __b10Lo = __ryu_umul128(__aHi, __bLo, &__b10Hi);
+  const uint64_t __b10Lo = _STD __ryu_umul128(__aHi, __bLo, &__b10Hi);
   uint64_t __b11Hi;
-  const uint64_t __b11Lo = __ryu_umul128(__aHi, __bHi, &__b11Hi);
+  const uint64_t __b11Lo = _STD __ryu_umul128(__aHi, __bHi, &__b11Hi);
   (void) __b00Lo; // unused
   (void) __b11Hi; // unused
   const uint64_t __temp1Lo = __b10Lo + __b00Hi;
@@ -355,7 +355,7 @@ _NODISCARD inline uint64_t __umul256_hi128_lo64(
 _NODISCARD inline uint32_t __uint128_mod1e9(const uint64_t __vHi, const uint64_t __vLo) {
   // After multiplying, we're going to shift right by 29, then truncate to uint32_t.
   // This means that we need only 29 + 32 = 61 bits, so we can truncate to uint64_t before shifting.
-  const uint64_t __multiplied = __umul256_hi128_lo64(__vHi, __vLo, 0x89705F4136B4A597u, 0x31680A88F8953031u);
+  const uint64_t __multiplied = _STD __umul256_hi128_lo64(__vHi, __vLo, 0x89705F4136B4A597u, 0x31680A88F8953031u);
 
   // For uint32_t truncation, see the __mod1e9() comment in d2s_intrinsics.h.
   const uint32_t __shifted = static_cast<uint32_t>(__multiplied >> 29);
@@ -366,11 +366,11 @@ _NODISCARD inline uint32_t __uint128_mod1e9(const uint64_t __vHi, const uint64_t
 
 _NODISCARD inline uint32_t __mulShift_mod1e9(const uint64_t __m, const uint64_t* const __mul, const int32_t __j) {
   uint64_t __high0;                                               // 64
-  const uint64_t __low0 = __ryu_umul128(__m, __mul[0], &__high0); // 0
+  const uint64_t __low0 = _STD __ryu_umul128(__m, __mul[0], &__high0); // 0
   uint64_t __high1;                                               // 128
-  const uint64_t __low1 = __ryu_umul128(__m, __mul[1], &__high1); // 64
+  const uint64_t __low1 = _STD __ryu_umul128(__m, __mul[1], &__high1); // 64
   uint64_t __high2;                                               // 192
-  const uint64_t __low2 = __ryu_umul128(__m, __mul[2], &__high2); // 128
+  const uint64_t __low2 = _STD __ryu_umul128(__m, __mul[2], &__high2); // 128
   const uint64_t __s0low = __low0;                  // 0
   (void) __s0low; // unused
   const uint64_t __s0high = __low1 + __high0;       // 64
@@ -383,18 +383,18 @@ _NODISCARD inline uint32_t __mulShift_mod1e9(const uint64_t __m, const uint64_t*
 #if _HAS_CHARCONV_INTRINSICS
   const uint32_t __dist = static_cast<uint32_t>(__j - 128); // __dist: [0, 52]
   const uint64_t __shiftedhigh = __s1high >> __dist;
-  const uint64_t __shiftedlow = __ryu_shiftright128(__s1low, __s1high, __dist);
-  return __uint128_mod1e9(__shiftedhigh, __shiftedlow);
+  const uint64_t __shiftedlow = _STD __ryu_shiftright128(__s1low, __s1high, __dist);
+  return _STD __uint128_mod1e9(__shiftedhigh, __shiftedlow);
 #else // ^^^ intrinsics available / intrinsics unavailable vvv
   if (__j < 160) { // __j: [128, 160)
-    const uint64_t __r0 = __mod1e9(__s1high);
-    const uint64_t __r1 = __mod1e9((__r0 << 32) | (__s1low >> 32));
+    const uint64_t __r0 = _STD __mod1e9(__s1high);
+    const uint64_t __r1 = _STD __mod1e9((__r0 << 32) | (__s1low >> 32));
     const uint64_t __r2 = ((__r1 << 32) | (__s1low & 0xffffffff));
-    return __mod1e9(__r2 >> (__j - 128));
+    return _STD __mod1e9(__r2 >> (__j - 128));
   } else { // __j: [160, 192)
-    const uint64_t __r0 = __mod1e9(__s1high);
+    const uint64_t __r0 = _STD __mod1e9(__s1high);
     const uint64_t __r1 = ((__r0 << 32) | (__s1low >> 32));
-    return __mod1e9(__r1 >> (__j - 160));
+    return _STD __mod1e9(__r1 >> (__j - 160));
   }
 #endif // ^^^ intrinsics unavailable ^^^
 }
@@ -509,7 +509,7 @@ _NODISCARD inline uint32_t __pow10BitsForIndex(const uint32_t __idx) {
 
 _NODISCARD inline uint32_t __lengthForIndex(const uint32_t __idx) {
   // +1 for ceil, +16 for mantissa, +8 to round up when dividing by 9
-  return (__log10Pow2(16 * static_cast<int32_t>(__idx)) + 1 + 16 + 8) / 9;
+  return (_STD __log10Pow2(16 * static_cast<int32_t>(__idx)) + 1 + 16 + 8) / 9;
 }
 
 template <class _CharT>
@@ -517,7 +517,7 @@ _NODISCARD pair<_CharT*, errc> __d2fixed_buffered_n(_CharT* _First, _CharT* cons
   const uint32_t __precision) {
   _CharT* const _Original_first = _First;
 
-  const uint64_t __bits = __double_to_bits(__d);
+  const uint64_t __bits = _STD __double_to_bits(__d);
 
   // Case distinction; exit early for the easy cases.
   if (__bits == 0) {
@@ -554,27 +554,27 @@ _NODISCARD pair<_CharT*, errc> __d2fixed_buffered_n(_CharT* _First, _CharT* cons
 
   bool __nonzero = false;
   if (__e2 >= -52) {
-    const uint32_t __idx = __e2 < 0 ? 0 : __indexForExponent(static_cast<uint32_t>(__e2));
-    const uint32_t __p10bits = __pow10BitsForIndex(__idx);
-    const int32_t __len = static_cast<int32_t>(__lengthForIndex(__idx));
+    const uint32_t __idx = __e2 < 0 ? 0 : _STD __indexForExponent(static_cast<uint32_t>(__e2));
+    const uint32_t __p10bits = _STD __pow10BitsForIndex(__idx);
+    const int32_t __len = static_cast<int32_t>(_STD __lengthForIndex(__idx));
     for (int32_t __i = __len - 1; __i >= 0; --__i) {
       const uint32_t __j = __p10bits - __e2;
       // Temporary: __j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in __mulShift_mod1e9. Instead, we can just increase the multipliers.
-      const uint32_t __digits = __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT[__POW10_OFFSET[__idx] + __i],
+      const uint32_t __digits = _STD __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT[__POW10_OFFSET[__idx] + __i],
         static_cast<int32_t>(__j + 8));
       if (__nonzero) {
         if (_Last - _First < 9) {
           return { _Last, errc::value_too_large };
         }
-        __append_nine_digits(__digits, _First);
+        _STD __append_nine_digits(__digits, _First);
         _First += 9;
       } else if (__digits != 0) {
-        const uint32_t __olength = __decimalLength9(__digits);
+        const uint32_t __olength = _STD __decimalLength9(__digits);
         if (_Last - _First < static_cast<ptrdiff_t>(__olength)) {
           return { _Last, errc::value_too_large };
         }
-        __append_n_digits(__olength, __digits, _First);
+        _STD __append_n_digits(__olength, __digits, _First);
         _First += __olength;
         __nonzero = true;
       }
@@ -629,12 +629,12 @@ _NODISCARD pair<_CharT*, errc> __d2fixed_buffered_n(_CharT* _First, _CharT* cons
       }
       // Temporary: __j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in __mulShift_mod1e9. Instead, we can just increase the multipliers.
-      uint32_t __digits = __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT_2[__p], __j + 8);
+      uint32_t __digits = _STD __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT_2[__p], __j + 8);
       if (__i < __blocks - 1) {
         if (_Last - _First < 9) {
           return { _Last, errc::value_too_large };
         }
-        __append_nine_digits(__digits, _First);
+        _STD __append_nine_digits(__digits, _First);
         _First += 9;
       } else {
         const uint32_t __maximum = __precision - 9 * __i;
@@ -649,14 +649,14 @@ _NODISCARD pair<_CharT*, errc> __d2fixed_buffered_n(_CharT* _First, _CharT* cons
           // Is m * 10^(additionalDigits + 1) / 2^(-__e2) integer?
           const int32_t __requiredTwos = -__e2 - static_cast<int32_t>(__precision) - 1;
           const bool __trailingZeros = __requiredTwos <= 0
-            || (__requiredTwos < 60 && __multipleOfPowerOf2(__m2, static_cast<uint32_t>(__requiredTwos)));
+            || (__requiredTwos < 60 && _STD __multipleOfPowerOf2(__m2, static_cast<uint32_t>(__requiredTwos)));
           __roundUp = __trailingZeros ? 2 : 1;
         }
         if (__maximum > 0) {
           if (_Last - _First < static_cast<ptrdiff_t>(__maximum)) {
             return { _Last, errc::value_too_large };
           }
-          __append_c_digits(__maximum, __digits, _First);
+          _STD __append_c_digits(__maximum, __digits, _First);
           _First += __maximum;
         }
         break;
@@ -707,7 +707,7 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
   uint32_t __precision) {
   char* const _Original_first = _First;
 
-  const uint64_t __bits = __double_to_bits(__d);
+  const uint64_t __bits = _STD __double_to_bits(__d);
 
   // Case distinction; exit early for the easy cases.
   if (__bits == 0) {
@@ -750,14 +750,14 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
   uint32_t __availableDigits = 0;
   int32_t __exp = 0;
   if (__e2 >= -52) {
-    const uint32_t __idx = __e2 < 0 ? 0 : __indexForExponent(static_cast<uint32_t>(__e2));
-    const uint32_t __p10bits = __pow10BitsForIndex(__idx);
-    const int32_t __len = static_cast<int32_t>(__lengthForIndex(__idx));
+    const uint32_t __idx = __e2 < 0 ? 0 : _STD __indexForExponent(static_cast<uint32_t>(__e2));
+    const uint32_t __p10bits = _STD __pow10BitsForIndex(__idx);
+    const int32_t __len = static_cast<int32_t>(_STD __lengthForIndex(__idx));
     for (int32_t __i = __len - 1; __i >= 0; --__i) {
       const uint32_t __j = __p10bits - __e2;
       // Temporary: __j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in __mulShift_mod1e9. Instead, we can just increase the multipliers.
-      __digits = __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT[__POW10_OFFSET[__idx] + __i],
+      __digits = _STD __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT[__POW10_OFFSET[__idx] + __i],
         static_cast<int32_t>(__j + 8));
       if (__printedDigits != 0) {
         if (__printedDigits + 9 > __precision) {
@@ -767,11 +767,11 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
         if (_Last - _First < 9) {
           return { _Last, errc::value_too_large };
         }
-        __append_nine_digits(__digits, _First);
+        _STD __append_nine_digits(__digits, _First);
         _First += 9;
         __printedDigits += 9;
       } else if (__digits != 0) {
-        __availableDigits = __decimalLength9(__digits);
+        __availableDigits = _STD __decimalLength9(__digits);
         __exp = __i * 9 + static_cast<int32_t>(__availableDigits) - 1;
         if (__availableDigits > __precision) {
           break;
@@ -780,7 +780,7 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
           if (_Last - _First < static_cast<ptrdiff_t>(__availableDigits + 1)) {
             return { _Last, errc::value_too_large };
           }
-          __append_d_digits(__availableDigits, __digits, _First);
+          _STD __append_d_digits(__availableDigits, __digits, _First);
           _First += __availableDigits + 1; // +1 for decimal point
         } else {
           if (_First == _Last) {
@@ -801,7 +801,7 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
       const uint32_t __p = __POW10_OFFSET_2[__idx] + static_cast<uint32_t>(__i) - __MIN_BLOCK_2[__idx];
       // Temporary: __j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in __mulShift_mod1e9. Instead, we can just increase the multipliers.
-      __digits = (__p >= __POW10_OFFSET_2[__idx + 1]) ? 0 : __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT_2[__p], __j + 8);
+      __digits = (__p >= __POW10_OFFSET_2[__idx + 1]) ? 0 : _STD __mulShift_mod1e9(__m2 << 8, __POW10_SPLIT_2[__p], __j + 8);
       if (__printedDigits != 0) {
         if (__printedDigits + 9 > __precision) {
           __availableDigits = 9;
@@ -810,11 +810,11 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
         if (_Last - _First < 9) {
           return { _Last, errc::value_too_large };
         }
-        __append_nine_digits(__digits, _First);
+        _STD __append_nine_digits(__digits, _First);
         _First += 9;
         __printedDigits += 9;
       } else if (__digits != 0) {
-        __availableDigits = __decimalLength9(__digits);
+        __availableDigits = _STD __decimalLength9(__digits);
         __exp = -(__i + 1) * 9 + static_cast<int32_t>(__availableDigits) - 1;
         if (__availableDigits > __precision) {
           break;
@@ -823,7 +823,7 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
           if (_Last - _First < static_cast<ptrdiff_t>(__availableDigits + 1)) {
             return { _Last, errc::value_too_large };
           }
-          __append_d_digits(__availableDigits, __digits, _First);
+          _STD __append_d_digits(__availableDigits, __digits, _First);
           _First += __availableDigits + 1; // +1 for decimal point
         } else {
           if (_First == _Last) {
@@ -858,10 +858,10 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
     const int32_t __rexp = static_cast<int32_t>(__precision) - __exp;
     const int32_t __requiredTwos = -__e2 - __rexp;
     bool __trailingZeros = __requiredTwos <= 0
-      || (__requiredTwos < 60 && __multipleOfPowerOf2(__m2, static_cast<uint32_t>(__requiredTwos)));
+      || (__requiredTwos < 60 && _STD __multipleOfPowerOf2(__m2, static_cast<uint32_t>(__requiredTwos)));
     if (__rexp < 0) {
       const int32_t __requiredFives = -__rexp;
-      __trailingZeros = __trailingZeros && __multipleOfPowerOf5(__m2, static_cast<uint32_t>(__requiredFives));
+      __trailingZeros = __trailingZeros && _STD __multipleOfPowerOf5(__m2, static_cast<uint32_t>(__requiredFives));
     }
     __roundUp = __trailingZeros ? 2 : 1;
   }
@@ -872,7 +872,7 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
     if (__digits == 0) {
       _CSTD memset(_First, '0', __maximum);
     } else {
-      __append_c_digits(__maximum, __digits, _First);
+      _STD __append_c_digits(__maximum, __digits, _First);
     }
     _First += __maximum;
   } else {
@@ -880,7 +880,7 @@ _NODISCARD inline to_chars_result __d2exp_buffered_n(char* _First, char* const _
       if (_Last - _First < static_cast<ptrdiff_t>(__maximum + 1)) {
         return { _Last, errc::value_too_large };
       }
-      __append_d_digits(__maximum, __digits, _First);
+      _STD __append_d_digits(__maximum, __digits, _First);
       _First += __maximum + 1; // +1 for decimal point
     } else {
       if (_First == _Last) {
@@ -998,7 +998,7 @@ _NODISCARD inline uint32_t __pow5Factor(uint32_t __value) {
 
 // Returns true if __value is divisible by 5^__p.
 _NODISCARD inline bool __multipleOfPowerOf5(const uint32_t __value, const uint32_t __p) {
-  return __pow5Factor(__value) >= __p;
+  return _STD __pow5Factor(__value) >= __p;
 }
 
 // Returns true if __value is divisible by 2^__p.
@@ -1038,11 +1038,11 @@ _NODISCARD inline uint32_t __mulShift(const uint32_t __m, const uint64_t __facto
 }
 
 _NODISCARD inline uint32_t __mulPow5InvDivPow2(const uint32_t __m, const uint32_t __q, const int32_t __j) {
-  return __mulShift(__m, __FLOAT_POW5_INV_SPLIT[__q], __j);
+  return _STD __mulShift(__m, __FLOAT_POW5_INV_SPLIT[__q], __j);
 }
 
 _NODISCARD inline uint32_t __mulPow5divPow2(const uint32_t __m, const uint32_t __i, const int32_t __j) {
-  return __mulShift(__m, __FLOAT_POW5_SPLIT[__i], __j);
+  return _STD __mulShift(__m, __FLOAT_POW5_SPLIT[__i], __j);
 }
 
 // A floating decimal representing m * 10^e.
@@ -1079,44 +1079,44 @@ _NODISCARD inline __floating_decimal_32 __f2d(const uint32_t __ieeeMantissa, con
   bool __vrIsTrailingZeros = false;
   uint8_t __lastRemovedDigit = 0;
   if (__e2 >= 0) {
-    const uint32_t __q = __log10Pow2(__e2);
+    const uint32_t __q = _STD __log10Pow2(__e2);
     __e10 = static_cast<int32_t>(__q);
-    const int32_t __k = __FLOAT_POW5_INV_BITCOUNT + __pow5bits(static_cast<int32_t>(__q)) - 1;
+    const int32_t __k = __FLOAT_POW5_INV_BITCOUNT + _STD __pow5bits(static_cast<int32_t>(__q)) - 1;
     const int32_t __i = -__e2 + static_cast<int32_t>(__q) + __k;
-    __vr = __mulPow5InvDivPow2(__mv, __q, __i);
-    __vp = __mulPow5InvDivPow2(__mp, __q, __i);
-    __vm = __mulPow5InvDivPow2(__mm, __q, __i);
+    __vr = _STD __mulPow5InvDivPow2(__mv, __q, __i);
+    __vp = _STD __mulPow5InvDivPow2(__mp, __q, __i);
+    __vm = _STD __mulPow5InvDivPow2(__mm, __q, __i);
     if (__q != 0 && (__vp - 1) / 10 <= __vm / 10) {
       // We need to know one removed digit even if we are not going to loop below. We could use
       // __q = X - 1 above, except that would require 33 bits for the result, and we've found that
       // 32-bit arithmetic is faster even on 64-bit machines.
-      const int32_t __l = __FLOAT_POW5_INV_BITCOUNT + __pow5bits(static_cast<int32_t>(__q - 1)) - 1;
-      __lastRemovedDigit = static_cast<uint8_t>(__mulPow5InvDivPow2(__mv, __q - 1,
+      const int32_t __l = __FLOAT_POW5_INV_BITCOUNT + _STD __pow5bits(static_cast<int32_t>(__q - 1)) - 1;
+      __lastRemovedDigit = static_cast<uint8_t>(_STD __mulPow5InvDivPow2(__mv, __q - 1,
         -__e2 + static_cast<int32_t>(__q) - 1 + __l) % 10);
     }
     if (__q <= 9) {
       // The largest power of 5 that fits in 24 bits is 5^10, but __q <= 9 seems to be safe as well.
       // Only one of __mp, __mv, and __mm can be a multiple of 5, if any.
       if (__mv % 5 == 0) {
-        __vrIsTrailingZeros = __multipleOfPowerOf5(__mv, __q);
+        __vrIsTrailingZeros = _STD __multipleOfPowerOf5(__mv, __q);
       } else if (__acceptBounds) {
-        __vmIsTrailingZeros = __multipleOfPowerOf5(__mm, __q);
+        __vmIsTrailingZeros = _STD __multipleOfPowerOf5(__mm, __q);
       } else {
-        __vp -= __multipleOfPowerOf5(__mp, __q);
+        __vp -= _STD __multipleOfPowerOf5(__mp, __q);
       }
     }
   } else {
-    const uint32_t __q = __log10Pow5(-__e2);
+    const uint32_t __q = _STD __log10Pow5(-__e2);
     __e10 = static_cast<int32_t>(__q) + __e2;
     const int32_t __i = -__e2 - static_cast<int32_t>(__q);
-    const int32_t __k = __pow5bits(__i) - __FLOAT_POW5_BITCOUNT;
+    const int32_t __k = _STD __pow5bits(__i) - __FLOAT_POW5_BITCOUNT;
     int32_t __j = static_cast<int32_t>(__q) - __k;
-    __vr = __mulPow5divPow2(__mv, static_cast<uint32_t>(__i), __j);
-    __vp = __mulPow5divPow2(__mp, static_cast<uint32_t>(__i), __j);
-    __vm = __mulPow5divPow2(__mm, static_cast<uint32_t>(__i), __j);
+    __vr = _STD __mulPow5divPow2(__mv, static_cast<uint32_t>(__i), __j);
+    __vp = _STD __mulPow5divPow2(__mp, static_cast<uint32_t>(__i), __j);
+    __vm = _STD __mulPow5divPow2(__mm, static_cast<uint32_t>(__i), __j);
     if (__q != 0 && (__vp - 1) / 10 <= __vm / 10) {
-      __j = static_cast<int32_t>(__q) - 1 - (__pow5bits(__i + 1) - __FLOAT_POW5_BITCOUNT);
-      __lastRemovedDigit = static_cast<uint8_t>(__mulPow5divPow2(__mv, static_cast<uint32_t>(__i + 1), __j) % 10);
+      __j = static_cast<int32_t>(__q) - 1 - (_STD __pow5bits(__i + 1) - __FLOAT_POW5_BITCOUNT);
+      __lastRemovedDigit = static_cast<uint8_t>(_STD __mulPow5divPow2(__mv, static_cast<uint32_t>(__i + 1), __j) % 10);
     }
     if (__q <= 1) {
       // {__vr,__vp,__vm} is trailing zeros if {__mv,__mp,__mm} has at least __q trailing 0 bits.
@@ -1130,7 +1130,7 @@ _NODISCARD inline __floating_decimal_32 __f2d(const uint32_t __ieeeMantissa, con
         --__vp;
       }
     } else if (__q < 31) { // TRANSITION(ulfjack): Use a tighter bound here.
-      __vrIsTrailingZeros = __multipleOfPowerOf2(__mv, __q - 1);
+      __vrIsTrailingZeros = _STD __multipleOfPowerOf2(__mv, __q - 1);
     }
   }
 
@@ -1266,7 +1266,7 @@ _NODISCARD pair<_CharT*, errc> _Large_integer_to_chars(_CharT* const _First, _Ch
         _Remainder = (_Remainder << 32) | _Data[_Idx];
 
         // floor((10^9 * 2^32 - 1) / 10^9) == 2^32 - 1, so uint32_t _Quotient is lossless.
-        const uint32_t _Quotient = static_cast<uint32_t>(__div1e9(_Remainder));
+        const uint32_t _Quotient = static_cast<uint32_t>(_STD __div1e9(_Remainder));
 
         // _Remainder is at most 10^9 - 1 again.
         // For uint32_t truncation, see the __mod1e9() comment in d2s_intrinsics.h.
@@ -1292,7 +1292,7 @@ _NODISCARD pair<_CharT*, errc> _Large_integer_to_chars(_CharT* const _First, _Ch
     _STL_INTERNAL_CHECK(_Data[_Idx] == 0);
   }
 
-  const uint32_t _Data_olength = _Data[0] >= 1000000000 ? 10 : __decimalLength9(_Data[0]);
+  const uint32_t _Data_olength = _Data[0] >= 1000000000 ? 10 : _STD __decimalLength9(_Data[0]);
   const uint32_t _Total_fixed_length = _Data_olength + 9 * _Filled_blocks;
 
   if (_Last - _First < static_cast<ptrdiff_t>(_Total_fixed_length)) {
@@ -1303,12 +1303,12 @@ _NODISCARD pair<_CharT*, errc> _Large_integer_to_chars(_CharT* const _First, _Ch
 
   // Print _Data[0]. While it's up to 10 digits,
   // which is more than Ryu generates, the code below can handle this.
-  __append_n_digits(_Data_olength, _Data[0], _Result);
+  _STD __append_n_digits(_Data_olength, _Data[0], _Result);
   _Result += _Data_olength;
 
   // Print 0-filled 9-digit blocks.
   for (int32_t _Idx = _Filled_blocks - 1; _Idx >= 0; --_Idx) {
-    __append_nine_digits(_Blocks[_Idx], _Result);
+    _STD __append_nine_digits(_Blocks[_Idx], _Result);
     _Result += 9;
   }
 
@@ -1321,7 +1321,7 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
   // Step 5: Print the decimal representation.
   uint32_t _Output = __v.__mantissa;
   const int32_t _Ryu_exponent = __v.__exponent;
-  const uint32_t __olength = __decimalLength9(_Output);
+  const uint32_t __olength = _STD __decimalLength9(_Output);
   int32_t _Scientific_exponent = _Ryu_exponent + static_cast<int32_t>(__olength) - 1;
 
   if (_Fmt == chars_format{}) {
@@ -1434,7 +1434,7 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
           16777215, 3355443, 671088, 134217, 26843, 5368, 1073, 214, 42, 8, 1 };
 
         unsigned long _Trailing_zero_bits;
-        (void) _BitScanForward(&_Trailing_zero_bits, __v.__mantissa); // __v.__mantissa is guaranteed nonzero
+        (void) ::_BitScanForward(&_Trailing_zero_bits, __v.__mantissa); // __v.__mantissa is guaranteed nonzero
         const uint32_t _Shifted_mantissa = __v.__mantissa >> _Trailing_zero_bits;
         _Can_use_ryu = _Shifted_mantissa <= _Max_shifted_mantissa[_Ryu_exponent];
       }
@@ -1445,7 +1445,7 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
           - __FLOAT_BIAS - __FLOAT_MANTISSA_BITS; // bias and normalization
 
         // Performance note: We've already called Ryu, so this will redundantly perform buffering and bounds checking.
-        return _Large_integer_to_chars(_First, _Last, _Mantissa2, _Exponent2);
+        return _STD _Large_integer_to_chars(_First, _Last, _Mantissa2, _Exponent2);
       }
 
       // _Can_use_ryu
@@ -1569,7 +1569,7 @@ _NODISCARD pair<_CharT*, errc> __f2s_buffered_n(_CharT* const _First, _CharT* co
   const chars_format _Fmt) {
 
   // Step 1: Decode the floating-point number, and unify normalized and subnormal cases.
-  const uint32_t __bits = __float_to_bits(__f);
+  const uint32_t __bits = _STD __float_to_bits(__f);
 
   // Case distinction; exit early for the easy cases.
   if (__bits == 0) {
@@ -1612,12 +1612,12 @@ _NODISCARD pair<_CharT*, errc> __f2s_buffered_n(_CharT* const _First, _CharT* co
     // (Subnormals are different, but they'll be rejected by the _Exponent2 test here, so they can be ignored.)
 
     if (_Exponent2 > 0) {
-      return _Large_integer_to_chars(_First, _Last, _Mantissa2, _Exponent2);
+      return _STD _Large_integer_to_chars(_First, _Last, _Mantissa2, _Exponent2);
     }
   }
 
-  const __floating_decimal_32 __v = __f2d(__ieeeMantissa, __ieeeExponent);
-  return __to_chars(_First, _Last, __v, _Fmt, __ieeeMantissa, __ieeeExponent);
+  const __floating_decimal_32 __v = _STD __f2d(__ieeeMantissa, __ieeeExponent);
+  return _STD __to_chars(_First, _Last, __v, _Fmt, __ieeeMantissa, __ieeeExponent);
 }
 
 // ^^^^^^^^^^ DERIVED FROM f2s.c ^^^^^^^^^^
@@ -1666,21 +1666,21 @@ _NODISCARD pair<_CharT*, errc> __f2s_buffered_n(_CharT* const _First, _CharT* co
 _NODISCARD inline uint64_t __mulShift(const uint64_t __m, const uint64_t* const __mul, const int32_t __j) {
   // __m is maximum 55 bits
   uint64_t __high1;                                               // 128
-  const uint64_t __low1 = __ryu_umul128(__m, __mul[1], &__high1); // 64
+  const uint64_t __low1 = _STD __ryu_umul128(__m, __mul[1], &__high1); // 64
   uint64_t __high0;                                               // 64
-  (void) __ryu_umul128(__m, __mul[0], &__high0);                  // 0
+  (void) _STD __ryu_umul128(__m, __mul[0], &__high0);                  // 0
   const uint64_t __sum = __high0 + __low1;
   if (__sum < __high0) {
     ++__high1; // overflow into __high1
   }
-  return __ryu_shiftright128(__sum, __high1, static_cast<uint32_t>(__j - 64));
+  return _STD __ryu_shiftright128(__sum, __high1, static_cast<uint32_t>(__j - 64));
 }
 
 _NODISCARD inline uint64_t __mulShiftAll(const uint64_t __m, const uint64_t* const __mul, const int32_t __j,
   uint64_t* const __vp, uint64_t* const __vm, const uint32_t __mmShift) {
-  *__vp = __mulShift(4 * __m + 2, __mul, __j);
-  *__vm = __mulShift(4 * __m - 1 - __mmShift, __mul, __j);
-  return __mulShift(4 * __m, __mul, __j);
+  *__vp = _STD __mulShift(4 * __m + 2, __mul, __j);
+  *__vm = _STD __mulShift(4 * __m - 1 - __mmShift, __mul, __j);
+  return _STD __mulShift(4 * __m, __mul, __j);
 }
 
 #else // ^^^ intrinsics available / intrinsics unavailable vvv
@@ -1781,36 +1781,36 @@ _NODISCARD inline __floating_decimal_64 __d2d(const uint64_t __ieeeMantissa, con
   if (__e2 >= 0) {
     // I tried special-casing __q == 0, but there was no effect on performance.
     // This expression is slightly faster than max(0, __log10Pow2(__e2) - 1).
-    const uint32_t __q = __log10Pow2(__e2) - (__e2 > 3);
+    const uint32_t __q = _STD __log10Pow2(__e2) - (__e2 > 3);
     __e10 = static_cast<int32_t>(__q);
-    const int32_t __k = __DOUBLE_POW5_INV_BITCOUNT + __pow5bits(static_cast<int32_t>(__q)) - 1;
+    const int32_t __k = __DOUBLE_POW5_INV_BITCOUNT + _STD __pow5bits(static_cast<int32_t>(__q)) - 1;
     const int32_t __i = -__e2 + static_cast<int32_t>(__q) + __k;
-    __vr = __mulShiftAll(__m2, __DOUBLE_POW5_INV_SPLIT[__q], __i, &__vp, &__vm, __mmShift);
+    __vr = _STD __mulShiftAll(__m2, __DOUBLE_POW5_INV_SPLIT[__q], __i, &__vp, &__vm, __mmShift);
     if (__q <= 21) {
       // This should use __q <= 22, but I think 21 is also safe. Smaller values
       // may still be safe, but it's more difficult to reason about them.
       // Only one of __mp, __mv, and __mm can be a multiple of 5, if any.
-      const uint32_t __mvMod5 = static_cast<uint32_t>(__mv) - 5 * static_cast<uint32_t>(__div5(__mv));
+      const uint32_t __mvMod5 = static_cast<uint32_t>(__mv) - 5 * static_cast<uint32_t>(_STD __div5(__mv));
       if (__mvMod5 == 0) {
-        __vrIsTrailingZeros = __multipleOfPowerOf5(__mv, __q);
+        __vrIsTrailingZeros = _STD __multipleOfPowerOf5(__mv, __q);
       } else if (__acceptBounds) {
         // Same as min(__e2 + (~__mm & 1), __pow5Factor(__mm)) >= __q
         // <=> __e2 + (~__mm & 1) >= __q && __pow5Factor(__mm) >= __q
         // <=> true && __pow5Factor(__mm) >= __q, since __e2 >= __q.
-        __vmIsTrailingZeros = __multipleOfPowerOf5(__mv - 1 - __mmShift, __q);
+        __vmIsTrailingZeros = _STD __multipleOfPowerOf5(__mv - 1 - __mmShift, __q);
       } else {
         // Same as min(__e2 + 1, __pow5Factor(__mp)) >= __q.
-        __vp -= __multipleOfPowerOf5(__mv + 2, __q);
+        __vp -= _STD __multipleOfPowerOf5(__mv + 2, __q);
       }
     }
   } else {
     // This expression is slightly faster than max(0, __log10Pow5(-__e2) - 1).
-    const uint32_t __q = __log10Pow5(-__e2) - (-__e2 > 1);
+    const uint32_t __q = _STD __log10Pow5(-__e2) - (-__e2 > 1);
     __e10 = static_cast<int32_t>(__q) + __e2;
     const int32_t __i = -__e2 - static_cast<int32_t>(__q);
-    const int32_t __k = __pow5bits(__i) - __DOUBLE_POW5_BITCOUNT;
+    const int32_t __k = _STD __pow5bits(__i) - __DOUBLE_POW5_BITCOUNT;
     const int32_t __j = static_cast<int32_t>(__q) - __k;
-    __vr = __mulShiftAll(__m2, __DOUBLE_POW5_SPLIT[__i], __j, &__vp, &__vm, __mmShift);
+    __vr = _STD __mulShiftAll(__m2, __DOUBLE_POW5_SPLIT[__i], __j, &__vp, &__vm, __mmShift);
     if (__q <= 1) {
       // {__vr,__vp,__vm} is trailing zeros if {__mv,__mp,__mm} has at least __q trailing 0 bits.
       // __mv = 4 * __m2, so it always has at least two trailing 0 bits.
@@ -1828,7 +1828,7 @@ _NODISCARD inline __floating_decimal_64 __d2d(const uint64_t __ieeeMantissa, con
       // <=> ntz(__mv) >= __q - 1 (__e2 is negative and -__e2 >= __q)
       // <=> (__mv & ((1 << (__q - 1)) - 1)) == 0
       // We also need to make sure that the left shift does not overflow.
-      __vrIsTrailingZeros = __multipleOfPowerOf2(__mv, __q - 1);
+      __vrIsTrailingZeros = _STD __multipleOfPowerOf2(__mv, __q - 1);
     }
   }
 
@@ -1840,13 +1840,13 @@ _NODISCARD inline __floating_decimal_64 __d2d(const uint64_t __ieeeMantissa, con
   if (__vmIsTrailingZeros || __vrIsTrailingZeros) {
     // General case, which happens rarely (~0.7%).
     for (;;) {
-      const uint64_t __vpDiv10 = __div10(__vp);
-      const uint64_t __vmDiv10 = __div10(__vm);
+      const uint64_t __vpDiv10 = _STD __div10(__vp);
+      const uint64_t __vmDiv10 = _STD __div10(__vm);
       if (__vpDiv10 <= __vmDiv10) {
         break;
       }
       const uint32_t __vmMod10 = static_cast<uint32_t>(__vm) - 10 * static_cast<uint32_t>(__vmDiv10);
-      const uint64_t __vrDiv10 = __div10(__vr);
+      const uint64_t __vrDiv10 = _STD __div10(__vr);
       const uint32_t __vrMod10 = static_cast<uint32_t>(__vr) - 10 * static_cast<uint32_t>(__vrDiv10);
       __vmIsTrailingZeros &= __vmMod10 == 0;
       __vrIsTrailingZeros &= __lastRemovedDigit == 0;
@@ -1858,13 +1858,13 @@ _NODISCARD inline __floating_decimal_64 __d2d(const uint64_t __ieeeMantissa, con
     }
     if (__vmIsTrailingZeros) {
       for (;;) {
-        const uint64_t __vmDiv10 = __div10(__vm);
+        const uint64_t __vmDiv10 = _STD __div10(__vm);
         const uint32_t __vmMod10 = static_cast<uint32_t>(__vm) - 10 * static_cast<uint32_t>(__vmDiv10);
         if (__vmMod10 != 0) {
           break;
         }
-        const uint64_t __vpDiv10 = __div10(__vp);
-        const uint64_t __vrDiv10 = __div10(__vr);
+        const uint64_t __vpDiv10 = _STD __div10(__vp);
+        const uint64_t __vrDiv10 = _STD __div10(__vr);
         const uint32_t __vrMod10 = static_cast<uint32_t>(__vr) - 10 * static_cast<uint32_t>(__vrDiv10);
         __vrIsTrailingZeros &= __lastRemovedDigit == 0;
         __lastRemovedDigit = static_cast<uint8_t>(__vrMod10);
@@ -1883,10 +1883,10 @@ _NODISCARD inline __floating_decimal_64 __d2d(const uint64_t __ieeeMantissa, con
   } else {
     // Specialized for the common case (~99.3%). Percentages below are relative to this.
     bool __roundUp = false;
-    const uint64_t __vpDiv100 = __div100(__vp);
-    const uint64_t __vmDiv100 = __div100(__vm);
+    const uint64_t __vpDiv100 = _STD __div100(__vp);
+    const uint64_t __vmDiv100 = _STD __div100(__vm);
     if (__vpDiv100 > __vmDiv100) { // Optimization: remove two digits at a time (~86.2%).
-      const uint64_t __vrDiv100 = __div100(__vr);
+      const uint64_t __vrDiv100 = _STD __div100(__vr);
       const uint32_t __vrMod100 = static_cast<uint32_t>(__vr) - 100 * static_cast<uint32_t>(__vrDiv100);
       __roundUp = __vrMod100 >= 50;
       __vr = __vrDiv100;
@@ -1899,12 +1899,12 @@ _NODISCARD inline __floating_decimal_64 __d2d(const uint64_t __ieeeMantissa, con
     // Loop iterations below (approximately), with optimization above:
     // 0: 70.6%, 1: 27.8%, 2: 1.40%, 3: 0.14%, 4+: 0.02%
     for (;;) {
-      const uint64_t __vpDiv10 = __div10(__vp);
-      const uint64_t __vmDiv10 = __div10(__vm);
+      const uint64_t __vpDiv10 = _STD __div10(__vp);
+      const uint64_t __vmDiv10 = _STD __div10(__vm);
       if (__vpDiv10 <= __vmDiv10) {
         break;
       }
-      const uint64_t __vrDiv10 = __div10(__vr);
+      const uint64_t __vrDiv10 = _STD __div10(__vr);
       const uint32_t __vrMod10 = static_cast<uint32_t>(__vr) - 10 * static_cast<uint32_t>(__vrDiv10);
       __roundUp = __vrMod10 >= 5;
       __vr = __vrDiv10;
@@ -1929,7 +1929,7 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
   // Step 5: Print the decimal representation.
   uint64_t _Output = __v.__mantissa;
   const int32_t _Ryu_exponent = __v.__exponent;
-  const uint32_t __olength = __decimalLength17(_Output);
+  const uint32_t __olength = _STD __decimalLength17(_Output);
   int32_t _Scientific_exponent = _Ryu_exponent + static_cast<int32_t>(__olength) - 1;
 
   if (_Fmt == chars_format{}) {
@@ -2051,14 +2051,14 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
 
         unsigned long _Trailing_zero_bits;
 #ifdef _WIN64
-        (void) _BitScanForward64(&_Trailing_zero_bits, __v.__mantissa); // __v.__mantissa is guaranteed nonzero
+        (void) ::_BitScanForward64(&_Trailing_zero_bits, __v.__mantissa); // __v.__mantissa is guaranteed nonzero
 #else // ^^^ 64-bit / 32-bit vvv
         const uint32_t _Low_mantissa = static_cast<uint32_t>(__v.__mantissa);
         if (_Low_mantissa != 0) {
-          (void) _BitScanForward(&_Trailing_zero_bits, _Low_mantissa);
+          (void) ::_BitScanForward(&_Trailing_zero_bits, _Low_mantissa);
         } else {
           const uint32_t _High_mantissa = static_cast<uint32_t>(__v.__mantissa >> 32); // nonzero here
-          (void) _BitScanForward(&_Trailing_zero_bits, _High_mantissa);
+          (void) ::_BitScanForward(&_Trailing_zero_bits, _High_mantissa);
           _Trailing_zero_bits += 32;
         }
 #endif // ^^^ 32-bit ^^^
@@ -2070,7 +2070,7 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
         // Print the integer exactly.
         // Performance note: This will redundantly perform bounds checking.
         // Performance note: This will redundantly decompose the IEEE representation.
-        return __d2fixed_buffered_n(_First, _Last, __f, 0);
+        return _STD __d2fixed_buffered_n(_First, _Last, __f, 0);
       }
 
       // _Can_use_ryu
@@ -2087,7 +2087,7 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
     // so the rest will fit into uint32_t.
     if ((_Output >> 32) != 0) {
       // Expensive 64-bit division.
-      const uint64_t __q = __div1e8(_Output);
+      const uint64_t __q = _STD __div1e8(_Output);
       uint32_t __output2 = static_cast<uint32_t>(_Output - 100000000 * __q);
       _Output = __q;
 
@@ -2163,7 +2163,7 @@ _NODISCARD pair<_CharT*, errc> __to_chars(_CharT* const _First, _CharT* const _L
   // so the rest will fit into uint32_t.
   if ((_Output >> 32) != 0) {
     // Expensive 64-bit division.
-    const uint64_t __q = __div1e8(_Output);
+    const uint64_t __q = _STD __div1e8(_Output);
     uint32_t __output2 = static_cast<uint32_t>(_Output) - 100000000 * static_cast<uint32_t>(__q);
     _Output = __q;
 
@@ -2277,7 +2277,7 @@ _NODISCARD pair<_CharT*, errc> __d2s_buffered_n(_CharT* const _First, _CharT* co
   const chars_format _Fmt) {
 
   // Step 1: Decode the floating-point number, and unify normalized and subnormal cases.
-  const uint64_t __bits = __double_to_bits(__f);
+  const uint64_t __bits = _STD __double_to_bits(__f);
 
   // Case distinction; exit early for the easy cases.
   if (__bits == 0) {
@@ -2328,19 +2328,19 @@ _NODISCARD pair<_CharT*, errc> __d2s_buffered_n(_CharT* const _First, _CharT* co
     // exponents here and skipping Ryu. Calling __d2fixed_buffered_n() with precision 0 is valid for all integers
     // (so it's okay if we call it with a Ryu-friendly value).
     if (_Exponent2 > 0) {
-      return __d2fixed_buffered_n(_First, _Last, __f, 0);
+      return _STD __d2fixed_buffered_n(_First, _Last, __f, 0);
     }
   }
 
   __floating_decimal_64 __v;
-  const bool __isSmallInt = __d2d_small_int(__ieeeMantissa, __ieeeExponent, &__v);
+  const bool __isSmallInt = _STD __d2d_small_int(__ieeeMantissa, __ieeeExponent, &__v);
   if (__isSmallInt) {
     // For small integers in the range [1, 2^53), __v.__mantissa might contain trailing (decimal) zeros.
     // For scientific notation we need to move these zeros into the exponent.
     // (This is not needed for fixed-point notation, so it might be beneficial to trim
     // trailing zeros in __to_chars only if needed - once fixed-point notation output is implemented.)
     for (;;) {
-      const uint64_t __q = __div10(__v.__mantissa);
+      const uint64_t __q = _STD __div10(__v.__mantissa);
       const uint32_t __r = static_cast<uint32_t>(__v.__mantissa) - 10 * static_cast<uint32_t>(__q);
       if (__r != 0) {
         break;
@@ -2349,10 +2349,10 @@ _NODISCARD pair<_CharT*, errc> __d2s_buffered_n(_CharT* const _First, _CharT* co
       ++__v.__exponent;
     }
   } else {
-    __v = __d2d(__ieeeMantissa, __ieeeExponent);
+    __v = _STD __d2d(__ieeeMantissa, __ieeeExponent);
   }
 
-  return __to_chars(_First, _Last, __v, _Fmt, __f);
+  return _STD __to_chars(_First, _Last, __v, _Fmt, __f);
 }
 
 // ^^^^^^^^^^ DERIVED FROM d2s.c ^^^^^^^^^^
@@ -2363,9 +2363,9 @@ template <class _Floating>
 _NODISCARD to_chars_result _Floating_to_chars_ryu(
     char* const _First, char* const _Last, const _Floating _Value, const chars_format _Fmt) noexcept {
     if constexpr (is_same_v<_Floating, float>) {
-        return _Convert_to_chars_result(__f2s_buffered_n(_First, _Last, _Value, _Fmt));
+        return _STD _Convert_to_chars_result(_STD __f2s_buffered_n(_First, _Last, _Value, _Fmt));
     } else {
-        return _Convert_to_chars_result(__d2s_buffered_n(_First, _Last, _Value, _Fmt));
+        return _STD _Convert_to_chars_result(_STD __d2s_buffered_n(_First, _Last, _Value, _Fmt));
     }
 }
 
@@ -2387,7 +2387,7 @@ _NODISCARD to_chars_result _Floating_to_chars_scientific_precision(
         return {_Last, errc::value_too_large};
     }
 
-    return __d2exp_buffered_n(_First, _Last, _Value, static_cast<uint32_t>(_Precision));
+    return _STD __d2exp_buffered_n(_First, _Last, _Value, static_cast<uint32_t>(_Precision));
 }
 
 template <class _Floating>
@@ -2408,7 +2408,8 @@ _NODISCARD to_chars_result _Floating_to_chars_fixed_precision(
         return {_Last, errc::value_too_large};
     }
 
-    return _Convert_to_chars_result(__d2fixed_buffered_n(_First, _Last, _Value, static_cast<uint32_t>(_Precision)));
+    return _STD _Convert_to_chars_result(
+        _STD __d2fixed_buffered_n(_First, _Last, _Value, static_cast<uint32_t>(_Precision)));
 }
 
 _STD_END
