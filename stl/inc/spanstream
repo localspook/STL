@@ -135,9 +135,11 @@ protected:
                 break;
             }
         case ios_base::cur:
-            if (_Sequence_in && _Sequence_out) {
-                return pos_type{off_type{-1}}; // report failure
-            } else if (_Sequence_in || _Sequence_out) {
+            {
+                if (_Sequence_in == _Sequence_out) {
+                    return pos_type{off_type{-1}}; // report failure
+                }
+
                 const off_type _Oldoff  = _Sequence_in ? static_cast<off_type>(_Mysb::gptr() - _Mysb::eback())
                                                        : static_cast<off_type>(_Mysb::pptr() - _Mysb::pbase());
                 const off_type _Oldleft = static_cast<off_type>(_Buf.size() - _Oldoff);
@@ -146,10 +148,8 @@ protected:
                 }
 
                 _Off += _Oldoff;
-            } else {
-                return pos_type{off_type{-1}}; // report failure
+                break;
             }
-            break;
         default:
             return pos_type{off_type{-1}}; // report failure
         }
